@@ -3,41 +3,21 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-from OpenGL.GL import *
-import OpenGL.arrays.vbo as glvbo
 from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
+
+from OpenGL.GL import *
+import OpenGL.arrays.vbo as glvbo
+
 import numpy as np
+import math
+
 import jydjs
 from jydjssyntax import JSHighlighter
-import math
+from jydgldraw import GLDraw
 
 gldx = 200
 gldy = 200
-
-def oget(m, k, d):
-  if k in m: return m[k]
-  return d
-
-def draw_rect(shape):
-    x = float(shape['x'])
-    y = float(shape['y'])
-    dx = oget(shape,'dx',0)
-    dy = oget(shape,'dy',0)
-    glRectf(-x/2 + dx, -y/2 + dy, x/2 + dx, y/2 + dy)    
-
-def draw_circle(shape):
-    num_segments = 42
-    r = float(shape['x'])/2
-    dx = oget(shape,'dx',0)
-    dy = oget(shape,'dy',0)
-    glBegin(GL_TRIANGLE_FAN)
-    for i in range(0, num_segments):
-        theta = 2.0 * math.pi * float(i) / float(num_segments) # get the current angle 
-        x = r * math.cos(theta) # calculate the x component 
-        y = r * math.sin(theta) # calculate the y component 
-        glVertex2f(x + dx, y + dy) # output vertex 
-    glEnd()
 
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
@@ -48,6 +28,7 @@ class MyGLWidget(QGLWidget):
         self.zoomfactor = 50
         self.zoom_changed = False
         self.shapes = []
+        self.gldraw = GLDraw()
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -70,8 +51,8 @@ class MyGLWidget(QGLWidget):
         glColor3f(0.0, 0.0, 1.0)
         if self.shapes != None:
             for shape in self.shapes:
-                if shape['shape'] == 'rect': draw_rect(shape)
-                if shape['shape'] == 'circle': draw_circle(shape)
+                if shape['shape'] == 'rect': self.gldraw.rect(shape)
+                if shape['shape'] == 'circle': self.gldraw.circle(shape)
         if self.zoom_changed:
             self.zoom_changed = False
             self.resizeGL(self.width(), self.height())
