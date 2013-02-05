@@ -90,5 +90,5 @@ shapes = () ->
     y: 1
 
   make = partial mod, rect1, 'dx'
-  make dx for dx in [-2, -1, 0, 1, 2]
+  [-2, -1, 0, 1, 2].map make
 """
