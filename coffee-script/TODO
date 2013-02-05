@@ -1,0 +1,3 @@
+Actually come with a way to use coffeescript in such a way
+that we're not using one single modified snapshot but can
+actually easily upgrade to newer versions...
