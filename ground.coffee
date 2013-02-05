@@ -1,0 +1,39 @@
+# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# License: GPL
+
+# clone, from http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning
+
+clone = (obj) ->
+  if not obj? or typeof obj isnt 'object'
+    return obj
+
+  if obj instanceof Date
+    return new Date(obj.getTime()) 
+
+  if obj instanceof RegExp
+    flags = ''
+    flags += 'g' if obj.global?
+    flags += 'i' if obj.ignoreCase?
+    flags += 'm' if obj.multiline?
+    flags += 'y' if obj.sticky?
+    return new RegExp(obj.source, flags) 
+
+  newInstance = new obj.constructor()
+
+  for key of obj
+    newInstance[key] = clone obj[key]
+
+  return newInstance
+
+# partial application, from http://autotelicum.github.com/Smooth-CoffeeScript/SmoothCoffeeScript.html#entry-partial-application-0
+
+partial = (func, a...) ->
+  (b...) -> func a..., b...
+
+# clone and mod an object
+
+mod = (obj, key, val) ->
+  b = clone(obj)
+  b[key] = val
+  return b
+  

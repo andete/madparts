@@ -41,7 +41,9 @@ def eval_js_footprint(js):
       return PyV8.convert(ctxt.eval(js+"; shapes();"))
 
 def eval_coffee_footprint(coffee):
-  js = make_js_from_coffee(coffee + "\nreturn shapes()\n")
+  ground = ""
+  with open("ground.coffee") as f: ground = f.read()
+  js = make_js_from_coffee(ground + "\n" + coffee + "\nreturn shapes()\n")
   with PyV8.JSContext() as ctxt:
       return PyV8.convert(ctxt.eval(js))
 
@@ -60,7 +62,7 @@ function shapes() {
 }
 """
 
-coffee_example = """
+coffee_example_old = """
 shapes = () ->
   dxs = [-2, -1, 0, 1, 2]
 
@@ -78,4 +80,15 @@ shapes = () ->
     b
  
   (xmod dx for dx in [-2, -1, 0, 1, 2])
+"""
+
+coffee_example = """
+shapes = () ->
+  rect1 = 
+    shape: 'rect'
+    x: 0.8
+    y: 1
+
+  make = partial mod, rect1, 'dx'
+  make dx for dx in [-2, -1, 0, 1, 2]
 """
