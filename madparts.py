@@ -9,6 +9,8 @@ from PySide.QtOpenGL import *
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as glvbo
 
+import FTGL
+
 import numpy as np
 import math
 
@@ -20,6 +22,8 @@ from jydgldraw import GLDraw
 gldx = 200
 gldy = 200
 
+font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
+
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
         super(MyGLWidget, self).__init__(parent)
@@ -29,7 +33,9 @@ class MyGLWidget(QGLWidget):
         self.zoomfactor = 50
         self.zoom_changed = False
         self.shapes = []
-        self.gldraw = GLDraw()
+        self.font = FTGL.BitmapFont(font_file)
+        self.gldraw = GLDraw(self.font)
+        self.font.FaceSize(24, 72)
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -49,11 +55,12 @@ class MyGLWidget(QGLWidget):
         glVertex3f(0, 100, 0)
         glEnd()
         
-        glColor3f(0.0, 0.0, 1.0)
+        i = 1
         if self.shapes != None:
             for shape in self.shapes:
-                if shape['shape'] == 'rect': self.gldraw.rect(shape)
+                if shape['shape'] == 'rect': self.gldraw.rect(shape, i)
                 if shape['shape'] == 'circle': self.gldraw.circle(shape)
+                i = i + 1
         if self.zoom_changed:
             self.zoom_changed = False
             self.resizeGL(self.width(), self.height())

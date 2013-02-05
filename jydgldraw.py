@@ -4,6 +4,7 @@
 # License: GPL
 
 from OpenGL.GL import *
+
 import math
 
 def oget(m, k, d):
@@ -12,14 +13,23 @@ def oget(m, k, d):
 
 class GLDraw:
 
-  def rect(self, shape):
+  def __init__(self, font):
+    self.font = font
+
+  def rect(self, shape, num = 1):
     x = float(shape['x'])
     y = float(shape['y'])
     dx = oget(shape,'dx',0)
     dy = oget(shape,'dy',0)
-    glRectf(-x/2 + dx, -y/2 + dy, x/2 + dx, y/2 + dy)    
+    glColor3f(0.0, 0.0, 1.0)
+    glRectf(-x/2 + dx, -y/2 + dy, x/2 + dx, y/2 + dy)
+    glColor3f(1.0, 1.0, 1.0)
+    glRasterPos(dx-x/4, dy-y/8)
+    #self.font.FaceSize(24, 72)
+    self.font.Render(str(num))
 
   def circle(self, shape):
+    glColor3f(0.0, 0.0, 1.0)
     num_segments = 42
     r = float(shape['x'])/2
     dx = oget(shape,'dx',0)
