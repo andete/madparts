@@ -25,20 +25,27 @@ class Global(PyV8.JSClass):
         self.path = store_path
       return result
 
-def eval_footprint(js):
+def make_js_from_coffee(coffee_script_code):
+  with PyV8.JSContext(Global()) as ctxt:
+    js_make_js_from_coffee = ctxt.eval("""
+(function (coffee_code) {
+  CoffeeScript = require('coffee-script/coffee-script');
+  js_code = CoffeeScript.compile(coffee_code, null);
+  return js_code;
+})
+""")
+    return js_make_js_from_coffee(coffee_script_code)
+
+def eval_js_footprint(js):
   with PyV8.JSContext() as ctxt:
       return PyV8.convert(ctxt.eval(js+"; shapes();"))
 
-test_js = """
-function footprint() {
-  return { 'x': 0, 'y': 0 }
-}
-"""
+def eval_coffee_footprint(coffee):
+  js = make_js_from_coffee(coffee + "\nreturn shapes()\n")
+  with PyV8.JSContext() as ctxt:
+      return PyV8.convert(ctxt.eval(js))
 
-if __name__ == '__main__':
-    eval_footprint(test_js)
-
-example = """
+js_example = """
 function shapes() {
   var dxs = [-2, -1, 0, 1, 2];
   var rect1 = { shape: 'rect', x: 0.8, y: 1};
@@ -51,4 +58,24 @@ function shapes() {
   }
   return dxs.map(xmod);
 }
+"""
+
+coffee_example = """
+shapes = () ->
+  dxs = [-2, -1, 0, 1, 2]
+
+  rect1 = 
+    shape: 'rect'
+    x: 0.8
+    y: 1
+
+  xmod = (dx) ->
+    b = {}
+    b.shape = rect1.shape
+    b.x = rect1.x 
+    b.y = rect1.y
+    b.dx = dx
+    b
+ 
+  (xmod dx for dx in [-2, -1, 0, 1, 2])
 """
