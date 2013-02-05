@@ -1,71 +1,99 @@
 # based on the pyside C++ syntax highlighting example
 # that in itself is based on the C++ example
 # see http://qt.gitorious.org/pyside/pyside-examples/blobs/9edeedb37163e71a0040417169ca9aae9e7e6e83/examples/richtext/syntaxhighlighter.py
+# inspiration gotten from coffee.vim 
+# http://www.vim.org/scripts/script.php?script_id=3590
 
 from PySide import QtGui, QtCore
 
-class JSHighlighter(QtGui.QSyntaxHighlighter):
+class CoffeeHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, parent=None):
-        super(JSHighlighter, self).__init__(parent)
+        super(CoffeeHighlighter, self).__init__(parent)
         # keywords
         keywordFormat = QtGui.QTextCharFormat()
         keywordFormat.setForeground(QtCore.Qt.darkCyan)
         keywordPatterns = [
+
+            # repeat
+            "for",
+            "while", 
+            "until",
+            "loop",
+
+            # conditional
+            "if", 
+            "else",
+            "switch",
+            "unless"
+            "when",
+            "then",
+
+            # exception
+            "try",
+            "catch",
+            "finally",
+
+            # keyword
+            "new",
+            "in",
+            "of",
+            "by",
+            "and",
+            "or",
+            "not",
+            "is",
+            "isnt",
+            "class",
+            "extends",
+            "super",
+            "do", 
+  
+            # own; special case: TODO
+            "own",
+
+            # operator
+            "instanceof",
+            "typeof",
+            "delete",
+ 
+            # boolean
+            "true",
+            "on",
+            "yes",
+            "false",
+            "off",
+            "no",
+
+            # global
+            "null",
+            "undefined",
+
+            # special vars
+            "this",
+            "prototype",
+            "arguments",
+
+            # TODO
             "TODO", 
             "FIXME", 
             "XXX",
             "TBD",
-            "if", 
-            "else",
-            "switch",
-            "while", 
-            "for", 
-            "do", 
-            "in",
-            "break",
-            "continue", 
-            "new",
-            "delete",
-            "instanceof", 
-            "typeof",
-            "return",
-            "with",
-            "true",
-            "false",
-            "null", 
-            "undefined",
-            "arguments",
-            "case",
-            "default",
-            "try",
-            "finally",
-            "throw",
-            "alert",
-            "confirm",
-            "prompt",
-            "status",
-            "document",
-            "event",
-            "location",
-            "function",
-            "var",
-            "let",
-            "this",
             ]
         self.highlightingRules = [(QtCore.QRegExp("\\b"+pattern+"\\b"), keywordFormat) for pattern in keywordPatterns]
+        opFormat = QtGui.QTextCharFormat()
+        opFormat.setForeground(QtCore.Qt.blue)
+        self.highlightingRules = self.highlightingRules + [(QtCore.QRegExp(pattern), opFormat) for pattern in ['\(', '\)', '\[', '\]', '\{', '\}']]
+
         # statements
         statementFormat = QtGui.QTextCharFormat()
         statementFormat.setForeground(QtCore.Qt.darkRed)
         statementFormat.setFontWeight(QtGui.QFont.Bold)
         statementPatterns = [
                "return",
-               "with",
+               "break",
+               "continue",
+               "throw",
             ] 
-
-        opFormat = QtGui.QTextCharFormat()
-        opFormat.setForeground(QtCore.Qt.blue)
-        self.highlightingRules = self.highlightingRules + [(QtCore.QRegExp(pattern), opFormat) for pattern in ['\[', '\]', '\{', '\}']]
-
         self.highlightingRules = self.highlightingRules +  [(QtCore.QRegExp("\\b"+pattern+"\\b"), statementFormat) for pattern in statementPatterns]
         # types
         typeFormat = QtGui.QTextCharFormat()

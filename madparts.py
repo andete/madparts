@@ -14,6 +14,7 @@ import math
 
 import jydjs
 from jydjssyntax import JSHighlighter
+from jydcoffeesyntax import CoffeeHighlighter
 from jydgldraw import GLDraw
 
 gldx = 200
@@ -103,7 +104,8 @@ class MainWin(QtGui.QMainWindow):
     self.te1.setAcceptRichText(False)
     #self.te1.setPlainText(jydjs.js_example)
     self.te1.setPlainText(jydjs.coffee_example)
-    self.highlighter1 = JSHighlighter(self.te1.document())
+    #self.highlighter1 = JSHighlighter(self.te1.document())
+    self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.compile)
     self.te2 = QtGui.QTextEdit()
     self.te2.setReadOnly(True)
