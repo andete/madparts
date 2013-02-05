@@ -29,7 +29,7 @@ partial = (func, a...) ->
   (b...) -> func a..., b...
 
 # clone and mod an object
-mod1 = (obj, key) ->
+mod1 = (obj, key) -> 
   (val) ->
     b = clone(obj)
     b[key] = val
