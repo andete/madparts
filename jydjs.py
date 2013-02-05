@@ -62,7 +62,7 @@ function shapes() {
 }
 """
 
-coffee_example_old = """
+coffee_example_old1 = """
 shapes = () ->
   dxs = [-2, -1, 0, 1, 2]
 
@@ -82,7 +82,7 @@ shapes = () ->
   (xmod dx for dx in [-2, -1, 0, 1, 2])
 """
 
-coffee_example = """
+coffee_example_old2 = """
 shapes = () ->
   rect1 = 
     shape: 'rect'
@@ -91,4 +91,14 @@ shapes = () ->
 
   make = partial mod, rect1, 'dx'
   [-2, -1, 0, 1, 2].map make
+"""
+
+coffee_example = """
+shapes = () ->
+  rect1 = 
+    shape: 'rect'
+    x: 0.8
+    y: 1
+  
+  range rect1, 'dx', [-2, -1, 0, 1, 2]
 """

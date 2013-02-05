@@ -2,7 +2,6 @@
 # License: GPL
 
 # clone, from http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning
-
 clone = (obj) ->
   if not obj? or typeof obj isnt 'object'
     return obj
@@ -26,14 +25,16 @@ clone = (obj) ->
   return newInstance
 
 # partial application, from http://autotelicum.github.com/Smooth-CoffeeScript/SmoothCoffeeScript.html#entry-partial-application-0
-
 partial = (func, a...) ->
   (b...) -> func a..., b...
 
 # clone and mod an object
+mod1 = (obj, key) ->
+  (val) ->
+    b = clone(obj)
+    b[key] = val
+    return b
 
-mod = (obj, key, val) ->
-  b = clone(obj)
-  b[key] = val
-  return b
-  
+# generate a range of mods
+range = (obj, key, l) ->
+  l.map (mod1 obj, key) 
