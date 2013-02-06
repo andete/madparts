@@ -7,7 +7,7 @@ from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
 from OpenGL.GL import *
-import OpenGL.arrays.vbo as glvbo
+import OpenGL.arrays.vbo as vbo
 
 import FTGL
 
@@ -27,7 +27,7 @@ font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
         super(MyGLWidget, self).__init__(parent)
-        self.data = np.array(
+        self.dot_field_data = np.array(
           [[x,y] for x in range(-gldx/2, gldx/2) for y in range(-gldy/2, gldy/2)],
           dtype=np.float32)
         self.zoomfactor = 50
@@ -36,14 +36,24 @@ class MyGLWidget(QGLWidget):
         self.font = FTGL.BitmapFont(font_file)
         self.gldraw = GLDraw(self.font, self.zoomfactor)
 
+    def initializeGL(self):
+        glClearColor(0.0, 0.0, 0.0, 1.0)
+        glClear(GL_COLOR_BUFFER_BIT)
+        self.dot_field_vbo = vbo.VBO(self.dot_field_data)
+        #self.shaderProgram = QGLShaderProgram()
+        #self.shaderProgram.addShaderFromSourceFile(QGLShader.Vertex, "shaders/1.vert")
+        #self.shaderProgram.addShaderFromSourceFile(QGLShader.Fragment, "shaders/1.frag")
+        #self.shaderProgram.link()
+
     def paintGL(self):
         if self.zoom_changed:
           self.gldraw.set_zoom(self.zoomfactor)
         glClear(GL_COLOR_BUFFER_BIT)
+        #self.shaderProgram.bind()
         glColor3f(0.5, 0.5, 0.5)
-        self.vbo.bind() # make this vbo the active one
+        self.dot_field_vbo.bind() # make this vbo the active one
         glEnableClientState(GL_VERTEX_ARRAY)
-        glVertexPointer(2, GL_FLOAT, 0, self.vbo)
+        glVertexPointer(2, GL_FLOAT, 0, self.dot_field_vbo)
         glDrawArrays(GL_POINTS, 0, gldx*gldy)
 
         glColor3f(1.0, 0.0, 0.0)
@@ -77,11 +87,6 @@ class MyGLWidget(QGLWidget):
         glOrtho(-mm_visible_x/2, mm_visible_x/2, -mm_visible_y/2, mm_visible_y/2, -1, 1)
         glViewport(0, 0, w, h)
 
-    def initializeGL(self):
-        glClearColor(0.0, 0.0, 0.0, 1.0)
-        glClear(GL_COLOR_BUFFER_BIT)
-        self.vbo = glvbo.VBO(self.data)
-  
     def set_shapes(self, s):
         self.shapes = s
         self.updateGL()
