@@ -64,32 +64,32 @@ function shapes() {
 
 coffee_example_old1 = """
 shapes = () ->
-  dxs = [-2, -1, 0, 1, 2]
+  xs = [-2, -1, 0, 1, 2]
 
   rect1 = 
     shape: 'rect'
-    x: 0.8
-    y: 1
+    dx: 0.8
+    dy: 1
 
-  xmod = (dx) ->
+  xmod = (x) ->
     b = {}
     b.shape = rect1.shape
-    b.x = rect1.x 
-    b.y = rect1.y
-    b.dx = dx
+    b.dx = rect1.dx 
+    b.dy = rect1.dy
+    b.x = x
     b
  
-  (xmod dx for dx in [-2, -1, 0, 1, 2])
+  (xmod x for x in [-2, -1, 0, 1, 2])
 """
 
 coffee_example_old2 = """
 shapes = () ->
   rect1 = 
     shape: 'rect'
-    x: 0.8
-    y: 1
+    dx: 0.8
+    dy: 1
 
-  make = partial mod, rect1, 'dx'
+  make = partial mod, rect1, 'x'
   [-2, -1, 0, 1, 2].map make
 """
 
@@ -97,8 +97,8 @@ coffee_example = """
 shapes = () ->
   rect1 = 
     shape: 'rect'
-    x: 0.8
-    y: 1
+    dx: 0.8
+    dy: 1
   
-  range rect1, 'dx', [-2, -1, 0, 1, 2]
+  range rect1, 'x', [-2, -1, 0, 1, 2]
 """
