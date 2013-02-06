@@ -16,19 +16,27 @@ def fget(m, k, d = 0.0):
 
 class GLDraw:
 
-  def __init__(self, font):
+  def __init__(self, font, zoom):
     self.font = font
+    self.set_zoom(zoom)
 
-  def rect(self, shape, num = 1):
+  def set_zoom(self, zoom):
+    self.font.FaceSize(int(24.*zoom/50.), 72)
+    (slx, sly, slz, srx, sry, srz) = self.font.BBox("X")
+    sdx = srx - slx # points
+    sdy = sry - sly # points
+    self.sdx = sdx / float(zoom) # converted in GL locations
+    self.sdy = sdy / float(zoom) # converted in GL locations
+
+  def rect(self, shape, num):
     x = fget(shape, 'x')
     y = fget(shape, 'y')
-    dx = fget(shape,'dx')
-    dy = fget(shape,'dy')
+    dx = fget(shape, 'dx')
+    dy = fget(shape, 'dy')
     glColor3f(0.0, 0.0, 1.0)
     glRectf(-dx/2 + x, -dy/2 + y, dx/2 + x, dy/2 + y)
     glColor3f(1.0, 1.0, 1.0)
-    glRasterPos(x-dx/4, y-dy/8)
-    #self.font.FaceSize(24, 72)
+    glRasterPos(x - self.sdx/2, y - self.sdy/2)
     self.font.Render(str(num))
 
   def circle(self, shape):

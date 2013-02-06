@@ -34,10 +34,11 @@ class MyGLWidget(QGLWidget):
         self.zoom_changed = False
         self.shapes = []
         self.font = FTGL.BitmapFont(font_file)
-        self.gldraw = GLDraw(self.font)
-        self.font.FaceSize(24, 72)
+        self.gldraw = GLDraw(self.font, self.zoomfactor)
 
     def paintGL(self):
+        if self.zoom_changed:
+          self.gldraw.set_zoom(self.zoomfactor)
         glClear(GL_COLOR_BUFFER_BIT)
         glColor3f(0.5, 0.5, 0.5)
         self.vbo.bind() # make this vbo the active one
