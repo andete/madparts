@@ -34,23 +34,17 @@ class MyGLWidget(QGLWidget):
         self.zoom_changed = False
         self.shapes = []
         self.font = FTGL.BitmapFont(font_file)
-        self.gldraw = GLDraw(self.font, self.zoomfactor)
 
     def initializeGL(self):
         glClearColor(0.0, 0.0, 0.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT)
         self.dot_field_vbo = vbo.VBO(self.dot_field_data)
-        #self.shaderProgram = QGLShaderProgram()
-        #self.shaderProgram.addShaderFromSourceFile(QGLShader.Vertex, "shaders/1.vert")
-        #self.shaderProgram.addShaderFromSourceFile(QGLShader.Fragment, "shaders/1.frag")
-        #self.shaderProgram.link()
-        #print self.shaderProgram.log()
+        self.gldraw = GLDraw(self.font, self.zoomfactor)
 
     def paintGL(self):
         if self.zoom_changed:
           self.gldraw.set_zoom(self.zoomfactor)
         glClear(GL_COLOR_BUFFER_BIT)
-        #self.shaderProgram.bind()
         glColor3f(0.5, 0.5, 0.5)
         self.dot_field_vbo.bind() # make this vbo the active one
         glEnableClientState(GL_VERTEX_ARRAY)

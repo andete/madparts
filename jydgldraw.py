@@ -3,6 +3,9 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+from PySide import QtGui, QtCore
+from PySide.QtOpenGL import *
+
 from OpenGL.GL import *
 
 import math
@@ -21,6 +24,13 @@ class GLDraw:
   def __init__(self, font, zoom):
     self.font = font
     self.set_zoom(zoom)
+
+    self.circle_shader = QGLShaderProgram()
+    self.circle_shader.addShaderFromSourceFile(QGLShader.Vertex, "shaders/circle.vert")
+    self.circle_shader.addShaderFromSourceFile(QGLShader.Fragment, "shaders/circle.frag")
+    self.circle_shader.link()
+    print self.circle_shader.log()
+    self.circle_shader_att_coord2d = self.circle_shader.attributeLocation("coord2d")
 
   def set_zoom(self, zoom):
     self.font.FaceSize(int(24.*zoom/50.), 72)
@@ -54,3 +64,19 @@ class GLDraw:
         dy = r * math.sin(theta) # calculate the y component 
         glVertex2f(x + dx, y + dy) # output vertex 
     glEnd()
+
+  def s_circle(self, shape):
+    # TODO; use shape
+    # TODO: doesn't work :)
+    self.circle_shader.bind()
+    self.circle_shader.enableAttributeArray(self.circle_shader_att_coord2d)
+    vert = [ 
+             QtGui.QVector2D(-0.5,  0.5), 
+             QtGui.QVector2D(-0.5, -0.5), 
+             QtGui.QVector2D(0.5, -.5), 
+             QtGui.QVector2D(0.5,  0.5) 
+           ] 
+    self.circle_shader.setAttributeArray2D(self.circle_shader_att_coord2d, vert)
+    glDrawArrays(GL_QUADS, 0, 4)
+    self.circle_shader.disableAttributeArray(self.circle_shader_att_coord2d);
+    self.circle_shader.release()
