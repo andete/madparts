@@ -44,6 +44,7 @@ class MyGLWidget(QGLWidget):
         #self.shaderProgram.addShaderFromSourceFile(QGLShader.Vertex, "shaders/1.vert")
         #self.shaderProgram.addShaderFromSourceFile(QGLShader.Fragment, "shaders/1.frag")
         #self.shaderProgram.link()
+        #print self.shaderProgram.log()
 
     def paintGL(self):
         if self.zoom_changed:
