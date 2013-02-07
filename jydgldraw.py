@@ -30,8 +30,8 @@ class GLDraw:
     self.circle_shader.addShaderFromSourceFile(QGLShader.Fragment, "shaders/circle.frag")
     self.circle_shader.link()
     print self.circle_shader.log()
-    self.circle_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
-    self.circle_data_vbo = vbo.VBO(self.circle_data)
+    self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
+    self.square_data_vbo = vbo.VBO(self.square_data)
 
   def set_zoom(self, zoom):
     self.font.FaceSize(int(24.*zoom/50.), 72)
@@ -67,12 +67,11 @@ class GLDraw:
     glEnd()
 
   def s_circle(self, shape):
-    glColor3f(0.0, 0.0, 1.0)
     # TODO; use shape
-    # TODO: doesn't work correctly
+    # TODO: use shader parameters to set radius, ...
     self.circle_shader.bind()
-    self.circle_data_vbo.bind()
+    self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
-    glVertexPointer(2, GL_FLOAT, 0, self.circle_data_vbo)
+    glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release()

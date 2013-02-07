@@ -66,7 +66,7 @@ class MyGLWidget(QGLWidget):
             for shape in self.shapes:
                 if shape['shape'] == 'rect': self.gldraw.rect(shape, i)
                 if shape['shape'] == 'circle': self.gldraw.circle(shape)
-                #if shape['shape'] == 'circle': self.gldraw.s_circle(shape)
+                if shape['shape'] == 'gl': self.gldraw.s_circle(shape)
                 i = i + 1
         if self.zoom_changed:
             self.zoom_changed = False
