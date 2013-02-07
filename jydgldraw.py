@@ -7,10 +7,10 @@ from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
 from OpenGL.GL import *
+import OpenGL.arrays.vbo as vbo
 
+import numpy as np
 import math
-
-
 
 def oget(m, k, d):
   if k in m: return m[k]
@@ -30,7 +30,8 @@ class GLDraw:
     self.circle_shader.addShaderFromSourceFile(QGLShader.Fragment, "shaders/circle.frag")
     self.circle_shader.link()
     print self.circle_shader.log()
-    self.circle_shader_att_coord2d = self.circle_shader.attributeLocation("coord2d")
+    self.circle_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
+    self.circle_data_vbo = vbo.VBO(self.circle_data)
 
   def set_zoom(self, zoom):
     self.font.FaceSize(int(24.*zoom/50.), 72)
@@ -66,17 +67,12 @@ class GLDraw:
     glEnd()
 
   def s_circle(self, shape):
+    glColor3f(0.0, 0.0, 1.0)
     # TODO; use shape
-    # TODO: doesn't work :)
+    # TODO: doesn't work correctly
     self.circle_shader.bind()
-    self.circle_shader.enableAttributeArray(self.circle_shader_att_coord2d)
-    vert = [ 
-             QtGui.QVector2D(-0.5,  0.5), 
-             QtGui.QVector2D(-0.5, -0.5), 
-             QtGui.QVector2D(0.5, -.5), 
-             QtGui.QVector2D(0.5,  0.5) 
-           ] 
-    self.circle_shader.setAttributeArray2D(self.circle_shader_att_coord2d, vert)
+    self.circle_data_vbo.bind()
+    glEnableClientState(GL_VERTEX_ARRAY)
+    glVertexPointer(2, GL_FLOAT, 0, self.circle_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
-    self.circle_shader.disableAttributeArray(self.circle_shader_att_coord2d);
     self.circle_shader.release()
