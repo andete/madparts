@@ -49,48 +49,18 @@ def eval_coffee_footprint(coffee):
 
 js_example = """
 function shapes() {
-  var dxs = [-2, -1, 0, 1, 2];
-  var rect1 = { shape: 'rect', x: 0.8, y: 1};
-  function xmod(dx) {
+  var xs = [-2, -1, 0, 1, 2];
+  var rect1 = { shape: 'rect', dx: 0.8, dy: 2, ro: 50 };
+  function xmod(x) {
     var b = Object();
     b.shape = rect1.shape;
-    b.x = rect1.x; 
-    b.y = rect1.y;
-    b.dx = dx; return b;
+    b.dx = rect1.dx; 
+    b.dy = rect1.dy;
+    b.ro = rect1.ro;
+    b.x = x; return b;
   }
-  return dxs.map(xmod);
+  return xs.map(xmod);
 }
-"""
-
-coffee_example_old1 = """
-shapes = () ->
-  xs = [-2, -1, 0, 1, 2]
-
-  rect1 = 
-    shape: 'rect'
-    dx: 0.8
-    dy: 1
-
-  xmod = (x) ->
-    b = {}
-    b.shape = rect1.shape
-    b.dx = rect1.dx 
-    b.dy = rect1.dy
-    b.x = x
-    b
- 
-  (xmod x for x in [-2, -1, 0, 1, 2])
-"""
-
-coffee_example_old2 = """
-shapes = () ->
-  rect1 = 
-    shape: 'rect'
-    dx: 0.8
-    dy: 1
-
-  make = partial mod, rect1, 'x'
-  [-2, -1, 0, 1, 2].map make
 """
 
 coffee_example = """
@@ -98,7 +68,8 @@ shapes = () ->
   rect1 = 
     shape: 'rect'
     dx: 0.8
-    dy: 1
+    dy: 2
+    ro: 50
   
   range rect1, 'x', [-2, -1, 0, 1, 2]
 """

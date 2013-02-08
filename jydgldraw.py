@@ -20,6 +20,7 @@ def fget(m, k, d = 0.0):
   return float(oget(m, k, d))
 
 def make_shader(name):
+  print "compiling %s... shaders" % (name)
   p = QGLShaderProgram()
   p.addShaderFromSourceFile(QGLShader.Vertex, "shaders/%s.vert" % (name))
   p.addShaderFromSourceFile(QGLShader.Fragment, "shaders/%s.frag" % (name))
@@ -39,6 +40,7 @@ class GLDraw:
     self.rect_shader = make_shader("rect")
     self.rect_scale_loc = self.rect_shader.uniformLocation("scale")
     self.rect_move_loc = self.rect_shader.uniformLocation("move")
+    self.rect_round_loc = self.rect_shader.uniformLocation("round")
 
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
@@ -81,11 +83,13 @@ class GLDraw:
     y = fget(shape, 'y')
     dx = fget(shape, 'dx')
     dy = fget(shape, 'dy')
+    ro = fget(shape, 'ro') / 100.0
     glColor3f(0.0, 0.0, 1.0)
     glRasterPos(x, y)
     self.rect_shader.bind()
     self.rect_shader.setUniformValue(self.rect_scale_loc, dx, dy)
     self.rect_shader.setUniformValue(self.rect_move_loc, x, y)
+    self.rect_shader.setUniformValue(self.rect_round_loc, ro, 0.0)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
