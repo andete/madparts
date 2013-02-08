@@ -13,4 +13,4 @@ dependencies
 * pyv8 (http://code.google.com/p/pyv8/)
 * pyftgl (http://code.google.com/p/pyftgl/) (tested with 0.5c)
 
-Requires openGL 2.0 available on the display.
+Requires openGL 2.1 available on the display.

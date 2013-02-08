@@ -71,5 +71,15 @@ shapes = () ->
     dy: 2
     ro: 50
   
-  range rect1, 'x', [-2, -1, 0, 1, 2]
+  line =
+    shape: 'line'
+    x1: -3
+    x2: 3
+    y1: 3
+    y2: 3
+    w: 0.25
+
+  l  = range rect1, 'x', [-2, -1, 0, 1, 2]
+  l.push line
+  l
 """
