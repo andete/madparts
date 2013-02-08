@@ -35,7 +35,7 @@ class GLDraw:
 
     self.circle_shader = make_shader("circle")
     self.rect_shader = make_shader("rect")
-    self.rect_scale_loc = self.rect_shader.uniformLocation("jydscale")
+    self.rect_scale_loc = self.rect_shader.uniformLocation("scale")
 
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
