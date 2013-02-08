@@ -36,6 +36,8 @@ class MyGLWidget(QGLWidget):
         self.font = FTGL.BitmapFont(font_file)
 
     def initializeGL(self):
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glClearColor(0.0, 0.0, 0.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT)
         self.dot_field_vbo = vbo.VBO(self.dot_field_data)
@@ -46,7 +48,6 @@ class MyGLWidget(QGLWidget):
           self.gldraw.set_zoom(self.zoomfactor)
         glClear(GL_COLOR_BUFFER_BIT)
         glColor3f(0.5, 0.5, 0.5)
-        glEnable(GL_BLEND)
         self.dot_field_vbo.bind() # make this vbo the active one
         glEnableClientState(GL_VERTEX_ARRAY)
         glVertexPointer(2, GL_FLOAT, 0, self.dot_field_vbo)

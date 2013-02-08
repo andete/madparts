@@ -3,6 +3,9 @@
 // (c) 2013 Joost Yervante Damad <joost@damad.be>
 // License: GPL
 
+// scale unit square to our rect size
+// and move to it's origin
+
 uniform vec2 scale;
 uniform vec2 move;
 void main() {
