@@ -19,17 +19,24 @@ def oget(m, k, d):
 def fget(m, k, d = 0.0):
   return float(oget(m, k, d))
 
+def make_shader(name):
+  p = QGLShaderProgram()
+  p.addShaderFromSourceFile(QGLShader.Vertex, "shaders/%s.vert" % (name))
+  p.addShaderFromSourceFile(QGLShader.Fragment, "shaders/%s.frag" % (name))
+  p.link()
+  print p.log()
+  return p
+
 class GLDraw:
 
   def __init__(self, font, zoom):
     self.font = font
     self.set_zoom(zoom)
 
-    self.circle_shader = QGLShaderProgram()
-    self.circle_shader.addShaderFromSourceFile(QGLShader.Vertex, "shaders/circle.vert")
-    self.circle_shader.addShaderFromSourceFile(QGLShader.Fragment, "shaders/circle.frag")
-    self.circle_shader.link()
-    print self.circle_shader.log()
+    self.circle_shader = make_shader("circle")
+    self.rect_shader = make_shader("rect")
+    self.rect_scale_loc = self.rect_shader.uniformLocation("jydscale")
+
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
 
@@ -66,7 +73,8 @@ class GLDraw:
         glVertex2f(x + dx, y + dy) # output vertex 
     glEnd()
 
-  def s_circle(self, shape):
+  def gl_circle(self, shape):
+    glColor3f(0.0, 0.0, 1.0)
     # TODO; use shape
     # TODO: use shader parameters to set radius, ...
     self.circle_shader.bind()
@@ -75,3 +83,19 @@ class GLDraw:
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release()
+
+  def gl_rect(self, shape, num):
+    # TODO; use shape
+    x = fget(shape, 'x')
+    y = fget(shape, 'y')
+    dx = fget(shape, 'dx')
+    dy = fget(shape, 'dy')
+    glColor3f(0.0, 0.0, 1.0)
+    self.rect_shader.bind()
+    self.rect_shader.setUniformValue(self.rect_scale_loc, dx, dy)
+    self.square_data_vbo.bind()
+    glEnableClientState(GL_VERTEX_ARRAY)
+    glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
+    glDrawArrays(GL_QUADS, 0, 4)
+    self.rect_shader.release()
+
