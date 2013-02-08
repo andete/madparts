@@ -37,4 +37,21 @@ mod1 = (obj, key) ->
 
 # generate a range of mods
 range = (obj, key, l) ->
-  l.map (mod1 obj, key) 
+  l.map (mod1 obj, key)
+
+steps = (n, dx) ->
+  [1..n].map ((x) -> ((-(n+1)/2) + x) * dx)
+
+modl = (l, key, val) ->
+  do1 = (o) ->
+    o[key] = val
+    o
+  l.map do1
+
+rot = (o) ->
+   b = clone(o)
+   b.dx = o.dy
+   b.dy = o.dx
+   b
+
+rotl = (l) -> l.map rot

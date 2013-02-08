@@ -67,19 +67,46 @@ coffee_example = """
 shapes = () ->
   rect1 = 
     shape: 'rect'
-    dx: 0.8
-    dy: 2
+    dx: 1.67
+    dy: 0.36
     ro: 50
-  
-  line =
+
+  l1  = modl (range rect1, 'y', (steps 8,  -0.8)), 'x', -4.5
+  l2  = modl (range (rot rect1), 'x', (steps 8,  0.8)), 'y', -4.5
+  l3  = modl (range rect1, 'y', (steps 8,  0.8)), 'x', 4.5
+  l4  = modl (range (rot rect1), 'x', (steps 8,  -0.8)), 'y', 4.5
+
+  line1 =
     shape: 'line'
     x1: -3
     x2: 3
     y1: 3
     y2: 3
-    w: 0.25
+    w: 0.25  
 
-  l  = range rect1, 'x', [-2, -1, 0, 1, 2]
-  l.push line
-  l
+  line2 =
+    shape: 'line'
+    x1: -3
+    x2: 3
+    y1: -3
+    y2: -3
+    w: 0.25 
+
+  line3 =
+    shape: 'line'
+    x1: -3
+    x2: -3
+    y1: 3
+    y2: -3
+    w: 0.25 
+
+  line4 =
+    shape: 'line'
+    x1: 3
+    x2: 3
+    y1: 3
+    y2: -3
+    w: 0.25 
+
+  l.concat [line1, line2, line3, line4]
 """
