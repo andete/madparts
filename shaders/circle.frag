@@ -4,9 +4,11 @@
 // License: GPL
 
 varying vec2 pos;
-varying float radius;
+varying vec2 radius;
 void main() {
-  float dist = radius * radius - pos.x * pos.x - pos.y * pos.y;
-  if (dist > 0)
+  float x = pos.x / radius.x;
+  float y = pos.y / radius.y;
+  float dist = x * x + y * y;
+  if (dist <= 1)
     gl_FragColor = gl_Color;
 }

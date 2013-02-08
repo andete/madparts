@@ -53,8 +53,14 @@ class GLDraw:
 
   def circle(self, shape, num):
     glColor3f(0.0, 0.0, 1.0)
-    # TODO allow better customization of circle
-    r = fget(shape, 'dx')/2
+    r = fget(shape, 'dx') / 2
+    r = fget(shape, 'r', r)
+    rx = fget(shape, 'rx', r)
+    dy = fget(shape, 'dy') / 2
+    if dy > 0:
+      ry = fget(shape, 'ry', dy)
+    else:
+      ry = fget(shape, 'ry', r)
     x = fget(shape,'x')
     y = fget(shape,'y')
     self.circle_shader.bind()
@@ -62,7 +68,7 @@ class GLDraw:
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
-    self.circle_shader.setUniformValue(self.circle_radius_loc, r, 0)
+    self.circle_shader.setUniformValue(self.circle_radius_loc, rx, ry)
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release()
     glColor3f(1.0, 1.0, 1.0)
