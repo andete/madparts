@@ -99,3 +99,16 @@ class GLDraw:
     glRasterPos(x - self.sdx/2, y - self.sdy/2)
     self.font.Render(str(num))
 
+  def line(self, shape):
+    x1 = fget(shape, 'x1')
+    y1 = fget(shape, 'y1')
+    x2 = fget(shape, 'x2')
+    y2 = fget(shape, 'y2')
+    w = fget(shape, 'w')
+    glLineWidth(w)
+    glColor3f(1.0, 1.0, 1.0)
+    glBegin(GL_LINES)
+    glVertex3f(x1, y1, 0)
+    glVertex3f(x2, y2, 0)
+    glEnd()
+    

@@ -38,6 +38,7 @@ class MyGLWidget(QGLWidget):
     def initializeGL(self):
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_LINE_SMOOTH)
         glClearColor(0.0, 0.0, 0.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT)
         self.dot_field_vbo = vbo.VBO(self.dot_field_data)
@@ -54,6 +55,7 @@ class MyGLWidget(QGLWidget):
         glDrawArrays(GL_POINTS, 0, gldx*gldy)
 
         glColor3f(1.0, 0.0, 0.0)
+        glLineWidth(1)
         glBegin(GL_LINES)
         glVertex3f(-100, 0, 0)
         glVertex3f(100, 0, 0)
@@ -68,6 +70,7 @@ class MyGLWidget(QGLWidget):
             for shape in self.shapes:
                 if shape['shape'] == 'rect': self.gldraw.rect(shape, i)
                 if shape['shape'] == 'circle': self.gldraw.circle(shape, i)
+                if shape['shape'] == 'line': self.gldraw.line(shape)
                 i = i + 1
         if self.zoom_changed:
             self.zoom_changed = False
