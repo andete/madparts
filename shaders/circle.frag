@@ -9,7 +9,4 @@ void main() {
   float dist = radius * radius - pos.x * pos.x - pos.y * pos.y;
   if (dist > 0)
     gl_FragColor = gl_Color;
-   else
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
-   // alpha channel is not working unfortunately :(
 }
