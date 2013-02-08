@@ -46,6 +46,7 @@ class MyGLWidget(QGLWidget):
           self.gldraw.set_zoom(self.zoomfactor)
         glClear(GL_COLOR_BUFFER_BIT)
         glColor3f(0.5, 0.5, 0.5)
+        glEnable(GL_BLEND)
         self.dot_field_vbo.bind() # make this vbo the active one
         glEnableClientState(GL_VERTEX_ARRAY)
         glVertexPointer(2, GL_FLOAT, 0, self.dot_field_vbo)
@@ -65,9 +66,7 @@ class MyGLWidget(QGLWidget):
         if self.shapes != None:
             for shape in self.shapes:
                 if shape['shape'] == 'rect': self.gldraw.rect(shape, i)
-                if shape['shape'] == 'glr': self.gldraw.gl_rect(shape, i)
-                if shape['shape'] == 'circle': self.gldraw.circle(shape)
-                if shape['shape'] == 'glc': self.gldraw.gl_circle(shape)
+                if shape['shape'] == 'circle': self.gldraw.circle(shape, i)
                 i = i + 1
         if self.zoom_changed:
             self.zoom_changed = False

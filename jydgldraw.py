@@ -34,8 +34,11 @@ class GLDraw:
     self.set_zoom(zoom)
 
     self.circle_shader = make_shader("circle")
+    self.circle_move_loc = self.circle_shader.uniformLocation("move")
+    self.circle_radius_loc = self.circle_shader.uniformLocation("radiusin")
     self.rect_shader = make_shader("rect")
     self.rect_scale_loc = self.rect_shader.uniformLocation("scale")
+    self.rect_move_loc = self.rect_shader.uniformLocation("move")
 
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
@@ -48,54 +51,41 @@ class GLDraw:
     self.sdx = sdx / float(zoom) # converted in GL locations
     self.sdy = sdy / float(zoom) # converted in GL locations
 
+  def circle(self, shape, num):
+    glColor3f(0.0, 0.0, 1.0)
+    # TODO allow better customization of circle
+    r = fget(shape, 'dx')/2
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    self.circle_shader.bind()
+    self.circle_shader.setUniformValue(self.circle_move_loc, x, y)
+    self.circle_shader.setUniformValue(self.circle_radius_loc, r, r)
+    self.square_data_vbo.bind()
+    glEnableClientState(GL_VERTEX_ARRAY)
+    glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
+    glDrawArrays(GL_QUADS, 0, 4)
+    self.circle_shader.release()
+    glColor3f(1.0, 1.0, 1.0)
+    glRasterPos(x - self.sdx/2, y - self.sdy/2)
+    self.font.Render(str(num))
+    # TODO, factor out number writing
+
   def rect(self, shape, num):
     x = fget(shape, 'x')
     y = fget(shape, 'y')
     dx = fget(shape, 'dx')
     dy = fget(shape, 'dy')
     glColor3f(0.0, 0.0, 1.0)
-    glRectf(-dx/2 + x, -dy/2 + y, dx/2 + x, dy/2 + y)
-    glColor3f(1.0, 1.0, 1.0)
-    glRasterPos(x - self.sdx/2, y - self.sdy/2)
-    self.font.Render(str(num))
-
-  def circle(self, shape):
-    glColor3f(0.0, 0.0, 1.0)
-    num_segments = 42
-    r = fget(shape, 'dx')/2
-    x = fget(shape,'x')
-    y = fget(shape,'y')
-    glBegin(GL_TRIANGLE_FAN)
-    for i in range(0, num_segments):
-        theta = 2.0 * math.pi * float(i) / float(num_segments) # get the current angle 
-        dx = r * math.cos(theta) # calculate the x component 
-        dy = r * math.sin(theta) # calculate the y component 
-        glVertex2f(x + dx, y + dy) # output vertex 
-    glEnd()
-
-  def gl_circle(self, shape):
-    glColor3f(0.0, 0.0, 1.0)
-    # TODO; use shape
-    # TODO: use shader parameters to set radius, ...
-    self.circle_shader.bind()
-    self.square_data_vbo.bind()
-    glEnableClientState(GL_VERTEX_ARRAY)
-    glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
-    glDrawArrays(GL_QUADS, 0, 4)
-    self.circle_shader.release()
-
-  def gl_rect(self, shape, num):
-    # TODO; use shape
-    x = fget(shape, 'x')
-    y = fget(shape, 'y')
-    dx = fget(shape, 'dx')
-    dy = fget(shape, 'dy')
-    glColor3f(0.0, 0.0, 1.0)
+    glRasterPos(x, y)
     self.rect_shader.bind()
     self.rect_shader.setUniformValue(self.rect_scale_loc, dx, dy)
+    self.rect_shader.setUniformValue(self.rect_move_loc, x, y)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
+    glColor3f(1.0, 1.0, 1.0)
+    glRasterPos(x - self.sdx/2, y - self.sdy/2)
+    self.font.Render(str(num))
 
