@@ -30,7 +30,7 @@ def make_js_from_coffee(coffee_script_code):
     js_make_js_from_coffee = ctxt.eval("""
 (function (coffee_code) {
   CoffeeScript = require('coffee-script/coffee-script');
-  js_code = CoffeeScript.compile(coffee_code, null);
+  js_code = CoffeeScript.compile(coffee_code, {bare:true});
   return js_code;
 })
 """)
@@ -43,9 +43,10 @@ def eval_js_footprint(js):
 def eval_coffee_footprint(coffee):
   ground = ""
   with open("ground.coffee") as f: ground = f.read()
-  js = make_js_from_coffee(ground + "\n" + coffee + "\nreturn shapes()\n")
+  ground_js = make_js_from_coffee(ground)
+  js = make_js_from_coffee(coffee + "\nreturn shapes()\n")
   with PyV8.JSContext() as ctxt:
-      return PyV8.convert(ctxt.eval(js))
+      return PyV8.convert(ctxt.eval("(function() {\n" + ground_js + js + "\n}).call(this);\n"))
 
 js_example = """
 function shapes() {
