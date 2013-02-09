@@ -66,6 +66,12 @@ function footprint() {
 
 coffee_example = """
 footprint = () ->
+
+  meta =
+    name: "TQFP32"
+    id: "id:e5bd48346acc4d549d678cb059be64ef"
+    desc: "TQFP example"
+
   pad = 
     type: 'smd'
     shape: 'rect'
@@ -73,14 +79,18 @@ footprint = () ->
     dy: 0.36
     ro: 50
 
-  l1  = modl (range pad, 'y', (steps 8,  -0.8)), ['x', -4.5]
-  l2  = modl (range pad, 'x', (steps 8,  0.8)), ['y', -4.5], ['rot', 90]
-  l3  = modl (range pad, 'y', (steps 8,  0.8)), ['x', 4.5], ['rot', 180]
-  l4  = modl (range pad, 'x', (steps 8,  -0.8)), ['y', 4.5], ['rot', 270]
+  pads = quad pad, 32, 0.8, 9
 
-  l5 = lines [-3,3], [3,3], [3,-3], [-3,-3], [-3,3]
+  silk = lines [-3,3], [3,3], [3,-3], [-3,-3], [-3,3]
 
-  l1[0].ro = 100
+  pads[0].ro = 100
 
-  combine [l1, l2, l3, l4, l5]
+  dot = 
+    type: 'silk'
+    shape: 'circle'
+    r: 0.25
+    x: -4.5
+    y: 3.5
+
+  combine [pads, silk, dot]
 """

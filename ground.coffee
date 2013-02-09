@@ -73,3 +73,12 @@ lines = (a...) ->
        b = c
        line
     )
+
+quad = (pad, num, step, dist) ->
+  n = num / 4
+  d = dist / 2
+  l1  = modl (range pad, 'y', (steps n,  -step)), ['x', -d]
+  l2  = modl (range pad, 'x', (steps n,  step)),  ['y', -d], ['rot', 90]
+  l3  = modl (range pad, 'y', (steps n,  step)),  ['x', d], ['rot', 180]
+  l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d], ['rot', 270]
+  combine [l1, l2, l3, l4]
