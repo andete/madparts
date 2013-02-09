@@ -76,6 +76,12 @@ shapes = () ->
   l3  = modl (range rect1, 'y', (steps 8,  0.8)), 'x', 4.5
   l4  = modl (range (rot rect1), 'x', (steps 8,  -0.8)), 'y', 4.5
 
+  l = []
+  l = l.concat l1
+  l = l.concat l2
+  l = l.concat l3
+  l = l.concat l4
+
   line1 =
     shape: 'line'
     x1: -3
