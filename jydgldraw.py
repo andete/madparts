@@ -59,7 +59,8 @@ class GLDraw:
   def set_zoom(self, zoom):
     self.zoom = float(zoom)
 
-  def _txt(self, shape, dx, dy, x, y, s):
+  def _txt(self, shape, dx, dy, x, y):
+    s = shape['name']
     (r,g,b) = self.txt_color[shape['type']]
     glColor3f(r,g,b)
     l = len(s)
@@ -88,7 +89,7 @@ class GLDraw:
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release() 
 
-  def circle(self, shape, num):
+  def circle(self, shape):
     r = fget(shape, 'dx') / 2
     r = fget(shape, 'r', r)
     rx = fget(shape, 'rx', r)
@@ -100,9 +101,10 @@ class GLDraw:
     x = fget(shape,'x')
     y = fget(shape,'y')
     self._circle(x, y, rx, ry)
-    self._txt(shape, rx*2, ry*2, x, y, str(num))
+    if 'name' in shape:
+      self._txt(shape, rx*2, ry*2, x, y)
 
-  def rect(self, shape, num):
+  def rect(self, shape):
     x = fget(shape, 'x')
     y = fget(shape, 'y')
     dx = fget(shape, 'dx')
@@ -122,7 +124,8 @@ class GLDraw:
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
-    self._txt(shape ,dx, dy, x, y, str(num))
+    if 'name' in shape:
+      self._txt(shape ,dx, dy, x, y)
 
   def line(self, shape):
     x1 = fget(shape, 'x1')
@@ -158,7 +161,7 @@ class GLDraw:
     for shape in shapes:
       (r,g,b) = self.color[shape['type']]
       glColor3f(r,g,b)
-      if shape['shape'] == 'rect': self.rect(shape, i)
-      if shape['shape'] == 'circle': self.circle(shape, i)
+      if shape['shape'] == 'rect': self.rect(shape)
+      if shape['shape'] == 'circle': self.circle(shape)
       if shape['shape'] == 'line': self.line(shape)
       i = i + 1
