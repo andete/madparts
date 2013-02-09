@@ -44,12 +44,12 @@ def eval_coffee_footprint(coffee):
   ground = ""
   with open("ground.coffee") as f: ground = f.read()
   ground_js = make_js_from_coffee(ground)
-  js = make_js_from_coffee(coffee + "\nreturn shapes()\n")
+  js = make_js_from_coffee(coffee + "\nreturn footprint()\n")
   with PyV8.JSContext() as ctxt:
       return PyV8.convert(ctxt.eval("(function() {\n" + ground_js + js + "\n}).call(this);\n"))
 
 js_example = """
-function shapes() {
+function footprint() {
   var xs = [-2, -1, 0, 1, 2];
   var rect1 = { shape: 'rect', dx: 0.8, dy: 2, ro: 50 };
   function xmod(x) {
@@ -65,7 +65,7 @@ function shapes() {
 """
 
 coffee_example = """
-shapes = () ->
+footprint = () ->
   pad = 
     type: 'pad'
     shape: 'rect'
