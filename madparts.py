@@ -94,10 +94,24 @@ class MainWin(QtGui.QMainWindow):
       self.glw.updateGL()
 
   def compile(self):
+      def _add_names(res):
+         if res == None: return None
+         def generate_ints():
+           for i in range(1, 1000):
+             yield i
+         g = generate_ints()
+         def _c(x):
+           if 'type' in x:
+             if x['type'] in ['smd', 'pad']:
+               x['name'] = str(g.next())
+           return x
+         return [_c(x) for x in res]
+
       code = self.te1.toPlainText()
       try:
           #result = jydjs.eval_js_footprint(code)
           result = jydjs.eval_coffee_footprint(code)
+          result = _add_names(result)
           self.te2.setPlainText(str(result))
           self.glw.set_shapes(result)
       except Exception as ex:

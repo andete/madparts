@@ -67,7 +67,7 @@ function footprint() {
 coffee_example = """
 footprint = () ->
   pad = 
-    type: 'pad'
+    type: 'smd'
     shape: 'rect'
     dx: 1.67
     dy: 0.36
