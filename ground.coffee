@@ -56,4 +56,21 @@ rot = (o) ->
 
 rotl = (l) -> l.map rot
 
+# a... treats a as a argument list
 combine = (a) -> [].concat a...
+
+# this is just temporarely
+lines = (a...) ->
+    b = a[0]
+    a[1..].map ((c) ->
+       line =
+         type: 'silk'
+         shape: 'line'
+         x1: b[0]
+         y1: b[1]
+         x2: c[0]
+         y2: c[1]
+         w: 0.25
+       b = c
+       line
+    )

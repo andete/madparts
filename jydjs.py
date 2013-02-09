@@ -65,48 +65,19 @@ function shapes() {
 
 coffee_example = """
 shapes = () ->
-  rect1 = 
+  pad = 
+    type: 'pad'
     shape: 'rect'
     dx: 1.67
     dy: 0.36
     ro: 50
 
-  l1  = modl (range rect1, 'y', (steps 8,  -0.8)), 'x', -4.5
-  l2  = modl (range (rot rect1), 'x', (steps 8,  0.8)), 'y', -4.5
-  l3  = modl (range rect1, 'y', (steps 8,  0.8)), 'x', 4.5
-  l4  = modl (range (rot rect1), 'x', (steps 8,  -0.8)), 'y', 4.5
+  l1  = modl (range pad, 'y', (steps 8,  -0.8)), 'x', -4.5
+  l2  = modl (range (rot pad), 'x', (steps 8,  0.8)), 'y', -4.5
+  l3  = modl (range pad, 'y', (steps 8,  0.8)), 'x', 4.5
+  l4  = modl (range (rot pad), 'x', (steps 8,  -0.8)), 'y', 4.5
 
-  line1 =
-    shape: 'line'
-    x1: -3
-    x2: 3
-    y1: 3
-    y2: 3
-    w: 0.25  
+  l5 = lines [-3,3], [3,3], [3,-3], [-3,-3], [-3,3]
 
-  line2 =
-    shape: 'line'
-    x1: -3
-    x2: 3
-    y1: -3
-    y2: -3
-    w: 0.25 
-
-  line3 =
-    shape: 'line'
-    x1: -3
-    x2: -3
-    y1: 3
-    y2: -3
-    w: 0.25 
-
-  line4 =
-    shape: 'line'
-    x1: 3
-    x2: 3
-    y1: 3
-    y2: -3
-    w: 0.25 
-
-  combine [line1, line2, line3, line4, l1, l2, l3, l4]
+  combine [l1, l2, l3, l4, l5]
 """
