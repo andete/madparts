@@ -33,7 +33,7 @@ class MyGLWidget(QGLWidget):
         self.zoomfactor = 50
         self.zoom_changed = False
         self.shapes = []
-        self.font = FTGL.BitmapFont(font_file)
+        self.font = FTGL.PixmapFont(font_file)
 
     def initializeGL(self):
         glEnable(GL_BLEND)

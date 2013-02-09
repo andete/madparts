@@ -46,13 +46,24 @@ class GLDraw:
     self.square_data_vbo = vbo.VBO(self.square_data)
 
   def set_zoom(self, zoom):
-    self.zoom = zoom
-    self.font.FaceSize(int(24.*zoom/50.), 72)
-    (slx, sly, slz, srx, sry, srz) = self.font.BBox("X")
-    sdx = srx - slx # points
+    self.zoom = float(zoom)
+
+  def _txt(self, dx, dy, x, y, s):
+    l = len(s)
+    dxp = dx * self.zoom # dx in pixels
+    dyp = dy * self.zoom # dy in pixels
+    dxp = dxp / 16. / l # dx in 16 pixel char units
+    dyp = dyp / 24. # dy in 24 pixel units
+    d = min(dxp, dyp, 1)
+    f = int(24.*d*1.25)
+    self.font.FaceSize(f)
+    (slx, sly, slz, srx, sry, srz) = self.font.BBox(s)
+    sdx = srx + (8/l) - slx # points
     sdy = sry - sly # points
-    self.sdx = sdx / float(zoom) # converted in GL locations
-    self.sdy = sdy / float(zoom) # converted in GL locations
+    sdx = sdx / self.zoom # converted in GL locations
+    sdy = sdy / self.zoom # converted in GL locations
+    glRasterPos(x - sdx/2, y - sdy/2)
+    self.font.Render(s)
 
   def _circle(self, x, y, rx, ry):
     self.circle_shader.bind()
@@ -78,9 +89,7 @@ class GLDraw:
     y = fget(shape,'y')
     self._circle(x, y, rx, ry)
     glColor3f(1.0, 1.0, 1.0)
-    glRasterPos(x - self.sdx/2, y - self.sdy/2)
-    self.font.Render(str(num))
-    # TODO, factor out number writing
+    self._txt(rx*2, ry*2, x, y, str(num))
 
   def rect(self, shape, num):
     x = fget(shape, 'x')
@@ -104,8 +113,7 @@ class GLDraw:
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
     glColor3f(1.0, 1.0, 1.0)
-    glRasterPos(x - self.sdx/2, y - self.sdy/2)
-    self.font.Render(str(num))
+    self._txt(dx, dy, x, y, str(num))
 
   def line(self, shape):
     x1 = fget(shape, 'x1')
