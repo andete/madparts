@@ -65,13 +65,7 @@ class MyGLWidget(QGLWidget):
         glVertex3f(0, 100, 0)
         glEnd()
         
-        i = 1
-        if self.shapes != None:
-            for shape in self.shapes:
-                if shape['shape'] == 'rect': self.gldraw.rect(shape, i)
-                if shape['shape'] == 'circle': self.gldraw.circle(shape, i)
-                if shape['shape'] == 'line': self.gldraw.line(shape)
-                i = i + 1
+        if self.shapes != None: self.gldraw.draw(self.shapes)
         if self.zoom_changed:
             self.zoom_changed = False
             self.resizeGL(self.width(), self.height())

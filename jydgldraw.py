@@ -145,3 +145,10 @@ class GLDraw:
     self._circle(x1, y1, r, r)
     self._circle(x2, y2, r, r)
     
+  def draw(self, shapes):
+    i = 1
+    for shape in shapes:
+      if shape['shape'] == 'rect': self.rect(shape, i)
+      if shape['shape'] == 'circle': self.circle(shape, i)
+      if shape['shape'] == 'line': self.line(shape)
+      i = i + 1
