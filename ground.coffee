@@ -55,3 +55,5 @@ rot = (o) ->
    b
 
 rotl = (l) -> l.map rot
+
+combine = (a) -> [].concat a...
