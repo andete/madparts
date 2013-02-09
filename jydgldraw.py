@@ -88,12 +88,16 @@ class GLDraw:
     dx = fget(shape, 'dx')
     dy = fget(shape, 'dy')
     ro = fget(shape, 'ro') / 100.0
+    rot = fget(shape, 'rot')
+    if rot not in [0, 90, 180, 270]:
+      raise Exception("only 0, 90, 180, 270 rotation supported for now")
+    if rot in [90, 270]:
+      (dx, dy) = (dy, dx)
     glColor3f(0.0, 0.0, 1.0)
-    glRasterPos(x, y)
     self.rect_shader.bind()
     self.rect_shader.setUniformValue(self.rect_scale_loc, dx, dy)
     self.rect_shader.setUniformValue(self.rect_move_loc, x, y)
-    self.rect_shader.setUniformValue(self.rect_round_loc, ro, 0.0)
+    self.rect_shader.setUniformValue(self.rect_round_loc, ro, 0)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)

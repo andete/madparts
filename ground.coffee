@@ -42,11 +42,10 @@ range = (obj, key, l) ->
 steps = (n, dx) ->
   [1..n].map ((x) -> ((-(n+1)/2) + x) * dx)
 
-modl = (l, key, val) ->
-  do1 = (o) ->
-    o[key] = val
-    o
-  l.map do1
+modl = (l, kv...) ->
+  l.map ((o) ->
+    o[k] = v for [k,v] in kv
+    o)
 
 rot = (o) ->
    b = clone(o)

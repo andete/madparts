@@ -72,10 +72,10 @@ shapes = () ->
     dy: 0.36
     ro: 50
 
-  l1  = modl (range pad, 'y', (steps 8,  -0.8)), 'x', -4.5
-  l2  = modl (range (rot pad), 'x', (steps 8,  0.8)), 'y', -4.5
-  l3  = modl (range pad, 'y', (steps 8,  0.8)), 'x', 4.5
-  l4  = modl (range (rot pad), 'x', (steps 8,  -0.8)), 'y', 4.5
+  l1  = modl (range pad, 'y', (steps 8,  -0.8)), ['x', -4.5]
+  l2  = modl (range pad, 'x', (steps 8,  0.8)), ['y', -4.5], ['rot', 90]
+  l3  = modl (range pad, 'y', (steps 8,  0.8)), ['x', 4.5], ['rot', 180]
+  l4  = modl (range pad, 'x', (steps 8,  -0.8)), ['y', 4.5], ['rot', 270]
 
   l5 = lines [-3,3], [3,3], [3,-3], [-3,-3], [-3,3]
 
