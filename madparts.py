@@ -104,6 +104,8 @@ class MainWin(QtGui.QMainWindow):
            if 'type' in x:
              if x['type'] in ['smd', 'pad']:
                x['name'] = str(g.next())
+           else:
+             x['type'] = 'silk' # default type
            return x
          return [_c(x) for x in res]
 

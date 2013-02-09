@@ -28,9 +28,20 @@ def make_shader(name):
   print p.log()
   return p
 
+
 class GLDraw:
 
+
   def __init__(self, font, zoom):
+    self.color = {}
+    self.txt_color = {}
+    self.color['silk'] = (1.0, 1.0, 1.0)
+    self.txt_color['silk'] = (0.0, 0.0, 0.0)
+    self.color['smd'] =  (0.0, 0.0, 1.0)
+    self.txt_color['smd'] =  (1.0, 1.0, 1.0)
+    self.color['pad'] =  (0.0, 1.0, 0.0)
+    self.txt_color['pad'] =  (0.0, 0.0, 0.0)
+
     self.font = font
     self.set_zoom(zoom)
 
@@ -48,7 +59,9 @@ class GLDraw:
   def set_zoom(self, zoom):
     self.zoom = float(zoom)
 
-  def _txt(self, dx, dy, x, y, s):
+  def _txt(self, shape, dx, dy, x, y, s):
+    (r,g,b) = self.txt_color[shape['type']]
+    glColor3f(r,g,b)
     l = len(s)
     dxp = dx * self.zoom # dx in pixels
     dyp = dy * self.zoom # dy in pixels
@@ -76,7 +89,6 @@ class GLDraw:
     self.circle_shader.release() 
 
   def circle(self, shape, num):
-    glColor3f(0.0, 0.0, 1.0)
     r = fget(shape, 'dx') / 2
     r = fget(shape, 'r', r)
     rx = fget(shape, 'rx', r)
@@ -88,8 +100,7 @@ class GLDraw:
     x = fget(shape,'x')
     y = fget(shape,'y')
     self._circle(x, y, rx, ry)
-    glColor3f(1.0, 1.0, 1.0)
-    self._txt(rx*2, ry*2, x, y, str(num))
+    self._txt(shape, rx*2, ry*2, x, y, str(num))
 
   def rect(self, shape, num):
     x = fget(shape, 'x')
@@ -102,7 +113,6 @@ class GLDraw:
       raise Exception("only 0, 90, 180, 270 rotation supported for now")
     if rot in [90, 270]:
       (dx, dy) = (dy, dx)
-    glColor3f(0.0, 0.0, 1.0)
     self.rect_shader.bind()
     self.rect_shader.setUniformValue(self.rect_scale_loc, dx, dy)
     self.rect_shader.setUniformValue(self.rect_move_loc, x, y)
@@ -112,8 +122,7 @@ class GLDraw:
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
-    glColor3f(1.0, 1.0, 1.0)
-    self._txt(dx, dy, x, y, str(num))
+    self._txt(shape ,dx, dy, x, y, str(num))
 
   def line(self, shape):
     x1 = fget(shape, 'x1')
@@ -133,7 +142,6 @@ class GLDraw:
     ddy = r * c
     ddx = r * s
     glBegin(GL_QUADS)
-    glColor3f(1.0, 1.0, 1.0)
     if (y1 > y2):
       ddx = -ddx
       ddy = -ddy
@@ -148,6 +156,8 @@ class GLDraw:
   def draw(self, shapes):
     i = 1
     for shape in shapes:
+      (r,g,b) = self.color[shape['type']]
+      glColor3f(r,g,b)
       if shape['shape'] == 'rect': self.rect(shape, i)
       if shape['shape'] == 'circle': self.circle(shape, i)
       if shape['shape'] == 'line': self.line(shape)
