@@ -12,13 +12,8 @@ footprint = () ->
     id: 'id:e5bd48346acc4d549d678cb059be64ef'
     desc: 'TQFP example'
 
-  name =
-    type: 'text'
-    name: 'NAME'
-    
-  value =
-    type: 'text'
-    name: 'VALUE'
+  name = make_name (half + 1.5)
+  value = make_value (-half - 1.5)
 
   pad = 
     type: 'smd'
@@ -41,4 +36,4 @@ footprint = () ->
     x: -half
     y: half - 1
 
-  combine [pads, silk, dot]
+  combine [meta, name, value, pads, silk, dot]

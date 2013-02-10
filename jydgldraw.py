@@ -41,6 +41,8 @@ class GLDraw:
     self.txt_color['smd'] =  (1.0, 1.0, 1.0)
     self.color['pad'] =  (0.0, 1.0, 0.0)
     self.txt_color['pad'] =  (0.0, 0.0, 0.0)
+    self.color['label'] =  (1.0, 1.0, 1.0)
+    self.txt_color['label'] =  (1.0, 1.0, 1.0)
 
     self.font = font
     self.set_zoom(zoom)
@@ -60,7 +62,10 @@ class GLDraw:
     self.zoom = float(zoom)
 
   def _txt(self, shape, dx, dy, x, y):
-    s = shape['name']
+    if 'name' in shape:
+      s = shape['name']
+    else:
+      s = shape['value']
     (r,g,b) = self.txt_color[shape['type']]
     glColor3f(r,g,b)
     l = len(s)
@@ -68,7 +73,7 @@ class GLDraw:
     dyp = dy * self.zoom # dy in pixels
     dxp = dxp / 16. / l # dx in 16 pixel char units
     dyp = dyp / 24. # dy in 24 pixel units
-    d = min(dxp, dyp, 1)
+    d = min(dxp, dyp, 100.0)
     f = int(24.*d*1.25)
     self.font.FaceSize(f)
     (slx, sly, slz, srx, sry, srz) = self.font.BBox(s)
@@ -78,6 +83,13 @@ class GLDraw:
     sdy = sdy / self.zoom # converted in GL locations
     glRasterPos(x - sdx/2, y - sdy/2)
     self.font.Render(s)
+
+  def label(self, shape):
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    dy = fget(shape,'dy', 1.2)
+    dx = fget(shape,'dx', 100.0) # arbitrary large number
+    self._txt(shape, dx, dy, x, y)
 
   def _circle(self, x, y, rx, ry):
     self.circle_shader.bind()
@@ -157,11 +169,12 @@ class GLDraw:
     self._circle(x2, y2, r, r)
     
   def draw(self, shapes):
-    i = 1
     for shape in shapes:
       (r,g,b) = self.color[shape['type']]
       glColor3f(r,g,b)
-      if shape['shape'] == 'rect': self.rect(shape)
-      if shape['shape'] == 'circle': self.circle(shape)
-      if shape['shape'] == 'line': self.line(shape)
-      i = i + 1
+      if 'shape' in shape:
+        if shape['shape'] == 'rect': self.rect(shape)
+        if shape['shape'] == 'circle': self.circle(shape)
+        if shape['shape'] == 'line': self.line(shape)
+      elif shape['type'] == 'label':
+        self.label(shape)

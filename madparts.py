@@ -108,7 +108,7 @@ class MainWin(QtGui.QMainWindow):
       def _add_names(res):
          if res == None: return None
          def generate_ints():
-           for i in range(1, 1000):
+           for i in range(1, 10000):
              yield i
          g = generate_ints()
          def _c(x):
