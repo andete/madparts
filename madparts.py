@@ -13,16 +13,18 @@ import FTGL
 
 import numpy as np
 import math
+import time
 
 import jydjs
 from jydjssyntax import JSHighlighter
 from jydcoffeesyntax import CoffeeHighlighter
 from jydgldraw import GLDraw
 
+# settings; TODO: expose in menu and move to QSettings
 gldx = 200
 gldy = 200
-
 font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
+key_idle = 500
 
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
@@ -94,6 +96,15 @@ class MainWin(QtGui.QMainWindow):
       self.glw.updateGL()
 
   def compile(self):
+      t = time.time()
+      if (t - self.last_time < float(key_idle)/1000.0): 
+        QtCore.QTimer.singleShot(key_idle, self.compile);
+        return
+      self.last_time = t
+      if self.first_keypress:
+        self.first_keypress = False
+        return
+      self.first_keypress = True
       def _add_names(res):
          if res == None: return None
          def generate_ints():
@@ -164,6 +175,9 @@ class MainWin(QtGui.QMainWindow):
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
     fileMenu.addAction(self.exitAction)
+
+    self.last_time = time.time() - 10.0
+    self.first_keypress = False
 
     def close(self):
         QtGui.qApp.quit()
