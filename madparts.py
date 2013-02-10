@@ -137,7 +137,8 @@ class MainWin(QtGui.QMainWindow):
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
     #self.te1.setPlainText(jydjs.js_example)
-    self.te1.setPlainText(jydjs.coffee_example)
+    with open('example.coffee') as f:
+        self.te1.setPlainText(f.read())
     #self.highlighter1 = JSHighlighter(self.te1.document())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.compile)
