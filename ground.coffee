@@ -59,7 +59,7 @@ rotl = (l) -> l.map rot
 combine = (a) -> [].concat a...
 
 # this is just temporarely
-lines = (wi, a...) ->
+lines = (wi, a) ->
     b = a[0]
     a[1..].map ((c) ->
        line =

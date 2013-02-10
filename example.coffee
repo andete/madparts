@@ -1,9 +1,24 @@
 footprint = () ->
 
+  size = 9
+  half = size / 2
+  line_size = half - 1.5
+  line_width = 0.25
+  num_pads = 32
+  e = 0.8
+
   meta =
-    name: "TQFP32"
-    id: "id:e5bd48346acc4d549d678cb059be64ef"
-    desc: "TQFP example"
+    name: 'TQFP32'
+    id: 'id:e5bd48346acc4d549d678cb059be64ef'
+    desc: 'TQFP example'
+
+  name =
+    type: 'text'
+    name: 'NAME'
+    
+  value =
+    type: 'text'
+    name: 'VALUE'
 
   pad = 
     type: 'smd'
@@ -12,17 +27,18 @@ footprint = () ->
     dy: 0.36
     ro: 50
 
-  pads = quad pad, 32, 0.8, 9
+  pads = quad pad, num_pads, e, size
 
-  silk = lines 0.25, [-3,3], [3,3], [3,-3], [-3,-3], [-3,3]
+  ls = line_size
+  silk = lines line_width, [[-ls,ls], [ls,ls], [ls,-ls], [-ls,-ls], [-ls,ls]]
 
   pads[0].ro = 100
 
   dot = 
     type: 'silk'
     shape: 'circle'
-    r: 0.25
-    x: -4.5
-    y: 3.5
+    r: line_width
+    x: -half
+    y: half - 1
 
   combine [pads, silk, dot]
