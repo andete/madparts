@@ -43,6 +43,8 @@ class GLDraw:
     self.txt_color['pad'] =  (0.0, 0.0, 0.0)
     self.color['label'] =  (1.0, 1.0, 1.0)
     self.txt_color['label'] =  (1.0, 1.0, 1.0)
+    self.color['meta'] =  (1.0, 1.0, 1.0)
+    self.txt_color['meta'] =  (1.0, 1.0, 1.0)
 
     self.font = font
     self.set_zoom(zoom)

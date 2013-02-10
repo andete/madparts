@@ -19,6 +19,7 @@ import jydjs
 from jydjssyntax import JSHighlighter
 from jydcoffeesyntax import CoffeeHighlighter
 from jydgldraw import GLDraw
+import export.eagle
 
 # settings; TODO: expose in menu and move to QSettings
 gldx = 200
@@ -124,12 +125,14 @@ class MainWin(QtGui.QMainWindow):
       try:
           #result = jydjs.eval_js_footprint(code)
           result = jydjs.eval_coffee_footprint(code)
-          result = _add_names(result)
+          self.result = _add_names(result)
           self.te2.setPlainText(str(result))
           self.glw.set_shapes(result)
       except Exception as ex:
           self.te2.setPlainText(str(ex))
-          
+  
+  def generate(self):
+     export.eagle.Generate().generate(self.result)
 
   def __init__(self):
     super(MainWin, self).__init__()
@@ -168,6 +171,11 @@ class MainWin(QtGui.QMainWindow):
 
     self.statusBar().showMessage("Ready.")
 
+    self.generateAction = QtGui.QAction('Generate', self)
+    self.generateAction.setShortcut('Ctrl+G')
+    self.generateAction.setStatusTip('Generate Eagle CAD library')
+    self.connect(self.generateAction, QtCore.SIGNAL('triggered()'), self.generate)
+
     self.exitAction = QtGui.QAction('Quit', self)
     self.exitAction.setShortcut('Ctrl+Q')
     self.exitAction.setStatusTip('Exit application')
@@ -175,10 +183,12 @@ class MainWin(QtGui.QMainWindow):
 
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
+    fileMenu.addAction(self.generateAction)
     fileMenu.addAction(self.exitAction)
 
     self.last_time = time.time() - 10.0
     self.first_keypress = False
+    self.result = ""
 
     def close(self):
         QtGui.qApp.quit()

@@ -8,6 +8,7 @@ footprint = () ->
   e = 0.8
 
   meta =
+    type: 'meta'
     name: 'TQFP32'
     id: 'id:e5bd48346acc4d549d678cb059be64ef'
     desc: 'TQFP example'
