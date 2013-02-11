@@ -6,7 +6,8 @@ A functional footprint editor.
 warning
 =======
 
-This software is still in heavy development, and not recommended for usage unless for experimental reasons.
+This project is still under heavy development.
+It is not recommended for usage unless for experimental reasons.
 
 dependencies
 ============
