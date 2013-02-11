@@ -123,7 +123,6 @@ class MainWin(QtGui.QMainWindow):
 
       code = self.te1.toPlainText()
       try:
-          #result = jydjs.eval_js_footprint(code)
           result = jydjs.eval_coffee_footprint(code)
           self.result = _add_names(result)
           self.te2.setPlainText(str(result))
@@ -139,10 +138,8 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
-    #self.te1.setPlainText(jydjs.js_example)
     with open('example.coffee') as f:
         self.te1.setPlainText(f.read())
-    #self.highlighter1 = JSHighlighter(self.te1.document())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.compile)
     self.te2 = QtGui.QTextEdit()
