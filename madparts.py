@@ -133,7 +133,7 @@ class MainWin(QtGui.QMainWindow):
   def generate(self):
      export.eagle.Generate().generate(self.result)
 
-  def _left_part(self):
+  def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
@@ -146,10 +146,23 @@ class MainWin(QtGui.QMainWindow):
     self.highlighter2 = JSHighlighter(self.te2.document())
     lsplitter.addWidget(self.te1)
     lsplitter.addWidget(self.te2)
+    return lsplitter
+
+  def _settings(self):
+    return QtGui.QLabel("TODO")
+
+  def _tree(self):
+    self.fs = QtGui.QFileSystemModel()
+    self.fs.setRootPath(QtCore.QDir.currentPath())
+    tree = QtGui.QTreeView()
+    tree.setModel(self.fs)
+    return tree
+
+  def _left_part(self):
     lqtab = QtGui.QTabWidget()
-    lqtab.addTab(QtGui.QWidget(), "library")
-    lqtab.addTab(lsplitter, "footprint")
-    lqtab.addTab(QtGui.QWidget(), "settings")
+    lqtab.addTab(self._tree(), "library")
+    lqtab.addTab(self._footprint(), "footprint")
+    lqtab.addTab(self._settings(), "settings")
     lqtab.setCurrentIndex(1)
     return lqtab
 
