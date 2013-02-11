@@ -1,7 +1,12 @@
 madparts
 ========
 
-The parts may be mad, but they are cool.
+A functional footprint editor.
+
+warning
+=======
+
+This software is still in heavy development, and not recommended for usage unless for experimental reasons.
 
 dependencies
 ============
