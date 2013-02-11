@@ -36,6 +36,9 @@ def make_js_from_coffee(coffee_script_code):
 """)
     return js_make_js_from_coffee(coffee_script_code)
 
+# there is probably plenty of room for speeding up things here by
+# re-using the generated js from ground and such, however for now it is
+# still snappy enough
 def eval_coffee_footprint(coffee):
   with open("ground.coffee") as f: ground = f.read()
   ground_js = make_js_from_coffee(ground)
