@@ -133,8 +133,7 @@ class MainWin(QtGui.QMainWindow):
   def generate(self):
      export.eagle.Generate().generate(self.result)
 
-  def __init__(self):
-    super(MainWin, self).__init__()
+  def _left_part(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
@@ -147,6 +146,14 @@ class MainWin(QtGui.QMainWindow):
     self.highlighter2 = JSHighlighter(self.te2.document())
     lsplitter.addWidget(self.te1)
     lsplitter.addWidget(self.te2)
+    lqtab = QtGui.QTabWidget()
+    lqtab.addTab(QtGui.QWidget(), "library")
+    lqtab.addTab(lsplitter, "footprint")
+    lqtab.addTab(QtGui.QWidget(), "settings")
+    lqtab.setCurrentIndex(1)
+    return lqtab
+
+  def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
     self.glw = MyGLWidget()
@@ -161,9 +168,14 @@ class MainWin(QtGui.QMainWindow):
 
     right = QtGui.QWidget()
     right.setLayout(rvbox)
+    return right
+
+  def __init__(self):
+    super(MainWin, self).__init__()
+
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
-    splitter.addWidget(lsplitter)
-    splitter.addWidget(right)
+    splitter.addWidget(self._left_part())
+    splitter.addWidget(self._right_part())
     self.setCentralWidget(splitter)
 
     self.statusBar().showMessage("Ready.")
