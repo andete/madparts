@@ -151,7 +151,7 @@ class Generate:
     y = fget(shape, 'y')
     dx = fget(shape, 'dx')
     dy = fget(shape, 'dy')
-    ro = fget(shape, 'ro') / 100.0
+    ro = fget(shape, 'ro')
     rot = fget(shape, 'rot')
     name = shape['name']
     f.write("""\
