@@ -150,7 +150,6 @@ class Generate:
 # this is just rough code for testing!
 
   def rect(self, f, shape):
-    #<smd name="1" x="-4.65" y="4.45" dx="1.27" dy="0.508" layer="1"/>
     x = fget(shape, 'x')
     y = fget(shape, 'y')
     dx = fget(shape, 'dx')
@@ -163,19 +162,22 @@ class Generate:
 """ % (name, x, y, dx, dy, ro, rot))
 
   def label(self, f, shape):
-    #<text x="-3" y="6" size="1.27" layer="21">&gt;NAME</text>
-    #<text x="-3" y="-7" size="1.27" layer="21">&gt;VALUE</text>
     x = fget(shape,'x')
     y = fget(shape,'y')
     dy = fget(shape,'dy', 1)
     y = y - dy/2
     s = shape['value']
     x = x - len(s)*dy/2
-    if s == "NAME": s = "&gt;NAME"
-    if s == "VALUE": s = "&gt;VALUE"
+    layer = 21
+    if s == "NAME": 
+      s = "&gt;NAME"
+      layer = 25
+    if s == "VALUE": 
+      s = "&gt;VALUE"
+      layer = 27
     f.write("""\
-<text x="%f" y="%f" size="%f" layer="21">%s</text>
-""" % (x, y, dy, s))
+<text x="%f" y="%f" size="%f" layer="%d">%s</text>
+""" % (x, y, dy, layer, s))
   
   def circle(self, f, shape):
     # <circle x="-2.7432" y="2.7432" radius="0.3592" width="0.1524" layer="21"/>
@@ -189,9 +191,10 @@ class Generate:
       ry = fget(shape, 'ry', r)
     x = fget(shape,'x')
     y = fget(shape,'y')
+    w = 0.25
     f.write("""\
 <circle x="%f" y="%f" radius="%f" width="%f" layer="21"/>
-""" % (x, y, r, 0.25))
+""" % (x, y, (r - w/2), w))
 
   def line(self, f, shape):
     # <wire x1="-3.15" y1="3.505" x2="-3.505" y2="3.15" width="0.1524" layer="21"/>
