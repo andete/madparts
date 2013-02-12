@@ -14,6 +14,7 @@ import FTGL
 import numpy as np
 import math
 import time
+import traceback
 
 import jydjs
 from jydjssyntax import JSHighlighter
@@ -25,7 +26,7 @@ import export.eagle
 gldx = 200
 gldy = 200
 font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
-key_idle = 500
+key_idle = 0
 
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
@@ -97,15 +98,16 @@ class MainWin(QtGui.QMainWindow):
       self.glw.updateGL()
 
   def compile(self):
-      t = time.time()
-      if (t - self.last_time < float(key_idle)/1000.0): 
-        QtCore.QTimer.singleShot(key_idle, self.compile);
-        return
-      self.last_time = t
-      if self.first_keypress:
-        self.first_keypress = False
-        return
-      self.first_keypress = True
+      if key_idle > 0:
+        t = time.time()
+        if (t - self.last_time < float(key_idle)/1000.0): 
+          QtCore.QTimer.singleShot(key_idle, self.compile);
+          return
+        self.last_time = t
+        if self.first_keypress:
+          self.first_keypress = False
+          return
+        self.first_keypress = True
       def _add_names(res):
          if res == None: return None
          def generate_ints():
@@ -129,6 +131,7 @@ class MainWin(QtGui.QMainWindow):
           self.glw.set_shapes(result)
       except Exception as ex:
           self.te2.setPlainText(str(ex))
+          traceback.print_exc()
   
   def generate(self):
      export.eagle.Generate().generate(self.result)
