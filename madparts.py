@@ -98,41 +98,47 @@ class MainWin(QtGui.QMainWindow):
       self.glw.updateGL()
 
   def compile(self):
-      if key_idle > 0:
-        t = time.time()
-        if (t - self.last_time < float(key_idle)/1000.0): 
-          QtCore.QTimer.singleShot(key_idle, self.compile);
-          return
-        self.last_time = t
-        if self.first_keypress:
-          self.first_keypress = False
-          return
-        self.first_keypress = True
-      def _add_names(res):
-         if res == None: return None
-         def generate_ints():
-           for i in range(1, 10000):
-             yield i
-         g = generate_ints()
-         def _c(x):
-           if 'type' in x:
-             if x['type'] in ['smd', 'pad']:
-               x['name'] = str(g.next())
-           else:
-             x['type'] = 'silk' # default type
-           return x
-         return [_c(x) for x in res]
+    def _add_names(res):
+      if res == None: return None
+      def generate_ints():
+        for i in range(1, 10000):
+          yield i
+      g = generate_ints()
+      def _c(x):
+        if 'type' in x:
+          if x['type'] in ['smd', 'pad']:
+            x['name'] = str(g.next())
+        else:
+          x['type'] = 'silk' # default type
+        return x
+      return [_c(x) for x in res]
 
-      code = self.te1.toPlainText()
-      try:
-          result = jydjs.eval_coffee_footprint(code)
-          self.result = _add_names(result)
-          self.te2.setPlainText(str(result))
-          self.glw.set_shapes(result)
-      except Exception as ex:
-          self.te2.setPlainText(str(ex))
-          traceback.print_exc()
+    code = self.te1.toPlainText()
+    try:
+      result = jydjs.eval_coffee_footprint(code)
+      self.result = _add_names(result)
+      self.te2.setPlainText(str(result))
+      self.glw.set_shapes(result)
+    except Exception as ex:
+      self.te2.setPlainText(str(ex))
+      traceback.print_exc()
   
+  def text_changed(self):
+    if key_idle > 0:
+      t = time.time()
+      if (t - self.last_time < float(key_idle)/1000.0):
+        self.timer.stop()
+        self.timer.start(key_idle)
+        return
+      self.last_time = t
+      if self.first_keypress:
+        self.first_keypress = False
+        self.timer.stop()
+        self.timer.start(key_idle)
+        return
+    self.first_keypress = True
+    self.compile()
+
   def generate(self):
      export.eagle.Generate().generate(self.result)
 
@@ -143,7 +149,7 @@ class MainWin(QtGui.QMainWindow):
     with open('example.coffee') as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
-    self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.compile)
+    self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.text_changed)
     self.te2 = QtGui.QTextEdit()
     self.te2.setReadOnly(True)
     self.highlighter2 = JSHighlighter(self.te2.document())
@@ -213,6 +219,9 @@ class MainWin(QtGui.QMainWindow):
 
     self.last_time = time.time() - 10.0
     self.first_keypress = False
+    self.timer = QtCore.QTimer()
+    self.timer.setSingleShot(True)
+    self.timer.connect(self.timer, QtCore.SIGNAL('timeout()'), self.text_changed)
     self.result = ""
 
     def close(self):
