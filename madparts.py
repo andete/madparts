@@ -26,7 +26,7 @@ import export.eagle
 gldx = 200
 gldy = 200
 font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
-key_idle = 0
+key_idle = 0.5
 
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
