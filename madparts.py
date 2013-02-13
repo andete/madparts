@@ -27,6 +27,7 @@ gldx = 200
 gldy = 200
 font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
 key_idle = 0.5
+libraries = ['library']
 
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
@@ -160,11 +161,18 @@ class MainWin(QtGui.QMainWindow):
   def _settings(self):
     return QtGui.QLabel("TODO")
 
+  def _make_model(self):
+    self.model = QtGui.QStandardItemModel()
+    parentItem = self.model.invisibleRootItem()
+    for i in range(0, 4):
+        item = QtGui.QStandardItem("item %d" % (i))
+        parentItem.appendRow(item)
+        parentItem = item
+
   def _tree(self):
-    self.fs = QtGui.QFileSystemModel()
-    self.fs.setRootPath(QtCore.QDir.currentPath())
+    self._make_model()
     tree = QtGui.QTreeView()
-    tree.setModel(self.fs)
+    tree.setModel(self.model)
     return tree
 
   def _left_part(self):
