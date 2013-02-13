@@ -20,6 +20,8 @@ import jydjs
 from jydjssyntax import JSHighlighter
 from jydcoffeesyntax import CoffeeHighlighter
 from jydgldraw import GLDraw
+import jydlibrary
+
 import export.eagle
 
 # settings; TODO: expose in menu and move to QSettings
@@ -27,7 +29,7 @@ gldx = 200
 gldy = 200
 font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
 key_idle = 0.5
-libraries = ['library']
+libraries = [('Example Library', 'library')]
 
 class MyGLWidget(QGLWidget):
     def __init__(self, parent = None):
@@ -147,7 +149,7 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
-    with open('example.coffee') as f:
+    with open('library/example.coffee') as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.text_changed)
@@ -164,10 +166,9 @@ class MainWin(QtGui.QMainWindow):
   def _make_model(self):
     self.model = QtGui.QStandardItemModel()
     parentItem = self.model.invisibleRootItem()
-    for i in range(0, 4):
-        item = QtGui.QStandardItem("item %d" % (i))
+    for (name, directory) in libraries:
+        item = jydlibrary.Library(name, directory)
         parentItem.appendRow(item)
-        parentItem = item
 
   def _tree(self):
     self._make_model()
