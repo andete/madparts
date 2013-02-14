@@ -12,7 +12,7 @@ class Library(QtGui.QStandardItem):
   def scan(self):
     self.removeRows(0, self.rowCount())
     d = QtCore.QDir(self.directory)
-    for f in filter(lambda f: f != '.' and f != '..', d.entryList()):
+    for f in d.entryList(['*.coffee']):
       self.appendRow(Footprint(f))
 
   def __init__(self, name, directory):
