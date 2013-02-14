@@ -3,6 +3,11 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+import numpy as np
+import math
+import time
+import traceback
+
 from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
@@ -10,11 +15,6 @@ from OpenGL.GL import *
 import OpenGL.arrays.vbo as vbo
 
 import FTGL
-
-import numpy as np
-import math
-import time
-import traceback
 
 import jydjs
 from jydjssyntax import JSHighlighter
@@ -165,6 +165,8 @@ class MainWin(QtGui.QMainWindow):
 
   def _make_model(self):
     self.model = QtGui.QStandardItemModel()
+    self.model.setColumnCount(3)
+    self.model.setHorizontalHeaderLabels(['name','id','desc'])
     parentItem = self.model.invisibleRootItem()
     for (name, directory) in libraries:
         item = jydlibrary.Library(name, directory)
