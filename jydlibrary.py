@@ -33,6 +33,9 @@ class Footprint():
     name_item = QtGui.QStandardItem(self.name)
     id_item   = QtGui.QStandardItem(self.id)
     desc_item = QtGui.QStandardItem(self.desc)
+    name_item.setEditable(False) # you edit them in the code
+    id_item.setEditable(False)
+    desc_item.setEditable(False)
     self.parent.appendRow([name_item, id_item, desc_item])
 
 class Library(QtGui.QStandardItem):
