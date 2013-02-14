@@ -13,8 +13,7 @@ def oget(m, k, d):
   return d
 
 class Footprint():
-  def __init__(self, parent, path, filename):
-    self.parent = parent
+  def __init__(self, path, filename):
     self.path = path
     self.filename = filename
  
@@ -27,16 +26,18 @@ class Footprint():
         self.name = shape['name']
         self.id = shape['id']
         self.desc = oget(shape, 'desc', '')
+        self.parent = oget(shape, 'parent', None)
     return self
  
-  def draw(self):
+  def draw(self, parent):
     name_item = QtGui.QStandardItem(self.name)
     id_item   = QtGui.QStandardItem(self.id)
     desc_item = QtGui.QStandardItem(self.desc)
     name_item.setEditable(False) # you edit them in the code
     id_item.setEditable(False)
     desc_item.setEditable(False)
-    self.parent.appendRow([name_item, id_item, desc_item])
+    parent.appendRow([name_item, id_item, desc_item])
+    self.item = name_item
 
 class Library(QtGui.QStandardItem):
 
@@ -47,16 +48,34 @@ class Library(QtGui.QStandardItem):
     for f in d.entryList(['*.coffee']):
       path = d.filePath(f)
       try:
-        foot = Footprint(self, path, f)
+        foot = Footprint(path, f)
+        foot.load()
         self.footprints.append(foot)
-        foot.load().draw()
       except Exception as ex:
         print "error for file %s:" % (path)
         traceback.print_exc()
+    foots_done = filter(lambda fp: fp.parent == None , self.footprints)
+    foots_done_id = map(lambda fp: fp.id, foots_done)
+    foots_todo = filter(lambda fp: fp.parent != None, self.footprints)
+    for foot in foots_done:
+      foot.draw(self)
+    # this algorithm doesn't halt when there is a reference to a
+    # non-existing parent... TODO fix
+    while foots_todo != []:
+      new_foot_todo = []
+      for foot in foots_todo:
+        if foot.parent in foots_done_id:
+          i = foots_done_id.index(foot.parent)
+          foots_done_id.append(foot.id)
+          foots_done.append(foot)
+          foot.draw(foots_done[i].item)
+        else:
+          new_foot_todo.append(foot)
+      foots_todo = new_foot_todo 
     self.sortChildren(0)
 
   def __init__(self, name, directory):
-    super(Library, self).__init__(name + " (" + directory + ")")
+    super(Library, self).__init__(name)
     self.name = name
     self.directory = directory
     self.setEditable(False)

@@ -11,7 +11,7 @@ footprint = () ->
     type: 'meta'
     name: 'TQFP44'
     id: '9364e38b40644665a3c8c07a5f2f3190'
-    parent: 'e5bd48346acc4d549d678cb059be64e'
+    parent: 'e5bd48346acc4d549d678cb059be64ef'
     desc: 'TQFP44 example'
 
   # this package is used by e.g. the Atmel ATMEGA1284P-AU
