@@ -149,7 +149,7 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
-    with open('library/e5bd48346acc4d549d678cb059be64e.coffee') as f:
+    with open('library/e5bd48346acc4d549d678cb059be64ef.coffee') as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.text_changed)
