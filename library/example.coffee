@@ -10,7 +10,7 @@ footprint = () ->
   meta =
     type: 'meta'
     name: 'TQFP32'
-    id: 'id:e5bd48346acc4d549d678cb059be64ef'
+    id: 'e5bd48346acc4d549d678cb059be64ef'
     desc: 'TQFP example'
 
   name = make_name (half + 1.5)
