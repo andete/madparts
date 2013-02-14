@@ -18,7 +18,7 @@ class Footprint():
     self.path = path
     self.filename = filename
  
-  def update(self):
+  def load(self):
     with open(self.path) as f:
       code = f.read()
     shapes = jydjs.eval_coffee_footprint(code)
@@ -27,8 +27,11 @@ class Footprint():
         self.name = shape['name']
         self.id = shape['id']
         self.desc = oget(shape, 'desc', '')
+    return self
+ 
+  def draw(self):
     name_item = QtGui.QStandardItem(self.name)
-    id_item = QtGui.QStandardItem(self.id)
+    id_item   = QtGui.QStandardItem(self.id)
     desc_item = QtGui.QStandardItem(self.desc)
     self.parent.appendRow([name_item, id_item, desc_item])
 
@@ -43,7 +46,7 @@ class Library(QtGui.QStandardItem):
       try:
         foot = Footprint(self, path, f)
         self.footprints.append(foot)
-        foot.update()
+        foot.load().draw()
       except Exception as ex:
         print "error for file %s:" % (path)
         traceback.print_exc()

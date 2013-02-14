@@ -1,19 +1,20 @@
 footprint = () ->
 
-  size = 9
+  size = 11
   half = size / 2
   line_size = half - 1.5
   line_width = 0.25
-  num_pads = 32
+  num_pads = 44
   e = 0.8
 
   meta =
     type: 'meta'
-    name: 'TQFP32'
-    id: 'e5bd48346acc4d549d678cb059be64ef'
-    desc: 'TQFP32 example'
+    name: 'TQFP44'
+    id: '9364e38b40644665a3c8c07a5f2f3190'
+    parent: 'e5bd48346acc4d549d678cb059be64e'
+    desc: 'TQFP44 example'
 
-  # this package is used by e.g. the Atmel ATMEGA328P-AU
+  # this package is used by e.g. the Atmel ATMEGA1284P-AU
 
   name = make_name (half + 1.5)
   value = make_value (-half - 1.5)
