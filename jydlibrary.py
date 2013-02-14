@@ -50,6 +50,7 @@ class Library(QtGui.QStandardItem):
       except Exception as ex:
         print "error for file %s:" % (path)
         traceback.print_exc()
+    self.sortChildren(0)
 
   def __init__(self, name, directory):
     super(Library, self).__init__(name + " (" + directory + ")")
