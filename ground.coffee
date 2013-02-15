@@ -47,6 +47,17 @@ modl = (l, kv...) ->
     o[k] = v for [k,v] in kv
     o)
 
+class Smd
+  constructor: ->
+    @type = 'smd'
+    @shape = 'rect'
+    @ro = 0
+
+class Dot
+  constructor: (@r) ->
+    @type = 'silk'
+    @shape = 'circle'
+
 rot = (o) ->
    b = clone(o)
    b.dx = o.dy

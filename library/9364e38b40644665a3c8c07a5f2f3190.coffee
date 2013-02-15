@@ -19,12 +19,10 @@ footprint = () ->
   name = make_name (half + 1.5)
   value = make_value (-half - 1.5)
 
-  pad = 
-    type: 'smd'
-    shape: 'rect'
-    dx: 1.67
-    dy: 0.36
-    ro: 50
+  pad = new Smd
+  pad.dx = 1.67
+  pad.dy = 0.36
+  pad.ro = 50
 
   pads = quad pad, num_pads, e, size
 
@@ -33,11 +31,8 @@ footprint = () ->
 
   pads[0].ro = 100
 
-  dot = 
-    type: 'silk'
-    shape: 'circle'
-    r: line_width
-    x: -half
-    y: half - 1
+  dot = new Dot(line_width)
+  dot.x = -half
+  dot.y = half - 1
 
   combine [meta, name, value, pads, silk, dot]
