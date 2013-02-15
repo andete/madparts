@@ -119,7 +119,7 @@ class CoffeeHighlighter(QtGui.QSyntaxHighlighter):
         # // comment
         singleLineCommentFormat = QtGui.QTextCharFormat()
         singleLineCommentFormat.setForeground(QtCore.Qt.red)
-        self.highlightingRules.append((QtCore.QRegExp("//[^\n]*"),
+        self.highlightingRules.append((QtCore.QRegExp("#[^\n]*"),
                 singleLineCommentFormat))
 
         # quotation
