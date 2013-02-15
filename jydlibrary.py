@@ -29,7 +29,8 @@ class Footprint():
         self.parent = oget(shape, 'parent', None)
     return self
  
-  # we use the editrole to store the path so we immediately get the path on click
+  # we use the EditRole to store the path so we immediately get the path on click
+  # in any of the fields
   def draw(self, parent):
     name_item = QtGui.QStandardItem(self.name)
     name_item.setData(self.path, QtCore.Qt.EditRole)

@@ -7,6 +7,7 @@ import numpy as np
 import math
 import time
 import traceback
+import re
 
 from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
@@ -149,7 +150,7 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
-    with open('library/e5bd48346acc4d549d678cb059be64ef.coffee') as f:
+    with open(self.initial_file) as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.text_changed)
@@ -178,7 +179,13 @@ class MainWin(QtGui.QMainWindow):
     return first_foot
 
   def row_changed(self, current, previous):
-    print current.data(QtCore.Qt.EditRole)
+    fn = current.data(QtCore.Qt.EditRole)
+    if re.match('^.+\.coffee$', fn) != None:
+      with open(fn) as f:
+        self.te1.setPlainText(f.read())
+    else:
+      # TODO jump back to previous
+      pass
 
   def _tree(self):
     first_foot = self._make_model()
@@ -187,6 +194,8 @@ class MainWin(QtGui.QMainWindow):
     selection_model = tree.selectionModel()
     self.connect(selection_model, QtCore.SIGNAL('currentRowChanged(QModelIndex,QModelIndex)'), self.row_changed)
     first_foot.select(selection_model)
+    self.initial_file = first_foot.path
+    self.tree = tree
     return tree
 
   def _left_part(self):
