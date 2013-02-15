@@ -29,15 +29,25 @@ class Footprint():
         self.parent = oget(shape, 'parent', None)
     return self
  
+  # we use the editrole to store the path so we immediately get the path on click
   def draw(self, parent):
     name_item = QtGui.QStandardItem(self.name)
+    name_item.setData(self.path, QtCore.Qt.EditRole)
     id_item   = QtGui.QStandardItem(self.id)
+    id_item.setData(self.path, QtCore.Qt.EditRole)
     desc_item = QtGui.QStandardItem(self.desc)
+    desc_item.setData(self.path, QtCore.Qt.EditRole)
     name_item.setEditable(False) # you edit them in the code
     id_item.setEditable(False)
     desc_item.setEditable(False)
     parent.appendRow([name_item, id_item, desc_item])
     self.item = name_item
+    self.items = [id_item, desc_item]
+
+  def select(self, selection_model):
+    selection_model.select(self.item.index(), QtGui.QItemSelectionModel.ClearAndSelect)
+    for item in self.items:
+      selection_model.select(item.index(), QtGui.QItemSelectionModel.Select)
 
 class Library(QtGui.QStandardItem):
 
@@ -64,6 +74,7 @@ class Library(QtGui.QStandardItem):
         return False
       return True
     foots_done = filter(is_root_foot , self.footprints)
+    self.first_foot = foots_done[0]
     foots_done_id = map(lambda fp: fp.id, foots_done)
     foots_todo = filter(lambda fp: not is_root_foot(fp), self.footprints)
     for foot in foots_done:
@@ -87,3 +98,6 @@ class Library(QtGui.QStandardItem):
     self.directory = directory
     self.setEditable(False)
     self.scan()
+
+  def first_footprint(self):
+    return self.first_foot

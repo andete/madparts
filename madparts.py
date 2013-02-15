@@ -168,19 +168,25 @@ class MainWin(QtGui.QMainWindow):
     self.model.setColumnCount(3)
     self.model.setHorizontalHeaderLabels(['name','id','desc'])
     parentItem = self.model.invisibleRootItem()
+    first = True
     for (name, directory) in libraries:
-        item = jydlibrary.Library(name, directory)
-        parentItem.appendRow(item)
+      lib = jydlibrary.Library(name, directory)
+      parentItem.appendRow(lib)
+      if first:
+        first = False
+        first_foot = lib.first_footprint()
+    return first_foot
 
   def row_changed(self, current, previous):
-    print 'hey', current, previous
+    print current.data(QtCore.Qt.EditRole)
 
   def _tree(self):
-    self._make_model()
+    first_foot = self._make_model()
     tree = QtGui.QTreeView()
     tree.setModel(self.model)
     selection_model = tree.selectionModel()
     self.connect(selection_model, QtCore.SIGNAL('currentRowChanged(QModelIndex,QModelIndex)'), self.row_changed)
+    first_foot.select(selection_model)
     return tree
 
   def _left_part(self):
