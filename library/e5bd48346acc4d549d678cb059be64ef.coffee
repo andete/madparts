@@ -2,7 +2,7 @@ footprint = () ->
 
   size = 9
   half = size / 2
-  line_size = half - 1.5
+  half_line_size = half - 1.5
   line_width = 0.25
   num_pads = 32
   e = 0.8
@@ -25,8 +25,7 @@ footprint = () ->
 
   pads = quad pad, num_pads, e, size
 
-  ls = line_size
-  silk = lines line_width, [[-ls,ls], [ls,ls], [ls,-ls], [-ls,-ls], [-ls,ls]]
+  silk = silk_square half_line_size, line_width
 
   pads[0].ro = 100
 

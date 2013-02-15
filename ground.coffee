@@ -103,3 +103,7 @@ class Value
   constructor: (@y) ->
     @type = 'label'
     @value = 'VALUE'
+
+silk_square = (half_line_size, line_width) ->
+    ls = half_line_size
+    lines line_width, [[-ls,ls], [ls,ls], [ls,-ls], [-ls,-ls], [-ls,ls]]
