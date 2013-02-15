@@ -172,10 +172,15 @@ class MainWin(QtGui.QMainWindow):
         item = jydlibrary.Library(name, directory)
         parentItem.appendRow(item)
 
+  def row_changed(self, current, previous):
+    print 'hey', current, previous
+
   def _tree(self):
     self._make_model()
     tree = QtGui.QTreeView()
     tree.setModel(self.model)
+    selection_model = tree.selectionModel()
+    self.connect(selection_model, QtCore.SIGNAL('currentRowChanged(QModelIndex,QModelIndex)'), self.row_changed)
     return tree
 
   def _left_part(self):
