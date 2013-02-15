@@ -1,3 +1,9 @@
+#format 1.0
+#name TQFP32
+#id e5bd48346acc4d549d678cb059be64ef
+#desc TQFP example
+#desc this package is used by e.g. the Atmel ATMEGA328P-AU
+
 footprint = () ->
 
   size = 9
@@ -13,7 +19,6 @@ footprint = () ->
     id: 'e5bd48346acc4d549d678cb059be64ef'
     desc: 'TQFP32 example'
 
-  # this package is used by e.g. the Atmel ATMEGA328P-AU
 
   name = new Name (half + 1.5)
   value = new Value (-half - 1.5)

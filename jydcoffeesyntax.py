@@ -83,7 +83,7 @@ class CoffeeHighlighter(QtGui.QSyntaxHighlighter):
         opFormat = QtGui.QTextCharFormat()
         opFormat.setForeground(QtCore.Qt.blue)
         self.highlightingRules = self.highlightingRules + [(QtCore.QRegExp(pattern), opFormat) for pattern in ['\(', '\)', '\[', '\]', '\{', '\}']]
-
+        
         # statements
         statementFormat = QtGui.QTextCharFormat()
         statementFormat.setForeground(QtCore.Qt.darkRed)
@@ -116,11 +116,25 @@ class CoffeeHighlighter(QtGui.QSyntaxHighlighter):
         classFormat.setForeground(QtCore.Qt.darkGreen)
         self.highlightingRules.append((QtCore.QRegExp("\\bQ[A-Za-z]+\\b"),
                 classFormat))
-        # // comment
+        # # comment
         singleLineCommentFormat = QtGui.QTextCharFormat()
         singleLineCommentFormat.setForeground(QtCore.Qt.red)
         self.highlightingRules.append((QtCore.QRegExp("#[^\n]*"),
                 singleLineCommentFormat))
+
+        #footprint special meta
+        specialMetaFormat = QtGui.QTextCharFormat()
+        specialMetaFormat.setForeground(QtCore.Qt.darkGreen)
+        specialMetaFormat.setFontWeight(QtGui.QFont.Bold)
+        specialMeta = [
+            '#format',
+            '#name',
+            '#id',
+            '#parent',
+            '#desc',
+            ]
+        self.highlightingRules = self.highlightingRules +  [(QtCore.QRegExp("^"+pattern+"\\b[^\n]*"), specialMetaFormat) for pattern in specialMeta]
+
 
         # quotation
         quotationFormat = QtGui.QTextCharFormat()
