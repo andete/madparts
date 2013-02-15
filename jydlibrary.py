@@ -54,13 +54,20 @@ class Library(QtGui.QStandardItem):
       except Exception as ex:
         print "error for file %s:" % (path)
         traceback.print_exc()
-    foots_done = filter(lambda fp: fp.parent == None , self.footprints)
+    # this algorithm isn't exactly nice
+    # once libraries start getting bigger it should be improved
+    foots_id = map(lambda fp: fp.id, self.footprints)
+    def is_root_foot(fp):
+      if fp.parent == None:
+        return True
+      if fp.parent in foots_id:
+        return False
+      return True
+    foots_done = filter(is_root_foot , self.footprints)
     foots_done_id = map(lambda fp: fp.id, foots_done)
-    foots_todo = filter(lambda fp: fp.parent != None, self.footprints)
+    foots_todo = filter(lambda fp: not is_root_foot(fp), self.footprints)
     for foot in foots_done:
       foot.draw(self)
-    # this algorithm doesn't halt when there is a reference to a
-    # non-existing parent... TODO fix
     while foots_todo != []:
       new_foot_todo = []
       for foot in foots_todo:
