@@ -16,8 +16,8 @@ footprint = () ->
 
   # this package is used by e.g. the Atmel ATMEGA1284P-AU
 
-  name = make_name (half + 1.5)
-  value = make_value (-half - 1.5)
+  name = new Name (half + 1.5)
+  value = new Value (-half - 1.5)
 
   pad = new Smd
   pad.dx = 1.67

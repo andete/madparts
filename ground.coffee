@@ -94,16 +94,12 @@ quad = (pad, num, step, dist) ->
   l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d], ['rot', 270]
   combine [l1, l2, l3, l4]
 
-make_name = (yi) ->
-  a =
-    type: 'label'
-    value: 'NAME'
-    y: yi
-  a
+class Name
+  constructor: (@y) ->
+    @type = 'label'
+    @value = 'NAME'
 
-make_value = (yi) ->
-  a =
-    type: 'label'
-    value: 'VALUE'
-    y: yi
-  a
+class Value
+  constructor: (@y) ->
+    @type = 'label'
+    @value = 'VALUE'
