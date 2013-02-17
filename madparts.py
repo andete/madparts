@@ -18,8 +18,8 @@ import OpenGL.arrays.vbo as vbo
 import FTGL
 
 import jydcoffee
-from jydjssyntax import JSHighlighter
-from jydcoffeesyntax import CoffeeHighlighter
+from syntax.jydjssyntax import JSHighlighter
+from syntax.jydcoffeesyntax import CoffeeHighlighter
 from jydgldraw import GLDraw
 import jydlibrary
 

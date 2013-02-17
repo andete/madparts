@@ -5,7 +5,7 @@ import traceback
 
 from PySide import QtGui, QtCore
 
-import jydjs
+import jydcoffee
 
 # get rid of copies from jydgldraw.py
 def oget(m, k, d):
@@ -20,7 +20,7 @@ class Footprint():
   def load(self):
     with open(self.path) as f:
       code = f.read()
-    shapes = jydjs.eval_coffee_footprint(code)
+    shapes = jydcoffee.eval_coffee_footprint(code)
     for shape in shapes:
       if shape['type'] == 'meta':
         self.name = shape['name']
