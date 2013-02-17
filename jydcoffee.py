@@ -9,6 +9,8 @@ import string
 
 import PyV8
 
+supported_formats = ['1.0']
+
 class Global(PyV8.JSClass):
 
     def __init__(self):
@@ -52,6 +54,9 @@ def prepare_coffee_compiler():
 # still snappy enough; so let's just keep it simple
 def eval_coffee_footprint(coffee):
   meta = eval_coffee_meta(coffee)
+  format = meta['format']
+  if format not in supported_formats:
+     raise Exception("Unsupported file format. Supported formats: %s" % (supported_formats))
   # only compile the compiler once
   global js_make_js_ctx
   global js_make_js_from_coffee
@@ -59,7 +64,7 @@ def eval_coffee_footprint(coffee):
     prepare_coffee_compiler()
   try:
     js_make_js_ctx.enter()
-    with open("grind/ground-1.0.coffee") as f: ground = f.read()
+    with open("grind/ground-%s.coffee" % (format)) as f: ground = f.read()
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:
