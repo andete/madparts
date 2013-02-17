@@ -179,12 +179,12 @@ class MainWin(QtGui.QMainWindow):
     return first_foot
 
   def row_changed(self, current, previous):
-    fn = current.data(QtCore.Qt.EditRole)
-    if re.match('^.+\.coffee$', fn) != None:
+    fn = current.data(jydlibrary.Path_Role)
+    if fn != None and re.match('^.+\.coffee$', fn) != None:
       with open(fn) as f:
         self.te1.setPlainText(f.read())
     else:
-      # TODO jump back to previous
+      # TODO jump back to previous ?
       pass
 
   def _tree(self):

@@ -7,13 +7,17 @@ from PySide import QtGui, QtCore
 
 import jydcoffee
 
+# this is a hack; TODO find a cleaner way
+Path_Role = 42
+
 # get rid of copies from jydgldraw.py
 def oget(m, k, d):
   if k in m: return m[k]
   return d
 
 class Footprint():
-  def __init__(self, path, filename):
+  def __init__(self, library, path, filename):
+    self.library = library
     self.path = path
     self.filename = filename
  
@@ -27,15 +31,13 @@ class Footprint():
     self.parent = oget(meta, 'parent', None)
     return self
  
-  # we use the EditRole to store the path so we immediately get the path on click
-  # in any of the fields
   def draw(self, parent):
     name_item = QtGui.QStandardItem(self.name)
-    name_item.setData(self.path, QtCore.Qt.EditRole)
+    name_item.setData(self.path, Path_Role)
     id_item   = QtGui.QStandardItem(self.id)
-    id_item.setData(self.path, QtCore.Qt.EditRole)
+    id_item.setData(self.path, Path_Role)
     desc_item = QtGui.QStandardItem(self.desc)
-    desc_item.setData(self.path, QtCore.Qt.EditRole)
+    desc_item.setData(self.path, Path_Role)
     name_item.setEditable(False) # you edit them in the code
     id_item.setEditable(False)
     desc_item.setEditable(False)
@@ -52,14 +54,16 @@ class Library(QtGui.QStandardItem):
 
   def scan(self):
     self.removeRows(0, self.rowCount())
+    self.row_data = []
     d = QtCore.QDir(self.directory)
     self.footprints = []
     for f in d.entryList(['*.coffee']):
       path = d.filePath(f)
       try:
-        foot = Footprint(path, f)
+        foot = Footprint(self, path, f)
         foot.load()
         self.footprints.append(foot)
+        self.row_data.append(path)
       except Exception as ex:
         print "error for file %s:" % (path)
         traceback.print_exc()
