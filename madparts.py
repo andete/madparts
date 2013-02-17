@@ -276,6 +276,14 @@ class MainWin(QtGui.QMainWindow):
     kicadAction.setDisabled(True)
     exportMenu.addAction(kicadAction)
 
+    footprintMenu = menuBar.addMenu('&Footprint')
+    cloneAction = QtGui.QAction('&Clone', self)
+    cloneAction.setDisabled(True)
+    removeAction = QtGui.QAction('&Remove', self)
+    removeAction.setDisabled(True)
+    footprintMenu.addAction(cloneAction)
+    footprintMenu.addAction(removeAction)
+
     helpMenu = menuBar.addMenu('&Help')
     aboutAction = QtGui.QAction("&About", self)
     aboutAction.triggered.connect(self.about)

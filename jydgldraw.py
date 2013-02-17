@@ -20,7 +20,7 @@ def fget(m, k, d = 0.0):
   return float(oget(m, k, d))
 
 def make_shader(name):
-  print "compiling %s... shaders" % (name)
+  print "compiling %s shaders" % (name)
   p = QGLShaderProgram()
   p.addShaderFromSourceFile(QGLShader.Vertex, "shaders/%s.vert" % (name))
   p.addShaderFromSourceFile(QGLShader.Fragment, "shaders/%s.frag" % (name))
