@@ -54,7 +54,10 @@ def prepare_coffee_compiler():
 # still snappy enough; so let's just keep it simple
 def eval_coffee_footprint(coffee):
   meta = eval_coffee_meta(coffee)
-  format = meta['format']
+  if 'format' not in meta:
+    raise Exception("Missing mandatory #format meta field")
+  else:
+    format = meta['format']
   if format not in supported_formats:
      raise Exception("Unsupported file format. Supported formats: %s" % (supported_formats))
   # only compile the compiler once
