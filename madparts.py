@@ -195,12 +195,16 @@ class MainWin(QtGui.QMainWindow):
       # TODO jump back to previous ?
       pass
 
+  def row_double_clicked(self):
+    self.left_qtab.setCurrentIndex(1)
+
   def _tree(self):
     first_foot = self._make_model()
     tree = QtGui.QTreeView()
     tree.setModel(self.model)
     selection_model = tree.selectionModel()
     selection_model.currentRowChanged.connect(self.row_changed)
+    tree.doubleClicked.connect(self.row_double_clicked)
     first_foot.select(selection_model)
     self.active_file_name = first_foot.path
     self.tree = tree
@@ -213,6 +217,7 @@ class MainWin(QtGui.QMainWindow):
     lqtab.addTab(self._footprint(), "footprint")
     lqtab.addTab(self._settings(), "settings")
     lqtab.setCurrentIndex(1)
+    self.left_qtab = lqtab
     return lqtab
 
   def _right_part(self):
