@@ -123,9 +123,13 @@ class MainWin(QtGui.QMainWindow):
       self.result = _add_names(result)
       self.te2.setPlainText(str(result))
       self.glw.set_shapes(result)
+      if not self.is_fresh_from_file:
+        with open(self.active_file_name, "w+") as f:
+          f.write(code)
     except Exception as ex:
       self.te2.setPlainText(str(ex))
       traceback.print_exc()
+      
   
   def text_changed(self):
     if key_idle > 0:
@@ -142,6 +146,8 @@ class MainWin(QtGui.QMainWindow):
         return
     self.first_keypress = True
     self.compile()
+    if self.is_fresh_from_file:
+      self.is_fresh_from_file = False
 
   def generate(self):
      export.eagle.Generate()(self.result)
@@ -150,7 +156,7 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
-    with open(self.initial_file) as f:
+    with open(self.active_file_name) as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.text_changed)
@@ -180,9 +186,12 @@ class MainWin(QtGui.QMainWindow):
 
   def row_changed(self, current, previous):
     fn = current.data(jydlibrary.Path_Role)
+    print fn
     if fn != None and re.match('^.+\.coffee$', fn) != None:
       with open(fn) as f:
         self.te1.setPlainText(f.read())
+        self.is_fresh_from_file = True
+        self.active_file_name = fn
     else:
       # TODO jump back to previous ?
       pass
@@ -194,8 +203,9 @@ class MainWin(QtGui.QMainWindow):
     selection_model = tree.selectionModel()
     self.connect(selection_model, QtCore.SIGNAL('currentRowChanged(QModelIndex,QModelIndex)'), self.row_changed)
     first_foot.select(selection_model)
-    self.initial_file = first_foot.path
+    self.active_file_name = first_foot.path
     self.tree = tree
+    self.is_fresh_from_file = True
     return tree
 
   def _left_part(self):
