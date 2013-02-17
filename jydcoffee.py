@@ -55,7 +55,7 @@ def eval_coffee_footprint(coffee):
     prepare_coffee_compiler()
   try:
     js_make_js_ctx.enter()
-    with open("ground.coffee") as f: ground = f.read()
+    with open("grind/ground-1.0.coffee") as f: ground = f.read()
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:

@@ -17,7 +17,7 @@ import OpenGL.arrays.vbo as vbo
 
 import FTGL
 
-import jydjs
+import jydcoffee
 from jydjssyntax import JSHighlighter
 from jydcoffeesyntax import CoffeeHighlighter
 from jydgldraw import GLDraw
@@ -119,7 +119,7 @@ class MainWin(QtGui.QMainWindow):
 
     code = self.te1.toPlainText()
     try:
-      result = jydjs.eval_coffee_footprint(code)
+      result = jydcoffee.eval_coffee_footprint(code)
       self.result = _add_names(result)
       self.te2.setPlainText(str(result))
       self.glw.set_shapes(result)
