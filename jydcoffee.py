@@ -79,7 +79,7 @@ def eval_coffee_footprint(coffee):
 
 def eval_coffee_meta(coffee):
   lines = coffee.replace('\r', '').split('\n')
-  meta_lines = filter(lambda c: re.match('^#\w+',c), lines)
+  meta_lines = [l for l in lines if re.match('^#\w+',l)]
   meta_list = [re.split('\s',l, 1) for l in meta_lines]
   meta_list = [(l[0][1:], l[1]) for l in meta_list]
   def _collect(acc, (k,v)):
