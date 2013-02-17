@@ -159,7 +159,7 @@ class MainWin(QtGui.QMainWindow):
     with open(self.active_file_name) as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
-    self.connect(self.te1, QtCore.SIGNAL('textChanged()'), self.text_changed)
+    self.te1.textChanged.connect(self.text_changed)
     self.te2 = QtGui.QTextEdit()
     self.te2.setReadOnly(True)
     self.highlighter2 = JSHighlighter(self.te2.document())
@@ -186,7 +186,6 @@ class MainWin(QtGui.QMainWindow):
 
   def row_changed(self, current, previous):
     fn = current.data(jydlibrary.Path_Role)
-    print fn
     if fn != None and re.match('^.+\.coffee$', fn) != None:
       with open(fn) as f:
         self.te1.setPlainText(f.read())
@@ -201,7 +200,7 @@ class MainWin(QtGui.QMainWindow):
     tree = QtGui.QTreeView()
     tree.setModel(self.model)
     selection_model = tree.selectionModel()
-    self.connect(selection_model, QtCore.SIGNAL('currentRowChanged(QModelIndex,QModelIndex)'), self.row_changed)
+    selection_model.currentRowChanged.connect(self.row_changed)
     first_foot.select(selection_model)
     self.active_file_name = first_foot.path
     self.tree = tree
@@ -222,8 +221,8 @@ class MainWin(QtGui.QMainWindow):
     self.glw = MyGLWidget()
     self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
-    self.connect(self.zoom_selector, QtCore.SIGNAL('editingFinished()'), self.zoom)
-    self.connect(self.zoom_selector, QtCore.SIGNAL('returnPressed()'), self.zoom)
+    self.zoom_selector.editingFinished.connect(self.zoom)
+    self.zoom_selector.returnPressed.connect(self.zoom)
     rhbox.addWidget(QtGui.QLabel("Zoom: "))
     rhbox.addWidget(self.zoom_selector)
     rvbox.addLayout(rhbox)
@@ -246,12 +245,12 @@ class MainWin(QtGui.QMainWindow):
     self.generateAction = QtGui.QAction('Generate', self)
     self.generateAction.setShortcut('Ctrl+G')
     self.generateAction.setStatusTip('Generate Eagle CAD library')
-    self.connect(self.generateAction, QtCore.SIGNAL('triggered()'), self.generate)
+    self.generateAction.triggered.connect(self.generate)
 
     self.exitAction = QtGui.QAction('Quit', self)
     self.exitAction.setShortcut('Ctrl+Q')
     self.exitAction.setStatusTip('Exit application')
-    self.connect(self.exitAction, QtCore.SIGNAL('triggered()'), self.close)
+    self.exitAction.triggered.connect(self.close)
 
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
@@ -262,7 +261,7 @@ class MainWin(QtGui.QMainWindow):
     self.first_keypress = False
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
-    self.timer.connect(self.timer, QtCore.SIGNAL('timeout()'), self.text_changed)
+    self.timer.timeout.connect(self.text_changed)
     self.result = ""
 
     def close(self):
