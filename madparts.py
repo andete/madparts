@@ -237,6 +237,14 @@ class MainWin(QtGui.QMainWindow):
     right.setLayout(rvbox)
     return right
 
+  def about(self):
+    a = """
+<p align="center"><b>madparts</b><br/>the functional footprint editor</p>
+<p align="center">(c) 2013 Joost Yervante Damad &lt;joost@damad.be&gt;</p>
+<p align="center"><a href="http://madparts.org">madparts.org</a></p>
+"""
+    QtGui.QMessageBox.about(self, "about madparts", a)
+  
   def __init__(self):
     super(MainWin, self).__init__()
 
@@ -247,20 +255,31 @@ class MainWin(QtGui.QMainWindow):
 
     self.statusBar().showMessage("Ready.")
 
-    self.generateAction = QtGui.QAction('Generate', self)
-    self.generateAction.setShortcut('Ctrl+G')
-    self.generateAction.setStatusTip('Generate Eagle CAD library')
-    self.generateAction.triggered.connect(self.generate)
-
-    self.exitAction = QtGui.QAction('Quit', self)
-    self.exitAction.setShortcut('Ctrl+Q')
-    self.exitAction.setStatusTip('Exit application')
-    self.exitAction.triggered.connect(self.close)
-
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
-    fileMenu.addAction(self.generateAction)
-    fileMenu.addAction(self.exitAction)
+    exitAction = QtGui.QAction('Quit', self)
+    exitAction.setShortcut('Ctrl+Q')
+    exitAction.setStatusTip('Exit application')
+    exitAction.triggered.connect(self.close)
+    fileMenu.addAction(exitAction)
+
+    exportMenu = menuBar.addMenu('&Export')
+    eagleAction = QtGui.QAction('Eagle', self)
+    eagleAction.setShortcut('Ctrl+E')
+    eagleAction.setStatusTip('Generate Eagle CAD library')
+    eagleAction.triggered.connect(self.generate)
+    exportMenu.addAction(eagleAction)
+
+    kicadAction = QtGui.QAction('Kicad', self)
+    kicadAction.setShortcut('Ctrl+K')
+    kicadAction.setStatusTip('Generate KiCad library')
+    kicadAction.setDisabled(True)
+    exportMenu.addAction(kicadAction)
+
+    helpMenu = menuBar.addMenu('&Help')
+    aboutAction = QtGui.QAction("&About", self)
+    aboutAction.triggered.connect(self.about)
+    helpMenu.addAction(aboutAction)
 
     self.last_time = time.time() - 10.0
     self.first_keypress = False
