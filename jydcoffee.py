@@ -3,9 +3,11 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+import os.path
+import re
+import string
 
 import PyV8
-import os.path
 
 class Global(PyV8.JSClass):
 
@@ -49,6 +51,8 @@ def prepare_coffee_compiler():
 # re-using the generated js from ground and such, however for now it is
 # still snappy enough; so let's just keep it simple
 def eval_coffee_footprint(coffee):
+  meta = eval_coffee_meta(coffee)
+  # only compile the compiler once
   global js_make_js_ctx
   global js_make_js_from_coffee
   if js_make_js_ctx == None:
@@ -59,6 +63,22 @@ def eval_coffee_footprint(coffee):
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:
-      return PyV8.convert(ctxt.eval("(function() {\n" + ground_js + js + "\n}).call(this);\n"))
+      pl = PyV8.convert(ctxt.eval("(function() {\n" + ground_js + js + "\n}).call(this);\n"))
+      pl.append(meta)
+      return pl
   finally:
     js_make_js_ctx.leave()
+
+def eval_coffee_meta(coffee):
+  lines = coffee.replace('\r', '').split('\n')
+  meta_lines = filter(lambda c: re.match('^#\w+',c), lines)
+  meta_list = map(lambda c: re.split('\s',c, 1), meta_lines)
+  meta_list = map(lambda c: (c[0][1:], c[1]), meta_list)
+  meta = {}
+  for (k,v) in meta_list:
+    if k in meta:
+      meta[k] = meta[k] + "\n" + v
+    else:
+      meta[k] = v
+  meta['type'] = 'meta'
+  return meta

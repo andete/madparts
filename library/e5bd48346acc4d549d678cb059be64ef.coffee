@@ -13,15 +13,8 @@ footprint = () ->
   num_pads = 32
   e = 0.8
 
-  meta =
-    type: 'meta'
-    name: 'TQFP32'
-    id: 'e5bd48346acc4d549d678cb059be64ef'
-    desc: 'TQFP32 example'
-
-
-  name = new Name (half + 1.5)
-  value = new Value (-half - 1.5)
+  name = new Name(half + 1.5)
+  value = new Value(-half - 1.5)
 
   pad = new Smd
   pad.dx = 1.67
@@ -38,4 +31,4 @@ footprint = () ->
   dot.x = -half
   dot.y = half - 1
 
-  combine [meta, name, value, pads, silk, dot]
+  combine [name, value, pads, silk, dot]

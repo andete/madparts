@@ -20,13 +20,11 @@ class Footprint():
   def load(self):
     with open(self.path) as f:
       code = f.read()
-    shapes = jydcoffee.eval_coffee_footprint(code)
-    for shape in shapes:
-      if shape['type'] == 'meta':
-        self.name = shape['name']
-        self.id = shape['id']
-        self.desc = oget(shape, 'desc', '')
-        self.parent = oget(shape, 'parent', None)
+    meta = jydcoffee.eval_coffee_meta(code)
+    self.name = meta['name']
+    self.id = meta['id']
+    self.desc = oget(meta, 'desc', '')
+    self.parent = oget(meta, 'parent', None)
     return self
  
   # we use the EditRole to store the path so we immediately get the path on click
