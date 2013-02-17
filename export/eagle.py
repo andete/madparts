@@ -208,8 +208,8 @@ class Generate:
 """ % (x1, y1, x2, y2, w))
     pass
 
-  # TODO: HTML escaping?
-  def generate(self, shapes):
+  # TODO: HTML escaping!
+  def __call__(self, shapes):
     for shape in shapes:
       if shape['type'] == 'meta':
         name = eget(shape, 'name', 'Name not found')

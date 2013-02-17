@@ -144,7 +144,7 @@ class MainWin(QtGui.QMainWindow):
     self.compile()
 
   def generate(self):
-     export.eagle.Generate().generate(self.result)
+     export.eagle.Generate()(self.result)
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
