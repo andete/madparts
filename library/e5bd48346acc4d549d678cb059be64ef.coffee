@@ -13,8 +13,8 @@ footprint = () ->
   num_pads = 32
   e = 0.8
 
-  name = new Name(half + 1.5)
-  value = new Value(-half - 1.5)
+  name = new Name (half + 1.5)
+  value = new Value (-half - 1.5)
 
   pad = new Smd
   pad.dx = 1.67
