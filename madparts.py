@@ -104,16 +104,37 @@ class ExportDialog(QtGui.QDialog):
     print "rejected"
     QtGui.QDialog.reject(self)
 
+  def get_file(self):
+    result = QtGui.QFileDialog.getOpenFileName(self, "Select Library")
+    self.filename = result[0]
+    self.lib_filename.setText(self.filename)
+
   def __init__(self, parent=None):
     super(ExportDialog, self).__init__(parent)
     self.setWindowTitle('Export Dialog')
-    self.resize(100,100)
+    self.resize(640,240) # TODO, there must be a better way to do this
     vbox = QtGui.QVBoxLayout()
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
-    bg = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
-    bg.accepted.connect(self.accept)
-    bg.rejected.connect(self.reject)
-    vbox.addWidget(bg)
+    button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    button_box.accepted.connect(self.accept)
+    button_box.rejected.connect(self.reject)
+    form_layout = QtGui.QFormLayout()
+    lib_widget = QtGui.QWidget()
+    lib_hbox = QtGui.QHBoxLayout()
+    self.lib_filename = QtGui.QLineEdit()
+    self.lib_filename.setReadOnly(True)
+    self.lib_filename.setPlaceholderText("press Browse")
+    lib_button = QtGui.QPushButton("Browse")
+    self.filename = None
+    lib_button.clicked.connect(self.get_file)
+
+    lib_hbox.addWidget(self.lib_filename)
+    lib_hbox.addWidget(lib_button)
+    lib_widget.setLayout(lib_hbox)
+    form_layout.addRow("library", lib_widget) 
+    form_layout.addRow("type", QtGui.QLabel("TODO")) 
+    vbox.addLayout(form_layout)
+    vbox.addWidget(button_box)
     self.setLayout(vbox)
 
 class MainWin(QtGui.QMainWindow):
@@ -300,7 +321,7 @@ class MainWin(QtGui.QMainWindow):
     exportAction.setShortcut('Ctrl+E')
     exportAction.triggered.connect(self.export_footprint)
     footprintMenu.addAction(exportAction)
-    exportdAction = QtGui.QAction('E&xport...', self)
+    exportdAction = QtGui.QAction('E&xport fresh', self)
     exportdAction.setShortcut('Ctrl+X')
     exportdAction.triggered.connect(self.export_footprint)
     footprintMenu.addAction(exportdAction)
