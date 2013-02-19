@@ -94,6 +94,28 @@ class MyGLWidget(QGLWidget):
         self.updateGL()
 
 
+class ExportDialog(QtGui.QDialog):
+
+  def accept(self):
+    print "accepted"
+    QtGui.QDialog.accept(self)
+
+  def reject(self):
+    print "rejected"
+    QtGui.QDialog.reject(self)
+
+  def __init__(self, parent=None):
+    super(ExportDialog, self).__init__(parent)
+    self.setWindowTitle('Export Dialog')
+    self.resize(100,100)
+    vbox = QtGui.QVBoxLayout()
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+    bg = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    bg.accepted.connect(self.accept)
+    bg.rejected.connect(self.reject)
+    vbox.addWidget(bg)
+    self.setLayout(vbox)
+
 class MainWin(QtGui.QMainWindow):
 
   def zoom(self):
@@ -151,6 +173,10 @@ class MainWin(QtGui.QMainWindow):
 
   def generate(self):
      export.eagle.Generate()(self.result)
+
+  def export_footprint(self):
+     self.export_dialog = ExportDialog(self)
+     self.export_dialog.exec_()
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -270,16 +296,14 @@ class MainWin(QtGui.QMainWindow):
     removeAction = QtGui.QAction('&Remove', self)
     removeAction.setDisabled(True)
     footprintMenu.addAction(removeAction)
-    eagleAction = QtGui.QAction('Export to &Eagle', self)
-    eagleAction.setShortcut('Ctrl+E')
-    eagleAction.setStatusTip('Generate Eagle CAD library')
-    eagleAction.triggered.connect(self.generate)
-    footprintMenu.addAction(eagleAction)
-    kicadAction = QtGui.QAction('Export to &Kicad', self)
-    kicadAction.setShortcut('Ctrl+K')
-    kicadAction.setStatusTip('Generate KiCad library')
-    kicadAction.setDisabled(True)
-    footprintMenu.addAction(kicadAction)
+    exportAction = QtGui.QAction('&Export', self)
+    exportAction.setShortcut('Ctrl+E')
+    exportAction.triggered.connect(self.export_footprint)
+    footprintMenu.addAction(exportAction)
+    exportdAction = QtGui.QAction('E&xport...', self)
+    exportdAction.setShortcut('Ctrl+X')
+    exportdAction.triggered.connect(self.export_footprint)
+    footprintMenu.addAction(exportdAction)
 
 
     libraryMenu = menuBar.addMenu('&Library')
