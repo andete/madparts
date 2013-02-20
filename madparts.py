@@ -19,10 +19,11 @@ import jydlibrary
 
 import export.eagle
 
-# settings; TODO: expose in menu and move to QSettings
-gldx = 200
-gldy = 200
-font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
+# default values for settings
+gldx_default = 200
+gldy_default = 200
+default_font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
+default_zoomfactor = 50
 key_idle = 0.5
 libraries = [('Example Library', 'library')]
 
@@ -203,7 +204,11 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    self.glw = jydgldraw.JYDGLWidget(gldx, gldy, font_file)
+    gldx = self.settings.value("gl/gldx", gldx_default)
+    gldy = self.settings.value("gl/gldy", gldy_default)
+    font_file = self.settings.value("gl/fontfile", default_font_file)
+    start_zoomfactor = self.settings.value("gl/zoomfactor", default_zoomfactor)
+    self.glw = jydgldraw.JYDGLWidget(gldx, gldy, str(font_file), start_zoomfactor)
     self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)
@@ -227,6 +232,8 @@ class MainWin(QtGui.QMainWindow):
   
   def __init__(self):
     super(MainWin, self).__init__()
+
+    self.settings = QtCore.QSettings()
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
     splitter.addWidget(self._left_part())

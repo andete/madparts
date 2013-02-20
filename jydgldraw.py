@@ -183,14 +183,14 @@ class GLDraw:
         self.label(shape)
 
 class JYDGLWidget(QGLWidget):
-    def __init__(self, gldx, gldy, font_file, parent = None):
+    def __init__(self, gldx, gldy, font_file, start_zoomfactor, parent = None):
         super(JYDGLWidget, self).__init__(parent)
         self.gldx = gldx
         self.gldy = gldy
         self.dot_field_data = np.array(
           [[x,y] for x in range(-gldx/2, gldx/2) for y in range(-gldy/2, gldy/2)],
           dtype=np.float32)
-        self.zoomfactor = 50
+        self.zoomfactor = start_zoomfactor
         self.zoom_changed = False
         self.shapes = []
         self.font = FTGL.PixmapFont(font_file)
