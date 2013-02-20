@@ -16,13 +16,9 @@ from syntax.jydjssyntax import JSHighlighter
 from syntax.jydcoffeesyntax import CoffeeHighlighter
 import jydgldraw
 import jydlibrary
-
 import export.eagle
+import jyddefaultsettings as default
 
-# default values for settings
-gldx_default = 200
-gldy_default = 200
-default_font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
 default_zoomfactor = 50
 key_idle = 0.5
 libraries = [('Example Library', 'library')]
@@ -204,10 +200,10 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    gldx = self.settings.value("gl/gldx", gldx_default)
-    gldy = self.settings.value("gl/gldy", gldy_default)
-    font_file = self.settings.value("gl/fontfile", default_font_file)
-    start_zoomfactor = self.settings.value("gl/zoomfactor", default_zoomfactor)
+    gldx = self.settings.value("gl/gldx", default.gldx)
+    gldy = self.settings.value("gl/gldy", default.gldy)
+    font_file = self.settings.value("gl/fontfile", default.font_file)
+    start_zoomfactor = self.settings.value("gl/zoomfactor", default.zoomfactor)
     self.glw = jydgldraw.JYDGLWidget(gldx, gldy, str(font_file), start_zoomfactor)
     self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
