@@ -19,8 +19,6 @@ import jydlibrary
 import export.eagle
 import jyddefaultsettings as default
 
-default_zoomfactor = 50
-key_idle = 0.5
 libraries = [('Example Library', 'library')]
 
 class ExportDialog(QtGui.QDialog):
@@ -105,17 +103,17 @@ class MainWin(QtGui.QMainWindow):
       
   
   def text_changed(self):
-    if key_idle > 0:
+    if self.key_idle > 0:
       t = time.time()
-      if (t - self.last_time < float(key_idle)/1000.0):
+      if (t - self.last_time < float(self.key_idle)/1000.0):
         self.timer.stop()
-        self.timer.start(key_idle)
+        self.timer.start(self.key_idle)
         return
       self.last_time = t
       if self.first_keypress:
         self.first_keypress = False
         self.timer.stop()
-        self.timer.start(key_idle)
+        self.timer.start(self.key_idle)
         return
     self.first_keypress = True
     self.compile()
@@ -230,6 +228,8 @@ class MainWin(QtGui.QMainWindow):
     super(MainWin, self).__init__()
 
     self.settings = QtCore.QSettings()
+
+    self.key_idle = self.settings.value("gui/keyidle", default.key_idle)
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
     splitter.addWidget(self._left_part())

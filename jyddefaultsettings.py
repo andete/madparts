@@ -6,3 +6,4 @@ gldx = 200
 gldy = 200
 font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
 zoomfactor = 50
+key_idle = 0.5
