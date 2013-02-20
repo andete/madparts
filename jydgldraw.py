@@ -9,6 +9,8 @@ from PySide.QtOpenGL import *
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as vbo
 
+import FTGL
+
 import numpy as np
 import math
 
@@ -30,7 +32,6 @@ def make_shader(name):
 
 
 class GLDraw:
-
 
   def __init__(self, font, zoom):
     self.color = {}
@@ -180,3 +181,66 @@ class GLDraw:
         if shape['shape'] == 'line': self.line(shape)
       elif shape['type'] == 'label':
         self.label(shape)
+
+class JYDGLWidget(QGLWidget):
+    def __init__(self, gldx, gldy, font_file, parent = None):
+        super(JYDGLWidget, self).__init__(parent)
+        self.gldx = gldx
+        self.gldy = gldy
+        self.dot_field_data = np.array(
+          [[x,y] for x in range(-gldx/2, gldx/2) for y in range(-gldy/2, gldy/2)],
+          dtype=np.float32)
+        self.zoomfactor = 50
+        self.zoom_changed = False
+        self.shapes = []
+        self.font = FTGL.PixmapFont(font_file)
+
+    def initializeGL(self):
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_LINE_SMOOTH)
+        glClearColor(0.0, 0.0, 0.0, 1.0)
+        glClear(GL_COLOR_BUFFER_BIT)
+        self.dot_field_vbo = vbo.VBO(self.dot_field_data)
+        self.gldraw = GLDraw(self.font, self.zoomfactor)
+
+    def paintGL(self):
+        if self.zoom_changed:
+          self.gldraw.set_zoom(self.zoomfactor)
+        glClear(GL_COLOR_BUFFER_BIT)
+        glColor3f(0.5, 0.5, 0.5)
+        self.dot_field_vbo.bind() # make this vbo the active one
+        glEnableClientState(GL_VERTEX_ARRAY)
+        glVertexPointer(2, GL_FLOAT, 0, self.dot_field_vbo)
+        glDrawArrays(GL_POINTS, 0, self.gldx*self.gldy)
+
+        glColor3f(1.0, 0.0, 0.0)
+        glLineWidth(1)
+        glBegin(GL_LINES)
+        glVertex3f(-100, 0, 0)
+        glVertex3f(100, 0, 0)
+        glEnd()
+        glBegin(GL_LINES)
+        glVertex3f(0, -100, 0)
+        glVertex3f(0, 100, 0)
+        glEnd()
+        
+        if self.shapes != None: self.gldraw.draw(self.shapes)
+        if self.zoom_changed:
+            self.zoom_changed = False
+            self.resizeGL(self.width(), self.height())
+
+    def resizeGL(self, w, h):
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        # every 'zoomfactor' pixels is one mm
+        mm_visible_x = float(w)/self.zoomfactor
+        if mm_visible_x < 1: mm_visible_x = 1.0
+        mm_visible_y = float(h)/self.zoomfactor
+        if mm_visible_y < 1: mm_visible_y = 1.0
+        glOrtho(-mm_visible_x/2, mm_visible_x/2, -mm_visible_y/2, mm_visible_y/2, -1, 1)
+        glViewport(0, 0, w, h)
+
+    def set_shapes(self, s):
+        self.shapes = s
+        self.updateGL()
