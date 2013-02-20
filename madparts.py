@@ -284,6 +284,9 @@ class MainWin(QtGui.QMainWindow):
         QtGui.qApp.quit()
     
 if __name__ == '__main__':
+    QtCore.QCoreApplication.setOrganizationName("teluna")
+    QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
+    QtCore.QCoreApplication.setApplicationName("madparts")
     app = QtGui.QApplication(["madparts"])
     widget = MainWin()
     widget.show()
