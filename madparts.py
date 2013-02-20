@@ -118,6 +118,7 @@ class ExportDialog(QtGui.QDialog):
     button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
     button_box.accepted.connect(self.accept)
     button_box.rejected.connect(self.reject)
+    button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(True)
     form_layout = QtGui.QFormLayout()
     lib_widget = QtGui.QWidget()
     lib_hbox = QtGui.QHBoxLayout()
