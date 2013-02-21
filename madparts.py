@@ -173,6 +173,7 @@ class MainWin(QtGui.QMainWindow):
       self.status("Exported to "+self.library_filename+".")
     except Exception as ex:
       self.status(str(ex))
+      raise
       
 
 

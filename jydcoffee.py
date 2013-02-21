@@ -89,4 +89,4 @@ def eval_coffee_meta(coffee):
     else:
       acc[k] = v
     return acc
-  return reduce(_collect, meta_list, { type: 'meta'})
+  return reduce(_collect, meta_list, { 'type': 'meta'})
