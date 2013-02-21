@@ -231,3 +231,7 @@ class Export:
   def check(self, fn):
     # TODO check file content
     return True
+
+  def export(self, fn, shapes):
+    pass
+    # TODO

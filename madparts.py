@@ -82,7 +82,7 @@ class MainWin(QtGui.QMainWindow):
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
     self.timer.timeout.connect(self.text_changed)
-    self.result = ""
+    self.result = []
     self.library_filename = ""
     self.library_filetype = ""
 
@@ -108,7 +108,7 @@ class MainWin(QtGui.QMainWindow):
       return [_c(x) for x in res]
 
     code = self.te1.toPlainText()
-    self.result = ""
+    self.result = []
     try:
       result = jydcoffee.eval_coffee_footprint(code)
       self.result = _add_names(result)
@@ -118,15 +118,15 @@ class MainWin(QtGui.QMainWindow):
         with open(self.active_file_name, "w+") as f:
           f.write(code)
     except jydcoffee.JSError as ex:
-      self.result = ""
+      self.result = []
       s = str(ex)
       s = s.replace('JSError: Error: ', '')
       self.te2.setPlainText(s)
     except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
-      self.result = ""
+      self.result = []
       self.te2.setPlainText(str(ex))
     except Exception as ex:
-      self.result = ""
+      self.result = []
       tb = traceback.format_exc()
       self.te2.setPlainText(str(ex) + "\n"+tb)
       
@@ -151,9 +151,13 @@ class MainWin(QtGui.QMainWindow):
 
   def _export_footprint(self):
     if self.library_filename == "": return
-    if self.result == "":
+    if self.result == []:
       QtGui.QMessageBox.warning(self, "warning", "Can't export if footprint doesn't compile.")
-    pass # TODO
+    if self.library_filetype != 'eagle':
+      QtGui.QMessageBox.error(self, "error", "Only eagle CAD export is currently supported")
+      return
+    export.eagle.Export().export(self.library_filename, self.result)
+
 
   def export_previous(self):
     if self.library_filename == "":
