@@ -108,15 +108,17 @@ class MainWin(QtGui.QMainWindow):
       return [_c(x) for x in res]
 
     code = self.te1.toPlainText()
+    self.result = ""
     try:
       result = jydcoffee.eval_coffee_footprint(code)
       self.result = _add_names(result)
       self.te2.setPlainText(str(result))
-      self.glw.set_shapes(result)
+      self.glw.set_shapes(self.result)
       if not self.is_fresh_from_file:
         with open(self.active_file_name, "w+") as f:
           f.write(code)
     except Exception as ex:
+      self.result = ""
       self.te2.setPlainText(str(ex))
       traceback.print_exc()
       
@@ -140,6 +142,9 @@ class MainWin(QtGui.QMainWindow):
       self.is_fresh_from_file = False
 
   def _export_footprint(self):
+    if self.library_filename == "": return
+    if self.result == "":
+      QtGui.QMessageBox.warning(self, "warning", "Can't export if footprint doesn't compile.")
     pass # TODO
 
   def export_previous(self):
@@ -150,8 +155,7 @@ class MainWin(QtGui.QMainWindow):
 
   def export_footprint(self):
      dialog = LibrarySelectDialog(self)
-     if dialog.exec_() != QtGui.QDialog.Accepted:
-       return
+     if dialog.exec_() != QtGui.QDialog.Accepted: return
      self.library_filename = dialog.filename
      self.library_filetype = dialog.filetype
      self._export_footprint()
