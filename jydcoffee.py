@@ -9,6 +9,8 @@ import PyV8
 
 supported_formats = ['1.0']
 
+from PyV8 import JSError
+
 class Global(PyV8.JSClass):
 
     def __init__(self):
@@ -69,7 +71,8 @@ def eval_coffee_footprint(coffee):
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:
-      pl = PyV8.convert(ctxt.eval("(function() {\n" + ground_js + js + "\n}).call(this);\n"))
+      js_res = ctxt.eval("(function() {\n" + ground_js + js + "\n}).call(this);\n")
+      pl = PyV8.convert(js_res)
       pl.append(meta)
       return pl
   finally:

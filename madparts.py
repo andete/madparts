@@ -117,10 +117,18 @@ class MainWin(QtGui.QMainWindow):
       if not self.is_fresh_from_file:
         with open(self.active_file_name, "w+") as f:
           f.write(code)
-    except Exception as ex:
+    except jydcoffee.JSError as ex:
+      self.result = ""
+      s = str(ex)
+      s = s.replace('JSError: Error: ', '')
+      self.te2.setPlainText(s)
+    except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
       self.result = ""
       self.te2.setPlainText(str(ex))
-      traceback.print_exc()
+    except Exception as ex:
+      self.result = ""
+      tb = traceback.format_exc()
+      self.te2.setPlainText(str(ex) + "\n"+tb)
       
   
   def text_changed(self):
