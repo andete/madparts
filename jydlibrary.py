@@ -6,14 +6,10 @@ import traceback
 from PySide import QtGui, QtCore
 
 import jydcoffee
+from jydutil import *
 
 # this is a hack; TODO find a cleaner way
 Path_Role = 42
-
-# get rid of copies from jydgldraw.py
-def oget(m, k, d):
-  if k in m: return m[k]
-  return d
 
 class Footprint():
   def __init__(self, library, path, filename):

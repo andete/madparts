@@ -14,12 +14,7 @@ import FTGL
 import numpy as np
 import math
 
-def oget(m, k, d):
-  if k in m: return m[k]
-  return d
-
-def fget(m, k, d = 0.0):
-  return float(oget(m, k, d))
+from jydutil import *
 
 def make_shader(name):
   print "compiling %s shaders" % (name)
