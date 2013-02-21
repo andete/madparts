@@ -86,10 +86,13 @@ class MainWin(QtGui.QMainWindow):
     self.library_filename = ""
     self.library_filetype = ""
 
+  def status(self, s):
+    self.statusBar().showMessage(s)
+
   def zoom(self):
-      self.glw.zoomfactor = int(self.zoom_selector.text())
-      self.glw.zoom_changed = True
-      self.glw.updateGL()
+    self.glw.zoomfactor = int(self.zoom_selector.text())
+    self.glw.zoom_changed = True
+    self.glw.updateGL()
 
   def compile(self):
     def _add_names(res):
@@ -117,18 +120,22 @@ class MainWin(QtGui.QMainWindow):
       if not self.is_fresh_from_file:
         with open(self.active_file_name, "w+") as f:
           f.write(code)
+      self.status("Compilation successful.")
     except jydcoffee.JSError as ex:
       self.result = []
       s = str(ex)
       s = s.replace('JSError: Error: ', '')
       self.te2.setPlainText(s)
+      self.status(s)
     except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
       self.result = []
       self.te2.setPlainText(str(ex))
+      self.status(str(ex))
     except Exception as ex:
       self.result = []
       tb = traceback.format_exc()
       self.te2.setPlainText(str(ex) + "\n"+tb)
+      self.status(str(ex))
       
   
   def text_changed(self):
@@ -152,11 +159,21 @@ class MainWin(QtGui.QMainWindow):
   def _export_footprint(self):
     if self.library_filename == "": return
     if self.result == []:
-      QtGui.QMessageBox.warning(self, "warning", "Can't export if footprint doesn't compile.")
-    if self.library_filetype != 'eagle':
-      QtGui.QMessageBox.error(self, "error", "Only eagle CAD export is currently supported")
+      s = "Can't export if footprint doesn't compile."
+      QtGui.QMessageBox.warning(self, "warning", s)
+      self.status(s) 
       return
-    export.eagle.Export().export(self.library_filename, self.result)
+    if self.library_filetype != 'eagle':
+      s = "Only eagle CAD export is currently supported"
+      QtGui.QMessageBox.error(self, "error", s)
+      self.status(s)
+      return
+    try:
+      export.eagle.Export().export(self.library_filename, self.result)
+      self.status("Exported to "+self.library_filename+".")
+    except Exception as ex:
+      self.status(str(ex))
+      
 
 
   def export_previous(self):

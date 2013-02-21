@@ -17,6 +17,7 @@ footprint = () ->
   value = new Value (-half - 1.5)
 
   pad = new Smd
+
   pad.dx = 1.67
   pad.dy = 0.36
   pad.ro = 50
