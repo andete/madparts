@@ -56,7 +56,7 @@ class MainWin(QtGui.QMainWindow):
     footprintMenu.addAction(removeAction)
     exportAction = QtGui.QAction('&Export previous', self)
     exportAction.setShortcut('Ctrl+E')
-    exportAction.triggered.connect(self.export_footprint)
+    exportAction.triggered.connect(self.export_previous)
     footprintMenu.addAction(exportAction)
     exportdAction = QtGui.QAction('E&xport', self)
     exportdAction.setShortcut('Ctrl+X')
@@ -83,6 +83,8 @@ class MainWin(QtGui.QMainWindow):
     self.timer.setSingleShot(True)
     self.timer.timeout.connect(self.text_changed)
     self.result = ""
+    self.library_filename = ""
+    self.library_filetype = ""
 
   def zoom(self):
       self.glw.zoomfactor = int(self.zoom_selector.text())
@@ -137,10 +139,22 @@ class MainWin(QtGui.QMainWindow):
     if self.is_fresh_from_file:
       self.is_fresh_from_file = False
 
+  def _export_footprint(self):
+    pass # TODO
+
+  def export_previous(self):
+    if self.library_filename == "":
+      self.export_footprint()
+    else:
+      self._export_footprint()
+
   def export_footprint(self):
      dialog = LibrarySelectDialog(self)
-     if dialog.exec_() != QtGui.QDialog.Accepted: return
-     print dialog.filename, dialog.filetype
+     if dialog.exec_() != QtGui.QDialog.Accepted:
+       return
+     self.library_filename = dialog.filename
+     self.library_filetype = dialog.filetype
+     self._export_footprint()
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
