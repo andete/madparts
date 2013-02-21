@@ -146,7 +146,7 @@ def eget(m, k, e):
   if k in m: return m[k]
   raise Exception(e)
 
-class Generate:
+class Export:
 
 # this is just rough code for testing!
 # TODO decide on layer based on existing eagle XML and wanted type
@@ -210,7 +210,7 @@ class Generate:
 """ % (x1, y1, x2, y2, w))
     pass
 
-  def __call__(self, shapes):
+  def generate(self, shapes):
     for shape in shapes:
       if shape['type'] == 'meta':
         name = eget(shape, 'name', 'Name not found')
@@ -239,3 +239,6 @@ class Generate:
           self.label(f, shape)
       f.write("</package>\n");
       f.write(tail)
+
+  def check(self, fn):
+    return True
