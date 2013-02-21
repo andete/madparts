@@ -5,6 +5,8 @@
 
 from xml.sax.saxutils import escape
 
+from jydutil import *
+
 head = """\
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
@@ -134,18 +136,6 @@ tail = """
 </eagle>
 """
 
-# TODO get rid of copies from jydgldraw.py
-def oget(m, k, d):
-  if k in m: return m[k]
-  return d
-
-def fget(m, k, d = 0.0):
-  return float(oget(m, k, d))
-
-def eget(m, k, e):
-  if k in m: return m[k]
-  raise Exception(e)
-
 class Export:
 
 # this is just rough code for testing!
@@ -241,4 +231,5 @@ class Export:
       f.write(tail)
 
   def check(self, fn):
+    # TODO check file content
     return True

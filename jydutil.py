@@ -7,3 +7,7 @@ def oget(m, k, d):
 
 def fget(m, k, d = 0.0):
   return float(oget(m, k, d))
+
+def eget(m, k, e):
+  if k in m: return m[k]
+  raise Exception(e)
