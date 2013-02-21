@@ -23,21 +23,6 @@ libraries = [('Example Library', 'library')]
 
 class ExportDialog(QtGui.QDialog):
 
-  def accept(self):
-    print "accepted"
-    QtGui.QDialog.accept(self)
-
-  def reject(self):
-    print "rejected"
-    QtGui.QDialog.reject(self)
-
-  def get_file(self):
-    result = QtGui.QFileDialog.getOpenFileName(self,
-      "Select Library", filter="Eagle CAD Library (*.lbr);;XML file (*.xml)")
-    self.filename = result[0]
-    self.lib_filename.setText(self.filename)
-    if (self.filename == ''): return
-
   def __init__(self, parent=None):
     super(ExportDialog, self).__init__(parent)
     self.setWindowTitle('Export Dialog')
@@ -67,7 +52,81 @@ class ExportDialog(QtGui.QDialog):
     vbox.addWidget(button_box)
     self.setLayout(vbox)
 
+  def accept(self):
+    print "accepted"
+    QtGui.QDialog.accept(self)
+
+  def reject(self):
+    print "rejected"
+    QtGui.QDialog.reject(self)
+
+  def get_file(self):
+    result = QtGui.QFileDialog.getOpenFileName(self,
+      "Select Library", filter="Eagle CAD Library (*.lbr);;XML file (*.xml)")
+    self.filename = result[0]
+    self.lib_filename.setText(self.filename)
+    if (self.filename == ''): return
+
 class MainWin(QtGui.QMainWindow):
+
+  def __init__(self):
+    super(MainWin, self).__init__()
+
+    self.settings = QtCore.QSettings()
+
+    self.key_idle = self.settings.value("gui/keyidle", default.key_idle)
+
+    splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
+    splitter.addWidget(self._left_part())
+    splitter.addWidget(self._right_part())
+    self.setCentralWidget(splitter)
+
+    self.statusBar().showMessage("Ready.")
+
+    menuBar = self.menuBar()
+    fileMenu = menuBar.addMenu('&File')
+    exitAction = QtGui.QAction('Quit', self)
+    exitAction.setShortcut('Ctrl+Q')
+    exitAction.setStatusTip('Exit application')
+    exitAction.triggered.connect(self.close)
+    fileMenu.addAction(exitAction)
+
+    footprintMenu = menuBar.addMenu('&Footprint')
+    cloneAction = QtGui.QAction('&Clone', self)
+    cloneAction.setDisabled(True)
+    footprintMenu.addAction(cloneAction)
+    removeAction = QtGui.QAction('&Remove', self)
+    removeAction.setDisabled(True)
+    footprintMenu.addAction(removeAction)
+    exportAction = QtGui.QAction('&Export previous', self)
+    exportAction.setShortcut('Ctrl+E')
+    exportAction.triggered.connect(self.export_footprint)
+    footprintMenu.addAction(exportAction)
+    exportdAction = QtGui.QAction('E&xport', self)
+    exportdAction.setShortcut('Ctrl+X')
+    exportdAction.triggered.connect(self.export_footprint)
+    footprintMenu.addAction(exportdAction)
+
+
+    libraryMenu = menuBar.addMenu('&Library')
+    createAction = QtGui.QAction('&Create', self)
+    createAction.setDisabled(True)
+    disconnectAction = QtGui.QAction('&Disconnect', self)
+    disconnectAction.setDisabled(True)
+    libraryMenu.addAction(createAction)
+    libraryMenu.addAction(disconnectAction)
+
+    helpMenu = menuBar.addMenu('&Help')
+    aboutAction = QtGui.QAction("&About", self)
+    aboutAction.triggered.connect(self.about)
+    helpMenu.addAction(aboutAction)
+
+    self.last_time = time.time() - 10.0
+    self.first_keypress = False
+    self.timer = QtCore.QTimer()
+    self.timer.setSingleShot(True)
+    self.timer.timeout.connect(self.text_changed)
+    self.result = ""
 
   def zoom(self):
       self.glw.zoomfactor = int(self.zoom_selector.text())
@@ -226,67 +285,8 @@ class MainWin(QtGui.QMainWindow):
 """
     QtGui.QMessageBox.about(self, "about madparts", a)
   
-  def __init__(self):
-    super(MainWin, self).__init__()
-
-    self.settings = QtCore.QSettings()
-
-    self.key_idle = self.settings.value("gui/keyidle", default.key_idle)
-
-    splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
-    splitter.addWidget(self._left_part())
-    splitter.addWidget(self._right_part())
-    self.setCentralWidget(splitter)
-
-    self.statusBar().showMessage("Ready.")
-
-    menuBar = self.menuBar()
-    fileMenu = menuBar.addMenu('&File')
-    exitAction = QtGui.QAction('Quit', self)
-    exitAction.setShortcut('Ctrl+Q')
-    exitAction.setStatusTip('Exit application')
-    exitAction.triggered.connect(self.close)
-    fileMenu.addAction(exitAction)
-
-    footprintMenu = menuBar.addMenu('&Footprint')
-    cloneAction = QtGui.QAction('&Clone', self)
-    cloneAction.setDisabled(True)
-    footprintMenu.addAction(cloneAction)
-    removeAction = QtGui.QAction('&Remove', self)
-    removeAction.setDisabled(True)
-    footprintMenu.addAction(removeAction)
-    exportAction = QtGui.QAction('&Export previous', self)
-    exportAction.setShortcut('Ctrl+E')
-    exportAction.triggered.connect(self.export_footprint)
-    footprintMenu.addAction(exportAction)
-    exportdAction = QtGui.QAction('E&xport', self)
-    exportdAction.setShortcut('Ctrl+X')
-    exportdAction.triggered.connect(self.export_footprint)
-    footprintMenu.addAction(exportdAction)
-
-
-    libraryMenu = menuBar.addMenu('&Library')
-    createAction = QtGui.QAction('&Create', self)
-    createAction.setDisabled(True)
-    disconnectAction = QtGui.QAction('&Disconnect', self)
-    disconnectAction.setDisabled(True)
-    libraryMenu.addAction(createAction)
-    libraryMenu.addAction(disconnectAction)
-
-    helpMenu = menuBar.addMenu('&Help')
-    aboutAction = QtGui.QAction("&About", self)
-    aboutAction.triggered.connect(self.about)
-    helpMenu.addAction(aboutAction)
-
-    self.last_time = time.time() - 10.0
-    self.first_keypress = False
-    self.timer = QtCore.QTimer()
-    self.timer.setSingleShot(True)
-    self.timer.timeout.connect(self.text_changed)
-    self.result = ""
-
-    def close(self):
-        QtGui.qApp.quit()
+  def close(self):
+    QtGui.qApp.quit()
     
 if __name__ == '__main__':
     QtCore.QCoreApplication.setOrganizationName("teluna")
