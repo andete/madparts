@@ -165,7 +165,7 @@ class MainWin(QtGui.QMainWindow):
       return
     if self.library_filetype != 'eagle':
       s = "Only eagle CAD export is currently supported"
-      QtGui.QMessageBox.error(self, "error", s)
+      QtGui.QMessageBox.critical(self, "error", s)
       self.status(s)
       return
     try:

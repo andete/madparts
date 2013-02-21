@@ -44,8 +44,12 @@ class LibrarySelectDialog(QtGui.QDialog):
     self.filename = result[0]
     self.lib_filename.setText(self.filename)
     if (self.filename == ''): return
-    if export.eagle.Export().check(self.filename):
+    try:
+      t = export.eagle.Export().check(self.filename)
       self.filetype = 'eagle'
-      self.lib_type.setText("Eagle CAD")
+      self.lib_type.setText(t)
       self.button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(False)
       self.button_box.button(QtGui.QDialogButtonBox.Ok).setFocus()
+    except Exception as ex:
+      QtGui.QMessageBox.critical(self, "error", str(ex))
+      
