@@ -32,9 +32,11 @@ class ExportDialog(QtGui.QDialog):
     QtGui.QDialog.reject(self)
 
   def get_file(self):
-    result = QtGui.QFileDialog.getOpenFileName(self, "Select Library")
+    result = QtGui.QFileDialog.getOpenFileName(self,
+      "Select Library", filter="Eagle CAD Library (*.lbr);;XML file (*.xml)")
     self.filename = result[0]
     self.lib_filename.setText(self.filename)
+    if (self.filename == ''): return
 
   def __init__(self, parent=None):
     super(ExportDialog, self).__init__(parent)
