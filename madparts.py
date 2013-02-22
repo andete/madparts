@@ -20,13 +20,15 @@ import export.eagle
 import jyddefaultsettings as default
 from jyddialogs import *
 
-libraries = [('Example Library', 'library')]
+example_library = ('Example Library', 'library')
 
 
 class MainWin(QtGui.QMainWindow):
 
   def __init__(self):
     super(MainWin, self).__init__()
+
+    self.libraries = [example_library]
 
     self.settings = QtCore.QSettings()
 
@@ -89,6 +91,12 @@ class MainWin(QtGui.QMainWindow):
     self.library_filename = ""
     self.library_filetype = ""
 
+  def library_by_directory(self, directory):
+    for x in self.libraries:
+      if x[1] == directory:
+        return x[0]
+    return None
+
   def status(self, s):
     self.statusBar().showMessage(s)
 
@@ -149,7 +157,7 @@ class MainWin(QtGui.QMainWindow):
     old_code = self.te1.toPlainText()
     old_meta = jydcoffee.eval_coffee_meta(old_code)
     dialog = CloneFootprintDialog(self, old_meta, old_code)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    if dialog.exec_() == QtGui.QDialog.Accepted: return
     # BUSY
   
   def text_changed(self):
@@ -228,7 +236,7 @@ class MainWin(QtGui.QMainWindow):
     self.model.setHorizontalHeaderLabels(['name','id','desc'])
     parentItem = self.model.invisibleRootItem()
     first = True
-    for (name, directory) in libraries:
+    for (name, directory) in self.libraries:
       lib = jydlibrary.Library(name, directory)
       parentItem.appendRow(lib)
       if first:
@@ -237,12 +245,16 @@ class MainWin(QtGui.QMainWindow):
     return first_foot
 
   def row_changed(self, current, previous):
-    fn = current.data(jydlibrary.Path_Role)
+    x = current.data(jydlibrary.Path_Role)
+    if x == None: return
+    (directory, fn) = x
     if fn != None and re.match('^.+\.coffee$', fn) != None:
-      with open(fn) as f:
+      ffn = QtCore.QDir(directory).filePath(fn)
+      with open(ffn) as f:
         self.te1.setPlainText(f.read())
         self.is_fresh_from_file = True
         self.active_file_name = fn
+        self.active_library = directory
     else:
       # TODO jump back to previous ?
       pass
@@ -259,6 +271,7 @@ class MainWin(QtGui.QMainWindow):
     tree.doubleClicked.connect(self.row_double_clicked)
     first_foot.select(selection_model)
     self.active_file_name = first_foot.path
+    self.active_library = first_foot.identify[0]
     self.tree = tree
     self.is_fresh_from_file = True
     return tree

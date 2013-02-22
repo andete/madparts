@@ -60,23 +60,39 @@ class CloneFootprintDialog(QtGui.QDialog):
 
   def __init__(self, parent, old_meta, old_code):
     super(CloneFootprintDialog, self).__init__(parent)
-    new_id = uuid.uuid4().hex
-    self.setWindowTitle('Select Library')
+    libraries = parent.libraries
+    self.library = parent.library_by_directory(parent.active_library)
+    self.new_id = uuid.uuid4().hex
+    self.setWindowTitle('Clone Footprint')
     self.resize(640,160) # TODO, there must be a better way to do this
     vbox = QtGui.QVBoxLayout()
-    formLayout = QtGui.QFormLayout()
-    formLayout.addRow("existing name:", QtGui.QLabel(old_meta['name']))
-    formLayout.addRow("existing id:", QtGui.QLabel(old_meta['id']))
+    gbox_existing = QtGui.QGroupBox("existing")
+    gbox_new = QtGui.QGroupBox("new")
+    existing_fl = QtGui.QFormLayout()
+    existing_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
+    existing_fl.addRow("id:", QtGui.QLabel(old_meta['id']))
+    existing_fl.addRow("library:", QtGui.QLabel(self.library))
+    gbox_existing.setLayout(existing_fl)
+    vbox.addWidget(gbox_existing) 
     nameLineEdit = QtGui.QLineEdit()
-    nameLineEdit.setText(old_meta['name']+"_"+new_id)
-    formLayout.addRow("new name:", nameLineEdit)
-    formLayout.addRow("new id:", QtGui.QLabel(new_id))
-    vbox.addLayout(formLayout) 
+    nameLineEdit.setText(old_meta['name']+"_"+self.new_id)
+    new_fl = QtGui.QFormLayout()
+    new_fl.addRow("name:", nameLineEdit)
+    new_fl.addRow("id:", QtGui.QLabel(self.new_id))
+    l_combo = QtGui.QComboBox()
+    for x in libraries:
+      l_combo.addItem(x[0], x)
+      if x == self.library:
+        l_combo.setCurrentIndex(l_combo.count()-1)
+    new_fl.addRow("library:", l_combo)
+    gbox_new.setLayout(new_fl)
+    vbox.addWidget(gbox_new) 
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
     self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
     self.button_box.accepted.connect(self.accept)
     self.button_box.rejected.connect(self.reject)
-    self.button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(True)
     vbox.addWidget(self.button_box)
     self.setLayout(vbox)
-    new_id = uuid.uuid4().hex
+
+  def accept(self):
+    super(CloneFootprintDialog, self).accept()

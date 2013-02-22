@@ -12,10 +12,9 @@ from jydutil import *
 Path_Role = 42
 
 class Footprint():
-  def __init__(self, library, path, filename):
-    self.library = library
+  def __init__(self, directory, path, filename):
+    self.identify = (directory, filename)
     self.path = path
-    self.filename = filename
  
   def load(self):
     with open(self.path) as f:
@@ -29,11 +28,11 @@ class Footprint():
  
   def draw(self, parent):
     name_item = QtGui.QStandardItem(self.name)
-    name_item.setData(self.path, Path_Role)
+    name_item.setData(self.identify, Path_Role)
     id_item   = QtGui.QStandardItem(self.id)
-    id_item.setData(self.path, Path_Role)
+    id_item.setData(self.identify, Path_Role)
     desc_item = QtGui.QStandardItem(self.desc)
-    desc_item.setData(self.path, Path_Role)
+    desc_item.setData(self.identify, Path_Role)
     name_item.setEditable(False) # you edit them in the code
     id_item.setEditable(False)
     desc_item.setEditable(False)
@@ -56,7 +55,7 @@ class Library(QtGui.QStandardItem):
     for f in d.entryList(['*.coffee']):
       path = d.filePath(f)
       try:
-        foot = Footprint(self, path, f)
+        foot = Footprint(self.directory, path, f)
         foot.load()
         self.footprints.append(foot)
         self.row_data.append(path)
