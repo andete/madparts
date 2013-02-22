@@ -1,6 +1,8 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+import uuid
+
 from PySide import QtGui, QtCore
 
 import export.eagle
@@ -53,3 +55,28 @@ class LibrarySelectDialog(QtGui.QDialog):
     except Exception as ex:
       QtGui.QMessageBox.critical(self, "error", str(ex))
       
+
+class CloneFootprintDialog(QtGui.QDialog):
+
+  def __init__(self, parent, old_meta, old_code):
+    super(CloneFootprintDialog, self).__init__(parent)
+    new_id = uuid.uuid4().hex
+    self.setWindowTitle('Select Library')
+    self.resize(640,160) # TODO, there must be a better way to do this
+    vbox = QtGui.QVBoxLayout()
+    formLayout = QtGui.QFormLayout()
+    formLayout.addRow("existing name:", QtGui.QLabel(old_meta['name']))
+    formLayout.addRow("existing id:", QtGui.QLabel(old_meta['id']))
+    nameLineEdit = QtGui.QLineEdit()
+    nameLineEdit.setText(old_meta['name']+"_"+new_id)
+    formLayout.addRow("new name:", nameLineEdit)
+    formLayout.addRow("new id:", QtGui.QLabel(new_id))
+    vbox.addLayout(formLayout) 
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+    self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    self.button_box.accepted.connect(self.accept)
+    self.button_box.rejected.connect(self.reject)
+    self.button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(True)
+    vbox.addWidget(self.button_box)
+    self.setLayout(vbox)
+    new_id = uuid.uuid4().hex

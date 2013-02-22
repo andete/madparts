@@ -18,7 +18,7 @@ import jydgldraw
 import jydlibrary
 import export.eagle
 import jyddefaultsettings as default
-from jyddialogs import LibrarySelectDialog
+from jyddialogs import *
 
 libraries = [('Example Library', 'library')]
 
@@ -49,11 +49,14 @@ class MainWin(QtGui.QMainWindow):
 
     footprintMenu = menuBar.addMenu('&Footprint')
     cloneAction = QtGui.QAction('&Clone', self)
-    cloneAction.setDisabled(True)
     footprintMenu.addAction(cloneAction)
+    cloneAction.triggered.connect(self.clone_footprint)
     removeAction = QtGui.QAction('&Remove', self)
     removeAction.setDisabled(True)
     footprintMenu.addAction(removeAction)
+    newAction = QtGui.QAction('&New', self)
+    newAction.setDisabled(True)
+    footprintMenu.addAction(newAction)
     exportAction = QtGui.QAction('&Export previous', self)
     exportAction.setShortcut('Ctrl+E')
     exportAction.triggered.connect(self.export_previous)
@@ -136,7 +139,18 @@ class MainWin(QtGui.QMainWindow):
       tb = traceback.format_exc()
       self.te2.setPlainText(str(ex) + "\n"+tb)
       self.status(str(ex))
-      
+  
+  def clone_footprint(self):    
+    if self.result == []:
+      s = "Can't clone if footprint doesn't compile."
+      QtGui.QMessageBox.warning(self, "warning", s)
+      self.status(s) 
+      return
+    old_code = self.te1.toPlainText()
+    old_meta = jydcoffee.eval_coffee_meta(old_code)
+    dialog = CloneFootprintDialog(self, old_meta, old_code)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    # BUSY
   
   def text_changed(self):
     if self.key_idle > 0:
