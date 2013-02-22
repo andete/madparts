@@ -45,7 +45,7 @@ class LibrarySelectDialog(QtGui.QDialog):
     self.lib_filename.setText(self.filename)
     if (self.filename == ''): return
     try:
-      t = export.eagle.Export().check(self.filename)
+      t = export.eagle.check(self.filename)
       self.filetype = 'eagle'
       self.lib_type.setText(t)
       self.button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(False)
