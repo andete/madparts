@@ -21,7 +21,6 @@ class Footprint():
     self.identify = (self.lib_name, self.id)
     self.desc = oget(meta, 'desc', '')
     self.parent = oget(meta, 'parent', None)
-    return self
  
   def draw(self, parent):
     name_item = QtGui.QStandardItem(self.name)
@@ -38,6 +37,7 @@ class Footprint():
     self.items = [id_item, desc_item]
 
   def select(self, selection_model):
+    print self.lib_name, self.name, "selected."
     selection_model.select(self.item.index(), QtGui.QItemSelectionModel.ClearAndSelect)
     for item in self.items:
       selection_model.select(item.index(), QtGui.QItemSelectionModel.Select)
@@ -48,10 +48,12 @@ class Library(QtGui.QStandardItem):
     super(Library, self).__init__(name)
     self.name = name
     self.directory = directory
+    self.selected_foot = None
     self.setEditable(False)
     self.scan()
 
-  def scan(self):
+  def scan(self, select_id = None):
+    self.selected_foot = None
     self.removeRows(0, self.rowCount())
     self.row_data = []
     d = QtCore.QDir(self.directory)
@@ -61,6 +63,8 @@ class Library(QtGui.QStandardItem):
       try:
         foot = Footprint(self.name)
         foot.load(path)
+        if foot.id == select_id:
+          self.selected_foot = foot
         self.footprints.append(foot)
         self.row_data.append(path)
       except Exception as ex:

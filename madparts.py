@@ -86,6 +86,7 @@ class MainWin(QtGui.QMainWindow):
     self.export_library_filetype = ""
     self.active_library = None
     self.active_footprint_id = None
+    self.is_fresh_from_file = True
 
   ### GUI HELPERS
 
@@ -114,14 +115,13 @@ class MainWin(QtGui.QMainWindow):
     first_foot = self._make_model()
     tree = QtGui.QTreeView()
     tree.setModel(self.model)
-    selection_model = tree.selectionModel()
-    selection_model.currentRowChanged.connect(self.row_changed)
-    tree.doubleClicked.connect(self.row_double_clicked)
-    first_foot.select(selection_model)
+    self.tree_selection_model = tree.selectionModel()
+    self.tree_selection_model.currentRowChanged.connect(self.row_changed)
+    tree.doubleClicked.connect(self.show_footprint_tab)
+    first_foot.select(self.tree_selection_model)
     self.active_footprint_id = first_foot.id
     self.active_library = first_foot.lib_name
     self.tree = tree
-    self.is_fresh_from_file = True
     return tree
 
   def _footprint(self):
@@ -195,8 +195,13 @@ class MainWin(QtGui.QMainWindow):
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
-    self.status("%s/%s cloned to %s/%s. TODO")
-    # BUSY
+    s = "%s/%s cloned to %s/%s." % (self.active_library, old_meta['name'], new_lib, new_name)
+    self.te1.setPlainText(new_code)
+    self.rescan_library(new_lib, new_id)
+    self.active_footprint_id = new_id
+    self.active_library = new_lib
+    self.show_footprint_tab()
+    self.status(s)
 
   def editor_text_changed(self):
     key_idle = self.setting("gui/keyidle")
@@ -247,7 +252,7 @@ class MainWin(QtGui.QMainWindow):
       # TODO jump back to previous ?
       pass
 
-  def row_double_clicked(self):
+  def show_footprint_tab(self):
     self.left_qtab.setCurrentIndex(1)
 
   def close(self):
@@ -333,6 +338,17 @@ class MainWin(QtGui.QMainWindow):
     except Exception as ex:
       self.status(str(ex))
       raise
+
+  def rescan_library(self, name, select_id):
+    root = self.model.invisibleRootItem()
+    for row_index in range(0, root.rowCount()):
+      library = root.child(row_index)
+      if library.name == name:
+        library.scan(select_id)
+        if library.selected_foot != None:
+          library.selected_foot.select(self.tree_selection_model)
+        break
+        
       
 if __name__ == '__main__':
     QtCore.QCoreApplication.setOrganizationName("teluna")
