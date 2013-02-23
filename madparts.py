@@ -113,8 +113,6 @@ class MainWin(QtGui.QMainWindow):
   def _tree(self):
     first_foot = self._make_model()
     tree = QtGui.QTreeView()
-    # tree.setRootIsDecorated(False)
-    # BUSY
     tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     deleteAction = QtGui.QAction("&Remove", tree)
     deleteAction.triggered.connect(self.remove_footprint)
@@ -129,6 +127,9 @@ class MainWin(QtGui.QMainWindow):
     exportdAction.triggered.connect(self.export_footprint)
     tree.addAction(exportdAction)
     tree.setModel(self.model)
+    tree.setRootIsDecorated(False)
+    tree.expandAll()
+    tree.setItemsExpandable(False)
     self.tree_selection_model = tree.selectionModel()
     self.tree_selection_model.currentRowChanged.connect(self.row_changed)
     tree.doubleClicked.connect(self.show_footprint_tab)
