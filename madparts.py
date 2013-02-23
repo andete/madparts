@@ -166,11 +166,7 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    gldx = self.setting('gl/dx')
-    gldy = self.setting('gl/dy')
-    font_file = self.setting('gl/fontfile')
-    start_zoomfactor = self.setting('gl/zoomfactor')
-    self.glw = jydgldraw.JYDGLWidget(gldx, gldy, str(font_file), start_zoomfactor)
+    self.glw = jydgldraw.JYDGLWidget(self)
     self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)
