@@ -4,18 +4,13 @@
 # License: GPL
 
 import numpy as np
-import math
-import time
-import traceback
-import re
+import math, time, traceback, re
 
 from PySide import QtGui, QtCore
 
-import jydcoffee
+import jydcoffee, jydgldraw, jydlibrary
 from syntax.jydjssyntax import JSHighlighter
 from syntax.jydcoffeesyntax import CoffeeHighlighter
-import jydgldraw
-import jydlibrary
 import export.eagle
 import jyddefaultsettings as default
 from jyddialogs import *

@@ -1,9 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import os.path
-import re
-import string
+import os.path, re, string
 
 import PyV8
 
