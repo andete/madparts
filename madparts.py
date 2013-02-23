@@ -82,7 +82,7 @@ class MainWin(QtGui.QMainWindow):
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
     self.timer.timeout.connect(self.text_changed)
-    self.result = []
+    self.executed_footprint = []
     self.export_library_filename = ""
     self.export_library_filetype = ""
 
@@ -120,34 +120,34 @@ class MainWin(QtGui.QMainWindow):
       return [_c(x) for x in res]
 
     code = self.te1.toPlainText()
-    self.result = []
+    self.executed_footprint = []
     try:
       result = jydcoffee.eval_coffee_footprint(code)
-      self.result = _add_names(result)
-      self.te2.setPlainText(str(result))
-      self.glw.set_shapes(self.result)
+      self.executed_footprint = _add_names(result)
+      self.te2.setPlainText(str(self.executed_footprint))
+      self.glw.set_shapes(self.executed_footprint)
       if not self.is_fresh_from_file:
         with open(self.active_file_name, "w+") as f:
           f.write(code)
       self.status("Compilation successful.")
     except jydcoffee.JSError as ex:
-      self.result = []
+      self.executed_footprint = []
       s = str(ex)
       s = s.replace('JSError: Error: ', '')
       self.te2.setPlainText(s)
       self.status(s)
     except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
-      self.result = []
+      self.executed_footprint = []
       self.te2.setPlainText(str(ex))
       self.status(str(ex))
     except Exception as ex:
-      self.result = []
+      self.executed_footprint = []
       tb = traceback.format_exc()
       self.te2.setPlainText(str(ex) + "\n"+tb)
       self.status(str(ex))
   
   def clone_footprint(self):    
-    if self.result == []:
+    if self.executed_footprint == []:
       s = "Can't clone if footprint doesn't compile."
       QtGui.QMessageBox.warning(self, "warning", s)
       self.status(s) 
@@ -185,7 +185,7 @@ class MainWin(QtGui.QMainWindow):
 
   def _export_footprint(self):
     if self.export_library_filename == "": return
-    if self.result == []:
+    if self.executed_footprint == []:
       s = "Can't export if footprint doesn't compile."
       QtGui.QMessageBox.warning(self, "warning", s)
       self.status(s) 
@@ -196,7 +196,7 @@ class MainWin(QtGui.QMainWindow):
       self.status(s)
       return
     try:
-      export.eagle.export(self.export_library_filename, self.result)
+      export.eagle.export(self.export_library_filename, self.executed_footprint)
       self.status("Exported to "+self.export_library_filename+".")
     except Exception as ex:
       self.status(str(ex))
