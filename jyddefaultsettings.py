@@ -2,8 +2,11 @@
 # License: GPL
 
 # default values for settings
-gldx = 200
-gldy = 200
-font_file = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
-zoomfactor = 50
-key_idle = 0.5
+
+default_settings = {
+  'gl/dx': 200,
+  'gl/dy': 200,
+  'gl/fontfile': "/usr/share/fonts/truetype/freefont/FreeMono.ttf",
+  'gl/zoomfactor': 50,
+  'gui/keyidle': 0.5,
+}

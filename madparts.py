@@ -12,7 +12,7 @@ import jydcoffee, jydgldraw, jydlibrary
 from syntax.jydjssyntax import JSHighlighter
 from syntax.jydcoffeesyntax import CoffeeHighlighter
 import export.eagle
-import jyddefaultsettings as default
+from jyddefaultsettings import default_settings
 from jyddialogs import *
 
 example_library = ('Example Library', 'library')
@@ -27,7 +27,7 @@ class MainWin(QtGui.QMainWindow):
 
     self.settings = QtCore.QSettings()
 
-    self.key_idle = self.settings.value("gui/keyidle", default.key_idle)
+    self.key_idle = self.setting("gui/keyidle")
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
     splitter.addWidget(self._left_part())
@@ -85,6 +85,9 @@ class MainWin(QtGui.QMainWindow):
     self.result = []
     self.library_filename = ""
     self.library_filetype = ""
+
+  def setting(self, key):
+    return self.settings.value(key, default_settings[key])
 
   def library_by_directory(self, directory):
     for x in self.libraries:
@@ -283,10 +286,10 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    gldx = self.settings.value("gl/gldx", default.gldx)
-    gldy = self.settings.value("gl/gldy", default.gldy)
-    font_file = self.settings.value("gl/fontfile", default.font_file)
-    start_zoomfactor = self.settings.value("gl/zoomfactor", default.zoomfactor)
+    gldx = self.setting('gl/dx')
+    gldy = self.setting('gl/dy')
+    font_file = self.setting('gl/fontfile')
+    start_zoomfactor = self.setting('gl/zoomfactor')
     self.glw = jydgldraw.JYDGLWidget(gldx, gldy, str(font_file), start_zoomfactor)
     self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
