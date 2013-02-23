@@ -74,17 +74,17 @@ class CloneFootprintDialog(QtGui.QDialog):
     existing_fl.addRow("library:", QtGui.QLabel(self.library))
     gbox_existing.setLayout(existing_fl)
     vbox.addWidget(gbox_existing) 
-    nameLineEdit = QtGui.QLineEdit()
-    nameLineEdit.setText(old_meta['name']+"_"+self.new_id)
+    self.nameLineEdit = QtGui.QLineEdit()
+    self.nameLineEdit.setText(old_meta['name']+"_"+self.new_id)
     new_fl = QtGui.QFormLayout()
-    new_fl.addRow("name:", nameLineEdit)
+    new_fl.addRow("name:", self.nameLineEdit)
     new_fl.addRow("id:", QtGui.QLabel(self.new_id))
-    l_combo = QtGui.QComboBox()
-    for x in libraries:
-      l_combo.addItem(x[0], x)
+    self.l_combo = QtGui.QComboBox()
+    for x in libraries.items():
+      self.l_combo.addItem(x[0], x)
       if x == self.library:
-        l_combo.setCurrentIndex(l_combo.count()-1)
-    new_fl.addRow("library:", l_combo)
+        self.l_combo.setCurrentIndex(self.l_combo.count()-1)
+    new_fl.addRow("library:", self.l_combo)
     gbox_new.setLayout(new_fl)
     vbox.addWidget(gbox_new) 
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
@@ -94,5 +94,5 @@ class CloneFootprintDialog(QtGui.QDialog):
     vbox.addWidget(self.button_box)
     self.setLayout(vbox)
 
-  def accept(self):
-    super(CloneFootprintDialog, self).accept()
+  def get_data(self):
+    return (self.new_id, self.nameLineEdit.text(), self.l_combo.currentText())

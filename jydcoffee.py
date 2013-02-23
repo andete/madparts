@@ -88,3 +88,7 @@ def eval_coffee_meta(coffee):
       acc[k] = v
     return acc
   return reduce(_collect, meta_list, { 'type': 'meta'})
+
+def adapt_coffee_meta(coffee, old_meta, new_id, new_name):
+  # TODO
+  return coffee

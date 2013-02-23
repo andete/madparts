@@ -23,7 +23,7 @@ class MainWin(QtGui.QMainWindow):
   def __init__(self):
     super(MainWin, self).__init__()
 
-    self.libraries = [example_library]
+    self.libraries = {example_library[0]:example_library[1]}
 
     self.settings = QtCore.QSettings()
 
@@ -90,9 +90,9 @@ class MainWin(QtGui.QMainWindow):
     return self.settings.value(key, default_settings[key])
 
   def library_by_directory(self, directory):
-    for x in self.libraries:
-      if x[1] == directory:
-        return x[0]
+    for x in self.libraries.keys():
+      if self.libraries[x] == directory:
+        return x
     return None
 
   def status(self, s):
@@ -155,7 +155,9 @@ class MainWin(QtGui.QMainWindow):
     old_code = self.te1.toPlainText()
     old_meta = jydcoffee.eval_coffee_meta(old_code)
     dialog = CloneFootprintDialog(self, old_meta, old_code)
-    if dialog.exec_() == QtGui.QDialog.Accepted: return
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (new_id, new_name, new_lib) = dialog.get_data()
+    new_code = jydcoffee.adapt_coffee_meta(old_code, old_meta, new_id, new_name)
     # BUSY
   
   def text_changed(self):
@@ -234,7 +236,7 @@ class MainWin(QtGui.QMainWindow):
     self.model.setHorizontalHeaderLabels(['name','id','desc'])
     parentItem = self.model.invisibleRootItem()
     first = True
-    for (name, directory) in self.libraries:
+    for (name, directory) in self.libraries.items():
       lib = jydlibrary.Library(name, directory)
       parentItem.appendRow(lib)
       if first:
