@@ -27,8 +27,6 @@ class MainWin(QtGui.QMainWindow):
 
     self.settings = QtCore.QSettings()
 
-    self.key_idle = self.setting("gui/keyidle")
-
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
     splitter.addWidget(self._left_part())
     splitter.addWidget(self._right_part())
@@ -82,6 +80,7 @@ class MainWin(QtGui.QMainWindow):
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
     self.timer.timeout.connect(self.editor_text_changed)
+
     self.executed_footprint = []
     self.export_library_filename = ""
     self.export_library_filetype = ""
@@ -107,7 +106,7 @@ class MainWin(QtGui.QMainWindow):
     def _add_names(res):
       if res == None: return None
       def generate_ints():
-        for i in range(1, 10000):
+        for i in xrange(1, 10000):
           yield i
       g = generate_ints()
       def _c(x):
@@ -166,17 +165,18 @@ class MainWin(QtGui.QMainWindow):
     # BUSY
   
   def editor_text_changed(self):
-    if self.key_idle > 0:
+    key_idle = self.setting("gui/keyidle")
+    if key_idle > 0:
       t = time.time()
-      if (t - self.last_time < float(self.key_idle)/1000.0):
+      if (t - self.last_time < float(key_idle)/1000.0):
         self.timer.stop()
-        self.timer.start(self.key_idle)
+        self.timer.start(key_idle)
         return
       self.last_time = t
       if self.first_keypress:
         self.first_keypress = False
         self.timer.stop()
-        self.timer.start(self.key_idle)
+        self.timer.start(key_idle)
         return
     self.first_keypress = True
     self.compile()
