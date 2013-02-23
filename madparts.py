@@ -106,19 +106,24 @@ class MainWin(QtGui.QMainWindow):
     self.settings_glzoomf.setValidator(QtGui.QIntValidator(1,250))
     form_layout.addRow("zoom factor", self.settings_glzoomf) 
     font_hbox = QtGui.QHBoxLayout()
-    self.font_filename = QtGui.QLineEdit()
-    self.font_filename.setReadOnly(True)
-    self.font_filename.setPlaceholderText("press Browse")
+    self.settings_font_filename = QtGui.QLineEdit(str(self.setting('gl/fontfile')))
+    self.settings_font_filename.setReadOnly(True)
     font_button = QtGui.QPushButton("Browse")
     font_button.clicked.connect(self.get_font)
-    font_hbox.addWidget(self.font_filename)
+    font_hbox.addWidget(self.settings_font_filename)
     font_hbox.addWidget(font_button)
     font_widget = QtGui.QWidget()
     font_widget.setLayout(font_hbox)
     form_layout.addRow("font", font_widget) 
+    self.settings_key_idle = QtGui.QLineEdit(str(self.setting('gui/keyidle')))
+    self.settings_key_idle.setValidator(QtGui.QDoubleValidator(0.0,5.0,2))
+    form_layout.addRow("key idle", self.settings_key_idle) 
     vbox.addLayout(form_layout)
-    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Reset
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.RestoreDefaults
     button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    rest_but = button_box.button(QtGui.QDialogButtonBox.RestoreDefaults)
+    rest_but.clicked.connect(self.settings_restore_defaults)
+    button_box.accepted.connect(self.settings_accepted)
     vbox.addWidget(button_box)
     settings_widget = QtGui.QWidget()
     settings_widget.setLayout(vbox)
@@ -217,6 +222,21 @@ class MainWin(QtGui.QMainWindow):
     QtGui.QMessageBox.about(self, "about madparts", a)
 
   ### GUI SLOTS
+
+  def settings_restore_defaults(self):
+    self.settings_gldx.setText(str(default_settings['gl/dx']))
+    self.settings_gldy.setText(str(default_settings['gl/dy']))
+    self.settings_glzoomf.setText(str(default_settings['gl/zoomfactor']))
+    self.settings_font_filename.setText(str(default_settings['gl/fontfile']))
+    self.settings_key_idle.setText(str(default_settings['gui/keyidle']))
+
+  def settings_accepted(self):
+    self.settings.setValue('gl/dx', self.settings_gldx.text())
+    self.settings.setValue('gl/dy', self.settings_gldy.text())
+    self.settings.setValue('gl/zoomfactor', self.settings_glzoomf.text())
+    self.settings.setValue('gl/fontfile', self.settings_font_filename.text())
+    self.settings.setValue('gui/keyidle', self.settings_key_idle.text())
+    self.status("Settings updated.")
 
   def get_font(self):
     pass # TODO

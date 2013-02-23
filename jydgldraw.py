@@ -179,7 +179,7 @@ class JYDGLWidget(QGLWidget):
   def __init__(self, parent):
     super(JYDGLWidget, self).__init__(parent)
     self.parent = parent
-    start_zoomfactor = parent.setting('gl/zoomfactor')
+    start_zoomfactor = int(parent.setting('gl/zoomfactor'))
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
     font_file = str(parent.setting('gl/fontfile'))
@@ -188,8 +188,8 @@ class JYDGLWidget(QGLWidget):
     self.make_dot_field()
 
   def make_dot_field(self):
-    gldx = self.parent.setting('gl/dx')
-    gldy = self.parent.setting('gl/dy')
+    gldx = int(self.parent.setting('gl/dx'))
+    gldy = int(self.parent.setting('gl/dy'))
     self.dot_field_data = np.array(
       [[x,y] for x in range(-gldx/2, gldx/2) for y in range(-gldy/2, gldy/2)],
       dtype=np.float32)
@@ -214,8 +214,8 @@ class JYDGLWidget(QGLWidget):
     self.dot_field_vbo.bind() # make this vbo the active one
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.dot_field_vbo)
-    gldx = self.parent.setting('gl/dx')
-    gldy = self.parent.setting('gl/dy')
+    gldx = int(self.parent.setting('gl/dx'))
+    gldy = int(self.parent.setting('gl/dy'))
     glDrawArrays(GL_POINTS, 0, gldx * gldy)
 
     glColor3f(1.0, 0.0, 0.0)
