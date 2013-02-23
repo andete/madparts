@@ -9,16 +9,16 @@ import jydcoffee
 from jydutil import *
 
 class Footprint():
-  def __init__(self, directory, path, filename):
-    self.identify = (directory, filename)
-    self.path = path
+  def __init__(self, lib_name):
+    self.lib_name = lib_name
  
-  def load(self):
-    with open(self.path) as f:
+  def load(self, path):
+    with open(path) as f:
       code = f.read()
     meta = jydcoffee.eval_coffee_meta(code)
     self.name = meta['name']
     self.id = meta['id']
+    self.identify = (self.lib_name, self.id)
     self.desc = oget(meta, 'desc', '')
     self.parent = oget(meta, 'parent', None)
     return self
@@ -44,6 +44,13 @@ class Footprint():
 
 class Library(QtGui.QStandardItem):
 
+  def __init__(self, name, directory):
+    super(Library, self).__init__(name)
+    self.name = name
+    self.directory = directory
+    self.setEditable(False)
+    self.scan()
+
   def scan(self):
     self.removeRows(0, self.rowCount())
     self.row_data = []
@@ -52,8 +59,8 @@ class Library(QtGui.QStandardItem):
     for f in d.entryList(['*.coffee']):
       path = d.filePath(f)
       try:
-        foot = Footprint(self.directory, path, f)
-        foot.load()
+        foot = Footprint(self.name)
+        foot.load(path)
         self.footprints.append(foot)
         self.row_data.append(path)
       except Exception as ex:
@@ -86,13 +93,6 @@ class Library(QtGui.QStandardItem):
           new_foot_todo.append(foot)
       foots_todo = new_foot_todo 
     self.sortChildren(0)
-
-  def __init__(self, name, directory):
-    super(Library, self).__init__(name)
-    self.name = name
-    self.directory = directory
-    self.setEditable(False)
-    self.scan()
 
   def first_footprint(self):
     return self.first_foot

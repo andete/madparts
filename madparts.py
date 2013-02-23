@@ -84,8 +84,14 @@ class MainWin(QtGui.QMainWindow):
     self.executed_footprint = []
     self.export_library_filename = ""
     self.export_library_filetype = ""
+    self.active_library = None
+    self.active_footprint_id = None
 
   ### GUI HELPERS
+
+  def active_footprint_file(self):
+   dir = QtCore.QDir(self.libraries[self.active_library])
+   return dir.filePath(self.active_footprint_id + '.coffee')
 
   def _settings(self):
     return QtGui.QLabel("TODO")
@@ -112,8 +118,8 @@ class MainWin(QtGui.QMainWindow):
     selection_model.currentRowChanged.connect(self.row_changed)
     tree.doubleClicked.connect(self.row_double_clicked)
     first_foot.select(selection_model)
-    self.active_file_name = first_foot.path
-    self.active_library = first_foot.identify[0]
+    self.active_footprint_id = first_foot.id
+    self.active_library = first_foot.lib_name
     self.tree = tree
     self.is_fresh_from_file = True
     return tree
@@ -122,7 +128,7 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
-    with open(self.active_file_name) as f:
+    with open(self.active_footprint_file()) as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.te1.textChanged.connect(self.editor_text_changed)
@@ -227,14 +233,16 @@ class MainWin(QtGui.QMainWindow):
   def row_changed(self, current, previous):
     x = current.data(QtCore.Qt.UserRole)
     if x == None: return
-    (directory, fn) = x
-    if fn != None and re.match('^.+\.coffee$', fn) != None:
+    (lib_name, fpid) = x
+    if fpid != None:
+      directory = self.libraries[lib_name]
+      fn = fpid + '.coffee'
       ffn = QtCore.QDir(directory).filePath(fn)
       with open(ffn) as f:
         self.te1.setPlainText(f.read())
         self.is_fresh_from_file = True
-        self.active_file_name = fn
-        self.active_library = directory
+        self.active_footprint_id = fpid
+        self.active_library = lib_name
     else:
       # TODO jump back to previous ?
       pass
@@ -288,7 +296,7 @@ class MainWin(QtGui.QMainWindow):
       self.te2.setPlainText(str(self.executed_footprint))
       self.glw.set_shapes(self.executed_footprint)
       if not self.is_fresh_from_file:
-        with open(self.active_file_name, "w+") as f:
+        with open(self.active_footprint_file(), "w+") as f:
           f.write(code)
       self.status("Compilation successful.")
     except jydcoffee.JSError as ex:
