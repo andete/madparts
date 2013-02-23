@@ -8,9 +8,6 @@ from PySide import QtGui, QtCore
 import jydcoffee
 from jydutil import *
 
-# this is a hack; TODO find a cleaner way
-Path_Role = 42
-
 class Footprint():
   def __init__(self, directory, path, filename):
     self.identify = (directory, filename)
@@ -28,11 +25,11 @@ class Footprint():
  
   def draw(self, parent):
     name_item = QtGui.QStandardItem(self.name)
-    name_item.setData(self.identify, Path_Role)
+    name_item.setData(self.identify, QtCore.Qt.UserRole)
     id_item   = QtGui.QStandardItem(self.id)
-    id_item.setData(self.identify, Path_Role)
+    id_item.setData(self.identify, QtCore.Qt.UserRole)
     desc_item = QtGui.QStandardItem(self.desc)
-    desc_item.setData(self.identify, Path_Role)
+    desc_item.setData(self.identify, QtCore.Qt.UserRole)
     name_item.setEditable(False) # you edit them in the code
     id_item.setEditable(False)
     desc_item.setEditable(False)

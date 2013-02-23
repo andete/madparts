@@ -81,7 +81,7 @@ class MainWin(QtGui.QMainWindow):
     self.first_keypress = False
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
-    self.timer.timeout.connect(self.text_changed)
+    self.timer.timeout.connect(self.editor_text_changed)
     self.executed_footprint = []
     self.export_library_filename = ""
     self.export_library_filetype = ""
@@ -165,7 +165,7 @@ class MainWin(QtGui.QMainWindow):
     self.status("%s/%s cloned to %s/%s. TODO")
     # BUSY
   
-  def text_changed(self):
+  def editor_text_changed(self):
     if self.key_idle > 0:
       t = time.time()
       if (t - self.last_time < float(self.key_idle)/1000.0):
@@ -224,7 +224,7 @@ class MainWin(QtGui.QMainWindow):
     with open(self.active_file_name) as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
-    self.te1.textChanged.connect(self.text_changed)
+    self.te1.textChanged.connect(self.editor_text_changed)
     self.te2 = QtGui.QTextEdit()
     self.te2.setReadOnly(True)
     self.highlighter2 = JSHighlighter(self.te2.document())
@@ -250,7 +250,7 @@ class MainWin(QtGui.QMainWindow):
     return first_foot
 
   def row_changed(self, current, previous):
-    x = current.data(jydlibrary.Path_Role)
+    x = current.data(QtCore.Qt.UserRole)
     if x == None: return
     (directory, fn) = x
     if fn != None and re.match('^.+\.coffee$', fn) != None:
