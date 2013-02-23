@@ -50,8 +50,8 @@ class MainWin(QtGui.QMainWindow):
     removeAction.setDisabled(True)
     footprintMenu.addAction(removeAction)
     newAction = QtGui.QAction('&New', self)
-    newAction.setDisabled(True)
     footprintMenu.addAction(newAction)
+    newAction.triggered.connect(self.new_footprint)
     exportAction = QtGui.QAction('&Export previous', self)
     exportAction.setShortcut('Ctrl+E')
     exportAction.triggered.connect(self.export_previous)
@@ -202,6 +202,22 @@ class MainWin(QtGui.QMainWindow):
     self.active_library = new_lib
     self.show_footprint_tab()
     self.status(s)
+
+  def new_footprint(self):
+    dialog = NewFootprintDialog(self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (new_id, new_name, new_lib) = dialog.get_data()
+    new_code = jydcoffee.new_coffee_meta(new_id, new_name)
+    lib_dir = QtCore.QDir(self.libraries[new_lib])
+    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
+    with open(new_file_name, 'w+') as f:
+      f.write(new_code)
+    self.te1.setPlainText(new_code)
+    self.rescan_library(new_lib, new_id)
+    self.active_footprint_id = new_id
+    self.active_library = new_lib
+    self.show_footprint_tab()
+    self.status("%s/%s created." % (new_lib, new_name))
 
   def editor_text_changed(self):
     key_idle = self.setting("gui/keyidle")

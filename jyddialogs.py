@@ -96,3 +96,37 @@ class CloneFootprintDialog(QtGui.QDialog):
 
   def get_data(self):
     return (self.new_id, self.nameLineEdit.text(), self.l_combo.currentText())
+
+class NewFootprintDialog(QtGui.QDialog):
+
+  def __init__(self, parent):
+    super(NewFootprintDialog, self).__init__(parent)
+    libraries = parent.libraries
+    self.library = parent.library_by_directory(parent.active_library)
+    self.new_id = uuid.uuid4().hex
+    self.setWindowTitle('New Footprint')
+    self.resize(640,160) # TODO, there must be a better way to do this
+    vbox = QtGui.QVBoxLayout()
+    gbox_new = QtGui.QGroupBox("new")
+    self.nameLineEdit = QtGui.QLineEdit()
+    self.nameLineEdit.setText("TODO_"+self.new_id)
+    new_fl = QtGui.QFormLayout()
+    new_fl.addRow("name:", self.nameLineEdit)
+    new_fl.addRow("id:", QtGui.QLabel(self.new_id))
+    self.l_combo = QtGui.QComboBox()
+    for x in libraries.items():
+      self.l_combo.addItem(x[0], x)
+      if x == self.library:
+        self.l_combo.setCurrentIndex(self.l_combo.count()-1)
+    new_fl.addRow("library:", self.l_combo)
+    gbox_new.setLayout(new_fl)
+    vbox.addWidget(gbox_new) 
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+    self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    self.button_box.accepted.connect(self.accept)
+    self.button_box.rejected.connect(self.reject)
+    vbox.addWidget(self.button_box)
+    self.setLayout(vbox)
+
+  def get_data(self):
+    return (self.new_id, self.nameLineEdit.text(), self.l_combo.currentText())
