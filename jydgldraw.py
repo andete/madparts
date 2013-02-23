@@ -23,7 +23,6 @@ def make_shader(name):
   print p.log()
   return p
 
-
 class GLDraw:
 
   def __init__(self, font, zoom):

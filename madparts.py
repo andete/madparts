@@ -94,7 +94,35 @@ class MainWin(QtGui.QMainWindow):
    return dir.filePath(self.active_footprint_id + '.coffee')
 
   def _settings(self):
-    return QtGui.QLabel("TODO")
+    vbox = QtGui.QVBoxLayout()
+    form_layout = QtGui.QFormLayout()
+    self.settings_gldx = QtGui.QLineEdit(str(self.setting('gl/dx')))
+    self.settings_gldx.setValidator(QtGui.QIntValidator(100,1000))
+    form_layout.addRow("GL dx", self.settings_gldx) 
+    self.settings_gldy = QtGui.QLineEdit(str(self.setting('gl/dy')))
+    self.settings_gldy.setValidator(QtGui.QIntValidator(100,1000))
+    form_layout.addRow("GL dy", self.settings_gldy) 
+    self.settings_glzoomf = QtGui.QLineEdit(str(self.setting('gl/zoomfactor')))
+    self.settings_glzoomf.setValidator(QtGui.QIntValidator(1,250))
+    form_layout.addRow("zoom factor", self.settings_glzoomf) 
+    font_hbox = QtGui.QHBoxLayout()
+    self.font_filename = QtGui.QLineEdit()
+    self.font_filename.setReadOnly(True)
+    self.font_filename.setPlaceholderText("press Browse")
+    font_button = QtGui.QPushButton("Browse")
+    font_button.clicked.connect(self.get_font)
+    font_hbox.addWidget(self.font_filename)
+    font_hbox.addWidget(font_button)
+    font_widget = QtGui.QWidget()
+    font_widget.setLayout(font_hbox)
+    form_layout.addRow("font", font_widget) 
+    vbox.addLayout(form_layout)
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Reset
+    button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    vbox.addWidget(button_box)
+    settings_widget = QtGui.QWidget()
+    settings_widget.setLayout(vbox)
+    return settings_widget
 
   def _make_model(self):
     self.model = QtGui.QStandardItemModel()
@@ -189,6 +217,9 @@ class MainWin(QtGui.QMainWindow):
     QtGui.QMessageBox.about(self, "about madparts", a)
 
   ### GUI SLOTS
+
+  def get_font(self):
+    pass # TODO
 
   def clone_footprint(self):    
     if self.executed_footprint == []:
