@@ -47,7 +47,7 @@ class MainWin(QtGui.QMainWindow):
     footprintMenu.addAction(cloneAction)
     cloneAction.triggered.connect(self.clone_footprint)
     removeAction = QtGui.QAction('&Remove', self)
-    removeAction.setDisabled(True)
+    removeAction.triggered.connect(self.remove_footprint)
     footprintMenu.addAction(removeAction)
     newAction = QtGui.QAction('&New', self)
     footprintMenu.addAction(newAction)
@@ -60,7 +60,6 @@ class MainWin(QtGui.QMainWindow):
     exportdAction.setShortcut('Ctrl+X')
     exportdAction.triggered.connect(self.export_footprint)
     footprintMenu.addAction(exportdAction)
-
 
     libraryMenu = menuBar.addMenu('&Library')
     createAction = QtGui.QAction('&Create', self)
@@ -114,6 +113,8 @@ class MainWin(QtGui.QMainWindow):
   def _tree(self):
     first_foot = self._make_model()
     tree = QtGui.QTreeView()
+    # tree.setRootIsDecorated(False)
+    # BUSY
     tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     deleteAction = QtGui.QAction("&Remove", tree)
     deleteAction.triggered.connect(self.remove_footprint)
@@ -293,8 +294,23 @@ class MainWin(QtGui.QMainWindow):
     self.glw.updateGL()
 
   def remove_footprint(self):
-    print self.tree.currentIndex().row()
-    # TODO
+    print self.active_library, self.active_footprint_id
+    directory = self.libraries[self.active_library]
+    fn = self.active_footprint_id + '.coffee'
+    QtCore.QDir(directory).remove(fn)
+    # fall back to first_foot in library, if any
+    library = self.rescan_library(self.active_library)
+    if library.first_foot != None:
+      library.first_foot.select(self.tree_selection_model)
+      return
+    # else fall back to any first foot...
+    root = self.model.invisibleRootItem()
+    for row_index in range(0, root.rowCount()):
+      library = root.child(row_index)
+      if library.first_foot != None:
+        library.first_foot.select(self.tree_selection_model)
+    # else... ?
+    # we don't support being completely footless now
 
   ### OTHER METHODS
 
@@ -372,7 +388,7 @@ class MainWin(QtGui.QMainWindow):
       self.status(str(ex))
       raise
 
-  def rescan_library(self, name, select_id):
+  def rescan_library(self, name, select_id = None):
     root = self.model.invisibleRootItem()
     for row_index in range(0, root.rowCount()):
       library = root.child(row_index)
@@ -380,7 +396,7 @@ class MainWin(QtGui.QMainWindow):
         library.scan(select_id)
         if library.selected_foot != None:
           library.selected_foot.select(self.tree_selection_model)
-        break
+        return library
         
       
 if __name__ == '__main__':
