@@ -83,8 +83,8 @@ class MainWin(QtGui.QMainWindow):
     self.timer.setSingleShot(True)
     self.timer.timeout.connect(self.text_changed)
     self.result = []
-    self.library_filename = ""
-    self.library_filetype = ""
+    self.export_library_filename = ""
+    self.export_library_filetype = ""
 
   def setting(self, key):
     return self.settings.value(key, default_settings[key])
@@ -157,7 +157,12 @@ class MainWin(QtGui.QMainWindow):
     dialog = CloneFootprintDialog(self, old_meta, old_code)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
-    new_code = jydcoffee.adapt_coffee_meta(old_code, old_meta, new_id, new_name)
+    new_code = jydcoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
+    lib_dir = QtCore.QDir(self.libraries[new_lib])
+    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
+    with open(new_file_name, 'w+') as f:
+      f.write(new_code)
+    self.status("%s/%s cloned to %s/%s. TODO")
     # BUSY
   
   def text_changed(self):
@@ -179,20 +184,20 @@ class MainWin(QtGui.QMainWindow):
       self.is_fresh_from_file = False
 
   def _export_footprint(self):
-    if self.library_filename == "": return
+    if self.export_library_filename == "": return
     if self.result == []:
       s = "Can't export if footprint doesn't compile."
       QtGui.QMessageBox.warning(self, "warning", s)
       self.status(s) 
       return
-    if self.library_filetype != 'eagle':
+    if self.export_library_filetype != 'eagle':
       s = "Only eagle CAD export is currently supported"
       QtGui.QMessageBox.critical(self, "error", s)
       self.status(s)
       return
     try:
-      export.eagle.export(self.library_filename, self.result)
-      self.status("Exported to "+self.library_filename+".")
+      export.eagle.export(self.export_library_filename, self.result)
+      self.status("Exported to "+self.export_library_filename+".")
     except Exception as ex:
       self.status(str(ex))
       raise
@@ -200,7 +205,7 @@ class MainWin(QtGui.QMainWindow):
 
 
   def export_previous(self):
-    if self.library_filename == "":
+    if self.export_library_filename == "":
       self.export_footprint()
     else:
       self._export_footprint()
@@ -208,8 +213,8 @@ class MainWin(QtGui.QMainWindow):
   def export_footprint(self):
      dialog = LibrarySelectDialog(self)
      if dialog.exec_() != QtGui.QDialog.Accepted: return
-     self.library_filename = dialog.filename
-     self.library_filetype = dialog.filetype
+     self.export_library_filename = dialog.filename
+     self.export_library_filetype = dialog.filetype
      self._export_footprint()
 
   def _footprint(self):
