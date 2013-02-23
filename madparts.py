@@ -85,6 +85,173 @@ class MainWin(QtGui.QMainWindow):
     self.export_library_filename = ""
     self.export_library_filetype = ""
 
+  ### GUI HELPERS
+
+  def _settings(self):
+    return QtGui.QLabel("TODO")
+
+  def _make_model(self):
+    self.model = QtGui.QStandardItemModel()
+    self.model.setColumnCount(3)
+    self.model.setHorizontalHeaderLabels(['name','id','desc'])
+    parentItem = self.model.invisibleRootItem()
+    first = True
+    for (name, directory) in self.libraries.items():
+      lib = jydlibrary.Library(name, directory)
+      parentItem.appendRow(lib)
+      if first:
+        first = False
+        first_foot = lib.first_footprint()
+    return first_foot
+
+  def _tree(self):
+    first_foot = self._make_model()
+    tree = QtGui.QTreeView()
+    tree.setModel(self.model)
+    selection_model = tree.selectionModel()
+    selection_model.currentRowChanged.connect(self.row_changed)
+    tree.doubleClicked.connect(self.row_double_clicked)
+    first_foot.select(selection_model)
+    self.active_file_name = first_foot.path
+    self.active_library = first_foot.identify[0]
+    self.tree = tree
+    self.is_fresh_from_file = True
+    return tree
+
+  def _footprint(self):
+    lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+    self.te1 = QtGui.QTextEdit()
+    self.te1.setAcceptRichText(False)
+    with open(self.active_file_name) as f:
+        self.te1.setPlainText(f.read())
+    self.highlighter1 = CoffeeHighlighter(self.te1.document())
+    self.te1.textChanged.connect(self.editor_text_changed)
+    self.te2 = QtGui.QTextEdit()
+    self.te2.setReadOnly(True)
+    self.highlighter2 = JSHighlighter(self.te2.document())
+    lsplitter.addWidget(self.te1)
+    lsplitter.addWidget(self.te2)
+    return lsplitter  
+
+  def _left_part(self):
+    lqtab = QtGui.QTabWidget()
+    lqtab.addTab(self._tree(), "library")
+    lqtab.addTab(self._footprint(), "footprint")
+    lqtab.addTab(self._settings(), "settings")
+    lqtab.setCurrentIndex(1)
+    self.left_qtab = lqtab
+    return lqtab
+
+  def _right_part(self):
+    rvbox = QtGui.QVBoxLayout()
+    rhbox = QtGui.QHBoxLayout()
+    gldx = self.setting('gl/dx')
+    gldy = self.setting('gl/dy')
+    font_file = self.setting('gl/fontfile')
+    start_zoomfactor = self.setting('gl/zoomfactor')
+    self.glw = jydgldraw.JYDGLWidget(gldx, gldy, str(font_file), start_zoomfactor)
+    self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
+    self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
+    self.zoom_selector.editingFinished.connect(self.zoom)
+    self.zoom_selector.returnPressed.connect(self.zoom)
+    rhbox.addWidget(QtGui.QLabel("Zoom: "))
+    rhbox.addWidget(self.zoom_selector)
+    rvbox.addLayout(rhbox)
+    rvbox.addWidget(self.glw)
+
+    right = QtGui.QWidget()
+    right.setLayout(rvbox)
+    return right
+
+  def about(self):
+    a = """
+<p align="center"><b>madparts</b><br/>the functional footprint editor</p>
+<p align="center">(c) 2013 Joost Yervante Damad &lt;joost@damad.be&gt;</p>
+<p align="center"><a href="http://madparts.org">http://madparts.org</a></p>
+"""
+    QtGui.QMessageBox.about(self, "about madparts", a)
+
+  ### GUI SLOTS
+
+  def clone_footprint(self):    
+    if self.executed_footprint == []:
+      s = "Can't clone if footprint doesn't compile."
+      QtGui.QMessageBox.warning(self, "warning", s)
+      self.status(s) 
+      return
+    old_code = self.te1.toPlainText()
+    old_meta = jydcoffee.eval_coffee_meta(old_code)
+    dialog = CloneFootprintDialog(self, old_meta, old_code)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (new_id, new_name, new_lib) = dialog.get_data()
+    new_code = jydcoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
+    lib_dir = QtCore.QDir(self.libraries[new_lib])
+    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
+    with open(new_file_name, 'w+') as f:
+      f.write(new_code)
+    self.status("%s/%s cloned to %s/%s. TODO")
+    # BUSY
+
+  def editor_text_changed(self):
+    key_idle = self.setting("gui/keyidle")
+    if key_idle > 0:
+      t = time.time()
+      if (t - self.last_time < float(key_idle)/1000.0):
+        self.timer.stop()
+        self.timer.start(key_idle)
+        return
+      self.last_time = t
+      if self.first_keypress:
+        self.first_keypress = False
+        self.timer.stop()
+        self.timer.start(key_idle)
+        return
+    self.first_keypress = True
+    self.compile()
+    if self.is_fresh_from_file:
+      self.is_fresh_from_file = False
+
+  def export_previous(self):
+    if self.export_library_filename == "":
+      self.export_footprint()
+    else:
+      self._export_footprint()
+
+  def export_footprint(self):
+     dialog = LibrarySelectDialog(self)
+     if dialog.exec_() != QtGui.QDialog.Accepted: return
+     self.export_library_filename = dialog.filename
+     self.export_library_filetype = dialog.filetype
+     self._export_footprint()
+
+  def row_changed(self, current, previous):
+    x = current.data(QtCore.Qt.UserRole)
+    if x == None: return
+    (directory, fn) = x
+    if fn != None and re.match('^.+\.coffee$', fn) != None:
+      ffn = QtCore.QDir(directory).filePath(fn)
+      with open(ffn) as f:
+        self.te1.setPlainText(f.read())
+        self.is_fresh_from_file = True
+        self.active_file_name = fn
+        self.active_library = directory
+    else:
+      # TODO jump back to previous ?
+      pass
+
+  def row_double_clicked(self):
+    self.left_qtab.setCurrentIndex(1)
+
+  def close(self):
+    QtGui.qApp.quit()
+
+  def zoom(self):
+    self.glw.zoomfactor = int(self.zoom_selector.text())
+    self.glw.zoom_changed = True
+    self.glw.updateGL()
+
+  ### OTHER METHODS
+
   def setting(self, key):
     return self.settings.value(key, default_settings[key])
 
@@ -96,11 +263,6 @@ class MainWin(QtGui.QMainWindow):
 
   def status(self, s):
     self.statusBar().showMessage(s)
-
-  def zoom(self):
-    self.glw.zoomfactor = int(self.zoom_selector.text())
-    self.glw.zoom_changed = True
-    self.glw.updateGL()
 
   def compile(self):
     def _add_names(res):
@@ -145,44 +307,6 @@ class MainWin(QtGui.QMainWindow):
       self.te2.setPlainText(str(ex) + "\n"+tb)
       self.status(str(ex))
   
-  def clone_footprint(self):    
-    if self.executed_footprint == []:
-      s = "Can't clone if footprint doesn't compile."
-      QtGui.QMessageBox.warning(self, "warning", s)
-      self.status(s) 
-      return
-    old_code = self.te1.toPlainText()
-    old_meta = jydcoffee.eval_coffee_meta(old_code)
-    dialog = CloneFootprintDialog(self, old_meta, old_code)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (new_id, new_name, new_lib) = dialog.get_data()
-    new_code = jydcoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
-    lib_dir = QtCore.QDir(self.libraries[new_lib])
-    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
-    with open(new_file_name, 'w+') as f:
-      f.write(new_code)
-    self.status("%s/%s cloned to %s/%s. TODO")
-    # BUSY
-  
-  def editor_text_changed(self):
-    key_idle = self.setting("gui/keyidle")
-    if key_idle > 0:
-      t = time.time()
-      if (t - self.last_time < float(key_idle)/1000.0):
-        self.timer.stop()
-        self.timer.start(key_idle)
-        return
-      self.last_time = t
-      if self.first_keypress:
-        self.first_keypress = False
-        self.timer.stop()
-        self.timer.start(key_idle)
-        return
-    self.first_keypress = True
-    self.compile()
-    if self.is_fresh_from_file:
-      self.is_fresh_from_file = False
-
   def _export_footprint(self):
     if self.export_library_filename == "": return
     if self.executed_footprint == []:
@@ -202,126 +326,6 @@ class MainWin(QtGui.QMainWindow):
       self.status(str(ex))
       raise
       
-
-
-  def export_previous(self):
-    if self.export_library_filename == "":
-      self.export_footprint()
-    else:
-      self._export_footprint()
-
-  def export_footprint(self):
-     dialog = LibrarySelectDialog(self)
-     if dialog.exec_() != QtGui.QDialog.Accepted: return
-     self.export_library_filename = dialog.filename
-     self.export_library_filetype = dialog.filetype
-     self._export_footprint()
-
-  def _footprint(self):
-    lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-    self.te1 = QtGui.QTextEdit()
-    self.te1.setAcceptRichText(False)
-    with open(self.active_file_name) as f:
-        self.te1.setPlainText(f.read())
-    self.highlighter1 = CoffeeHighlighter(self.te1.document())
-    self.te1.textChanged.connect(self.editor_text_changed)
-    self.te2 = QtGui.QTextEdit()
-    self.te2.setReadOnly(True)
-    self.highlighter2 = JSHighlighter(self.te2.document())
-    lsplitter.addWidget(self.te1)
-    lsplitter.addWidget(self.te2)
-    return lsplitter
-
-  def _settings(self):
-    return QtGui.QLabel("TODO")
-
-  def _make_model(self):
-    self.model = QtGui.QStandardItemModel()
-    self.model.setColumnCount(3)
-    self.model.setHorizontalHeaderLabels(['name','id','desc'])
-    parentItem = self.model.invisibleRootItem()
-    first = True
-    for (name, directory) in self.libraries.items():
-      lib = jydlibrary.Library(name, directory)
-      parentItem.appendRow(lib)
-      if first:
-        first = False
-        first_foot = lib.first_footprint()
-    return first_foot
-
-  def row_changed(self, current, previous):
-    x = current.data(QtCore.Qt.UserRole)
-    if x == None: return
-    (directory, fn) = x
-    if fn != None and re.match('^.+\.coffee$', fn) != None:
-      ffn = QtCore.QDir(directory).filePath(fn)
-      with open(ffn) as f:
-        self.te1.setPlainText(f.read())
-        self.is_fresh_from_file = True
-        self.active_file_name = fn
-        self.active_library = directory
-    else:
-      # TODO jump back to previous ?
-      pass
-
-  def row_double_clicked(self):
-    self.left_qtab.setCurrentIndex(1)
-
-  def _tree(self):
-    first_foot = self._make_model()
-    tree = QtGui.QTreeView()
-    tree.setModel(self.model)
-    selection_model = tree.selectionModel()
-    selection_model.currentRowChanged.connect(self.row_changed)
-    tree.doubleClicked.connect(self.row_double_clicked)
-    first_foot.select(selection_model)
-    self.active_file_name = first_foot.path
-    self.active_library = first_foot.identify[0]
-    self.tree = tree
-    self.is_fresh_from_file = True
-    return tree
-
-  def _left_part(self):
-    lqtab = QtGui.QTabWidget()
-    lqtab.addTab(self._tree(), "library")
-    lqtab.addTab(self._footprint(), "footprint")
-    lqtab.addTab(self._settings(), "settings")
-    lqtab.setCurrentIndex(1)
-    self.left_qtab = lqtab
-    return lqtab
-
-  def _right_part(self):
-    rvbox = QtGui.QVBoxLayout()
-    rhbox = QtGui.QHBoxLayout()
-    gldx = self.setting('gl/dx')
-    gldy = self.setting('gl/dy')
-    font_file = self.setting('gl/fontfile')
-    start_zoomfactor = self.setting('gl/zoomfactor')
-    self.glw = jydgldraw.JYDGLWidget(gldx, gldy, str(font_file), start_zoomfactor)
-    self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
-    self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
-    self.zoom_selector.editingFinished.connect(self.zoom)
-    self.zoom_selector.returnPressed.connect(self.zoom)
-    rhbox.addWidget(QtGui.QLabel("Zoom: "))
-    rhbox.addWidget(self.zoom_selector)
-    rvbox.addLayout(rhbox)
-    rvbox.addWidget(self.glw)
-
-    right = QtGui.QWidget()
-    right.setLayout(rvbox)
-    return right
-
-  def about(self):
-    a = """
-<p align="center"><b>madparts</b><br/>the functional footprint editor</p>
-<p align="center">(c) 2013 Joost Yervante Damad &lt;joost@damad.be&gt;</p>
-<p align="center"><a href="http://madparts.org">http://madparts.org</a></p>
-"""
-    QtGui.QMessageBox.about(self, "about madparts", a)
-  
-  def close(self):
-    QtGui.qApp.quit()
-    
 if __name__ == '__main__':
     QtCore.QCoreApplication.setOrganizationName("teluna")
     QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
