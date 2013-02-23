@@ -239,7 +239,11 @@ class MainWin(QtGui.QMainWindow):
     self.status("Settings updated.")
 
   def get_font(self):
-    pass # TODO
+    result = QtGui.QFileDialog.getOpenFileName(self,
+      "Select Font", filter="Truetype Font (*.ttf)")
+    font_filename = result[0]
+    if (font_filename == ''): return
+    self.settings_font_filename.setText(font_filename)
 
   def clone_footprint(self):    
     if self.executed_footprint == []:
