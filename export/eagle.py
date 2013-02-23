@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup, Tag
 
 from jydutil import *
 
-# TODO: get from xml isof hardcoded
+# TODO: get from eagle XML isof hardcoded; however in practice this is quite low prio
 def layer_to_eagle_layer(layer):
   type_to_layer_dict = {
     'top': 1,

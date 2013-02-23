@@ -114,6 +114,19 @@ class MainWin(QtGui.QMainWindow):
   def _tree(self):
     first_foot = self._make_model()
     tree = QtGui.QTreeView()
+    tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+    deleteAction = QtGui.QAction("&Remove", tree)
+    deleteAction.triggered.connect(self.remove_footprint)
+    tree.addAction(deleteAction)
+    cloneAction = QtGui.QAction('&Clone', tree)
+    cloneAction.triggered.connect(self.clone_footprint)
+    tree.addAction(cloneAction)
+    exportAction = QtGui.QAction('&Export previous', tree)
+    exportAction.triggered.connect(self.export_previous)
+    tree.addAction(exportAction)
+    exportdAction = QtGui.QAction('E&xport', tree)
+    exportdAction.triggered.connect(self.export_footprint)
+    tree.addAction(exportdAction)
     tree.setModel(self.model)
     self.tree_selection_model = tree.selectionModel()
     self.tree_selection_model.currentRowChanged.connect(self.row_changed)
@@ -278,6 +291,10 @@ class MainWin(QtGui.QMainWindow):
     self.glw.zoomfactor = int(self.zoom_selector.text())
     self.glw.zoom_changed = True
     self.glw.updateGL()
+
+  def remove_footprint(self):
+    print self.tree.currentIndex().row()
+    # TODO
 
   ### OTHER METHODS
 
