@@ -9,8 +9,20 @@ from bs4 import BeautifulSoup, Tag
 
 from jydutil import *
 
-# this can still use plenty of abstraction
+# TODO: get from xml isof hardcoded
+def layer_to_eagle_layer(layer):
+  type_to_layer_dict = {
+    'top': 1,
+    'silk': 21,
+    'name': 25,
+    'value': 27,
+    }
+  return type_to_layer_dict[layer]
 
+def type_to_eagle_layer(shape):
+  return layer_to_eagle_layer(type_to_layer(shape))
+
+# this can still use plenty of abstraction
 def rect(soup, package, shape):
   smd = soup.new_tag('smd')
   smd['name'] = shape['name']
@@ -20,7 +32,7 @@ def rect(soup, package, shape):
   smd['dy'] = fget(shape, 'dy')
   smd['roundness'] = iget(shape, 'ro')
   smd['rot'] = "R%d" % (fget(shape, 'rot'))
-  smd['layer'] = 1
+  smd['layer'] = type_to_eagle_layer(shape)
   package.append(smd)
 
 def label(soup, package, shape):
@@ -29,17 +41,14 @@ def label(soup, package, shape):
   y = fget(shape,'y')
   dy = fget(shape,'dy', 1)
   s = shape['value']
-  layer = 21
   if s == "NAME": 
     s = ">NAME"
-    layer = 25
   if s == "VALUE": 
     s = ">VALUE"
-    layer = 27
   label['x'] = x - len(s)*dy/2
   label['y'] = y - dy/2
   label['size'] = dy
-  label['layer'] = layer
+  label['layer'] = type_to_eagle_layer(shape)
   label.string = s
   package.append(label)
   
@@ -60,7 +69,7 @@ def circle(soup, package, shape):
   circle['y'] = y
   circle['radius'] = (r-w/2)
   circle['width'] = w
-  circle['layer'] = 21
+  circle['layer'] = type_to_eagle_layer(shape)
   package.append(circle)
 
 def line(soup, package, shape):
@@ -75,7 +84,7 @@ def line(soup, package, shape):
   line['x2'] = x2
   line['y2'] = y2
   line['width'] = w
-  line['layer'] = 21
+  line['layer'] = type_to_eagle_layer(shape)
   package.append(line)
 
 def load(fn):
