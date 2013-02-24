@@ -22,7 +22,8 @@ class Footprint():
     self.desc = oget(meta, 'desc', '')
     self.parent = oget(meta, 'parent', None)
  
-  def draw(self, parent):
+  def add_to(self, parent):
+    # print "adding %s to %s" % (self.name, parent.data(QtCore.Qt.UserRole))
     name_item = QtGui.QStandardItem(self.name)
     name_item.setData(self.identify, QtCore.Qt.UserRole)
     id_item   = QtGui.QStandardItem(self.id)
@@ -47,6 +48,7 @@ class Library(QtGui.QStandardItem):
   def __init__(self, name, directory):
     super(Library, self).__init__(name)
     self.name = name
+    self.setData(name, QtCore.Qt.UserRole)
     self.directory = directory
     self.selected_foot = None
     self.setEditable(False)
@@ -80,20 +82,20 @@ class Library(QtGui.QStandardItem):
       if fp.parent in foots_id:
         return False
       return True
-    foots_done = filter(is_root_foot , self.footprints)
-    self.first_foot = foots_done[0]
-    foots_done_id = map(lambda fp: fp.id, foots_done)
-    foots_todo = filter(lambda fp: not is_root_foot(fp), self.footprints)
-    for foot in foots_done:
-      foot.draw(self)
+    root_foots = filter(is_root_foot , self.footprints)
+    self.first_foot = root_foots[0]
+    root_foots_id = map(lambda fp: fp.id, root_foots)
+    foots_todo = filter(lambda fp: fp.id not in root_foots_id, self.footprints)
+    for foot in root_foots:
+      foot.add_to(self)
     while foots_todo != []:
       new_foot_todo = []
       for foot in foots_todo:
-        if foot.parent in foots_done_id:
-          i = foots_done_id.index(foot.parent)
-          foots_done_id.append(foot.id)
-          foots_done.append(foot)
-          foot.draw(foots_done[i].item)
+        if foot.parent in root_foots_id:
+          i = root_foots_id.index(foot.parent)
+          root_foots_id.append(foot.id)
+          root_foots.append(foot)
+          foot.add_to(root_foots[i].item) # 
         else:
           new_foot_todo.append(foot)
       foots_todo = new_foot_todo 

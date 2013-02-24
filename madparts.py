@@ -399,6 +399,7 @@ class MainWin(QtGui.QMainWindow):
     root = self.model.invisibleRootItem()
     lib = jydlibrary.Library(name, directory)
     root.appendRow(lib)
+    self.tree.expandAll()
 
   def disconnect_library(self):
     dialog = DisconnectLibraryDialog(self)
@@ -411,9 +412,20 @@ class MainWin(QtGui.QMainWindow):
       library = root.child(row_index)
       if library.name == lib_name: break
     root.removeRow(row_index)
-    if lib_name == self.active_library:
-      pass
-    # TODO
+    if lib_name != self.active_library: return
+    # select first foot of the first library which contains foots
+    for row_index in range(0, root.rowCount()):
+      library = root.child(row_index)
+      if library.first_foot != None:
+        library.first_foot.select(self.tree_selection_model)
+        self.active_footprint_id = library.first_foot.id
+        self.active_library = library.first_foot.lib_name
+        directory = self.libraries[self.active_library]
+        fn = self.active_footprint_id + '.coffee'
+        ffn = QtCore.QDir(directory).filePath(fn)
+        with open(ffn) as f:
+          self.te1.setPlainText(f.read())
+    # TODO deal with all empty situation...
 
   ### OTHER METHODS
 
