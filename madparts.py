@@ -396,10 +396,24 @@ class MainWin(QtGui.QMainWindow):
     (name, directory) = dialog.get_data()
     self.libraries[name] = directory
     self.save_libraries()
-    # TODO add library to library browser
+    root = self.model.invisibleRootItem()
+    lib = jydlibrary.Library(name, directory)
+    root.appendRow(lib)
 
   def disconnect_library(self):
-    pass
+    dialog = DisconnectLibraryDialog(self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    lib_name = dialog.get_data()
+    del self.libraries[lib_name]
+    self.save_libraries()
+    root = self.model.invisibleRootItem()
+    for row_index in range(0, root.rowCount()):
+      library = root.child(row_index)
+      if library.name == lib_name: break
+    root.removeRow(row_index)
+    if lib_name == self.active_library:
+      pass
+    # TODO
 
   ### OTHER METHODS
 

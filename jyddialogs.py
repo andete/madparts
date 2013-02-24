@@ -166,6 +166,27 @@ class MoveFootprintDialog(QtGui.QDialog):
   def get_data(self):
     return (self.name_edit.text(), self.l_combo.currentText())
 
+class DisconnectLibraryDialog(QtGui.QDialog):
+
+  def __init__(self, parent):
+    super(DisconnectLibraryDialog, self).__init__(parent)
+    self.setWindowTitle('Disconnect Library')
+    self.resize(640,160) # TODO, there must be a better way to do this
+    vbox = QtGui.QVBoxLayout()
+    fl = QtGui.QFormLayout()
+    self.l_combo = library_combo(parent.libraries)
+    fl.addRow("library:", self.l_combo)
+    vbox.addLayout(fl)
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+    button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    button_box.accepted.connect(self.accept)
+    button_box.rejected.connect(self.reject)
+    vbox.addWidget(button_box)
+    self.setLayout(vbox)
+
+  def get_data(self):
+    return self.l_combo.currentText()
+
 class AddLibraryDialog(QtGui.QDialog):
 
   def __init__(self, parent):
