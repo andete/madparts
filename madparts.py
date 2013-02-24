@@ -17,8 +17,6 @@ from syntax.jydcoffeesyntax import CoffeeHighlighter
 
 import export.eagle
 
-
-
 class MainWin(QtGui.QMainWindow):
 
   def __init__(self):
@@ -212,7 +210,6 @@ class MainWin(QtGui.QMainWindow):
       action.triggered.connect(slot)
     if shortcut != None: action.setShortcut(shortcut)
 
-
   ### GUI SLOTS
 
   def settings_restore_defaults(self):
@@ -388,7 +385,7 @@ class MainWin(QtGui.QMainWindow):
     with open(ffn) as f:
        self.te1.setPlainText(f.read())
     # else... ?
-    # we don't support being completely footless now
+    # TODO we don't support being completely footless now
 
   def add_library(self):
     dialog = AddLibraryDialog(self)
@@ -425,7 +422,7 @@ class MainWin(QtGui.QMainWindow):
         ffn = QtCore.QDir(directory).filePath(fn)
         with open(ffn) as f:
           self.te1.setPlainText(f.read())
-    # TODO deal with all empty situation...
+    # TODO we don't support being completely footless now
 
   ### OTHER METHODS
 
