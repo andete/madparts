@@ -50,10 +50,12 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+X')
     self.add_action(footprintMenu, '&Print', None)
+    self.add_action(footprintMenu, '&Reload', None)
 
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
     self.add_action(libraryMenu, '&Disconnect', self.disconnect_library)
+    self.add_action(libraryMenu, '&Reload', None)
 
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
