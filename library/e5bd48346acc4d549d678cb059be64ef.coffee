@@ -10,7 +10,7 @@ footprint = () ->
   half = size / 2
   half_line_size = half - 1.5
   line_width = 0.25
-  num_pads = 28
+  num_pads = 32
   e = 0.8
 
   name = new Name (half + 1.5)

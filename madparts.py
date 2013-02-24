@@ -62,11 +62,11 @@ class MainWin(QtGui.QMainWindow):
     footprintMenu.addAction(exportdAction)
 
     libraryMenu = menuBar.addMenu('&Library')
-    createAction = QtGui.QAction('&Create', self)
-    createAction.setDisabled(True)
+    addAction = QtGui.QAction('&Add', self)
+    addAction.setDisabled(True)
+    libraryMenu.addAction(addAction)
     disconnectAction = QtGui.QAction('&Disconnect', self)
     disconnectAction.setDisabled(True)
-    libraryMenu.addAction(createAction)
     libraryMenu.addAction(disconnectAction)
 
     helpMenu = menuBar.addMenu('&Help')
@@ -83,15 +83,9 @@ class MainWin(QtGui.QMainWindow):
     self.executed_footprint = []
     self.export_library_filename = ""
     self.export_library_filetype = ""
-    self.active_library = None
-    self.active_footprint_id = None
     self.is_fresh_from_file = True
 
   ### GUI HELPERS
-
-  def active_footprint_file(self):
-   dir = QtCore.QDir(self.libraries[self.active_library])
-   return dir.filePath(self.active_footprint_id + '.coffee')
 
   def _settings(self):
     vbox = QtGui.QVBoxLayout()
@@ -185,6 +179,9 @@ class MainWin(QtGui.QMainWindow):
     self.highlighter2 = JSHighlighter(self.te2.document())
     lsplitter.addWidget(self.te1)
     lsplitter.addWidget(self.te2)
+    self.lsplitter = lsplitter
+    [s1, s2] = lsplitter.sizes()
+    lsplitter.setSizes([min(s1+s2-150, 150), 150])
     return lsplitter  
 
   def _left_part(self):
@@ -346,7 +343,6 @@ class MainWin(QtGui.QMainWindow):
     self.glw.updateGL()
 
   def remove_footprint(self):
-    print self.active_library, self.active_footprint_id
     directory = self.libraries[self.active_library]
     fn = self.active_footprint_id + '.coffee'
     QtCore.QDir(directory).remove(fn)
@@ -405,21 +401,30 @@ class MainWin(QtGui.QMainWindow):
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)
       self.status("Compilation successful.")
+      [s1, s2] = self.lsplitter.sizes()
+      self.lsplitter.setSizes([s1+s2, 0])
+    # TODO: get rid of exception handling code duplication
     except jydcoffee.JSError as ex:
       self.executed_footprint = []
       s = str(ex)
       s = s.replace('JSError: Error: ', '')
       self.te2.setPlainText(s)
       self.status(s)
+      [s1, s2] = self.lsplitter.sizes()
+      self.lsplitter.setSizes([s1+s2-150, 150])
     except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
       self.executed_footprint = []
       self.te2.setPlainText(str(ex))
       self.status(str(ex))
+      [s1, s2] = self.lsplitter.sizes()
+      self.lsplitter.setSizes([s1+s2-150, 150])
     except Exception as ex:
       self.executed_footprint = []
       tb = traceback.format_exc()
       self.te2.setPlainText(str(ex) + "\n"+tb)
       self.status(str(ex))
+      [s1, s2] = self.lsplitter.sizes()
+      self.lsplitter.setSizes([s1+s2-150, 150])
   
   def _export_footprint(self):
     if self.export_library_filename == "": return
@@ -449,10 +454,15 @@ class MainWin(QtGui.QMainWindow):
         if library.selected_foot != None:
           library.selected_foot.select(self.tree_selection_model)
         return library
+
+  def active_footprint_file(self):
+   print self.active_library, self.active_footprint_id
+   dir = QtCore.QDir(self.libraries[self.active_library])
+   return dir.filePath(self.active_footprint_id + '.coffee')
         
       
 if __name__ == '__main__':
-    QtCore.QCoreApplication.setOrganizationName("teluna")
+    QtCore.QCoreApplication.setOrganizationName("madparts")
     QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
     QtCore.QCoreApplication.setApplicationName("madparts")
     app = QtGui.QApplication(["madparts"])
