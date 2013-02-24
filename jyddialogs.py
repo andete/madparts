@@ -84,10 +84,10 @@ class CloneFootprintDialog(QtGui.QDialog):
     existing_fl.addRow("library:", QtGui.QLabel(library))
     gbox_existing.setLayout(existing_fl)
     vbox.addWidget(gbox_existing) 
-    self.nameLineEdit = QtGui.QLineEdit()
-    self.nameLineEdit.setText(old_meta['name']+"_"+self.new_id)
+    self.name_edit = QtGui.QLineEdit()
+    self.name_edit.setText(old_meta['name']+"_"+self.new_id)
     new_fl = QtGui.QFormLayout()
-    new_fl.addRow("name:", self.nameLineEdit)
+    new_fl.addRow("name:", self.name_edit)
     new_fl.addRow("id:", QtGui.QLabel(self.new_id))
     self.l_combo = library_combo(libraries, library)
     new_fl.addRow("library:", self.l_combo)
@@ -101,7 +101,7 @@ class CloneFootprintDialog(QtGui.QDialog):
     self.setLayout(vbox)
 
   def get_data(self):
-    return (self.new_id, self.nameLineEdit.text(), self.l_combo.currentText())
+    return (self.new_id, self.name_edit.text(), self.l_combo.currentText())
 
 class NewFootprintDialog(QtGui.QDialog):
 
@@ -114,10 +114,10 @@ class NewFootprintDialog(QtGui.QDialog):
     self.resize(640,160) # TODO, there must be a better way to do this
     vbox = QtGui.QVBoxLayout()
     gbox_new = QtGui.QGroupBox("new")
-    self.nameLineEdit = QtGui.QLineEdit()
-    self.nameLineEdit.setText("TODO_"+self.new_id)
+    self.name_edit = QtGui.QLineEdit()
+    self.name_edit.setText("TODO_"+self.new_id)
     new_fl = QtGui.QFormLayout()
-    new_fl.addRow("name:", self.nameLineEdit)
+    new_fl.addRow("name:", self.name_edit)
     new_fl.addRow("id:", QtGui.QLabel(self.new_id))
     self.l_combo = library_combo(libraries, library)
     new_fl.addRow("library:", self.l_combo)
@@ -131,7 +131,7 @@ class NewFootprintDialog(QtGui.QDialog):
     self.setLayout(vbox)
 
   def get_data(self):
-    return (self.new_id, self.nameLineEdit.text(), self.l_combo.currentText())
+    return (self.new_id, self.name_edit.text(), self.l_combo.currentText())
 
 class MoveFootprintDialog(QtGui.QDialog):
 
@@ -139,16 +139,22 @@ class MoveFootprintDialog(QtGui.QDialog):
     super(MoveFootprintDialog, self).__init__(parent)
     self.setWindowTitle('Move Footprint')
     self.resize(640,160) # TODO, there must be a better way to do this
-    library = parent.active_library
     vbox = QtGui.QVBoxLayout()
     gbox_from = QtGui.QGroupBox("from")
-    gbox_from.addRow("name:", QtGui.QLabel(old_meta['name']))
-    gbox_from.addRow("library:", QtGui.QLabel(library))
-    gbox_to = QtGui.QGroupBox("to")
+    from_fl = QtGui.QFormLayout()
+    from_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
+    library = parent.active_library
+    from_fl.addRow("library:", QtGui.QLabel(library))
+    gbox_from.setLayout(from_fl)
     vbox.addWidget(gbox_from) 
-    gbox_to.addRow("name:", QtGui.QLabel(old_meta['name']))
-    self.l_combo = library_combo(libraries, library)
-    gbox_to.addRow("library:", self.l_combo)
+    gbox_to = QtGui.QGroupBox("to")
+    to_fl = QtGui.QFormLayout()
+    self.name_edit = QtGui.QLineEdit()
+    self.name_edit.setText(old_meta['name'])
+    to_fl.addRow("name:", self.name_edit)
+    self.l_combo = library_combo(parent.libraries, library)
+    to_fl.addRow("library:", self.l_combo)
+    gbox_to.setLayout(to_fl)
     vbox.addWidget(gbox_to) 
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
     self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
@@ -157,3 +163,5 @@ class MoveFootprintDialog(QtGui.QDialog):
     vbox.addWidget(self.button_box)
     self.setLayout(vbox)
 
+  def get_data(self):
+    return (self.name_edit.text(), self.l_combo.currentText())

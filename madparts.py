@@ -277,7 +277,9 @@ class MainWin(QtGui.QMainWindow):
     self.status("%s/%s created." % (new_lib, new_name))
 
   def move_footprint(self):
-    dialog = MoveFootprintDialog(self)
+    old_code = self.te1.toPlainText()
+    old_meta = jydcoffee.eval_coffee_meta(old_code)
+    dialog = MoveFootprintDialog(self, old_meta)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     pass
 
