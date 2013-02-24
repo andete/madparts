@@ -68,6 +68,7 @@ class MainWin(QtGui.QMainWindow):
     self.export_library_filename = ""
     self.export_library_filetype = ""
     self.is_fresh_from_file = True
+    self.selected_library = None
 
   ### GUI HELPERS
 
@@ -148,6 +149,28 @@ class MainWin(QtGui.QMainWindow):
     self.active_library = first_foot.lib_name
     self.tree = tree
     return tree
+
+  def _tree_footprint_selected(self):
+    for action in self.tree.actions():
+      self.tree.removeAction(action)
+    def _add(text, slot):
+      action = QtGui.QAction(text, self.tree)
+      self.tree.addAction(action)
+      action.triggered.connect(slot)
+    _add('&Remove', self.remove_footprint)
+    _add('&Clone', self.clone_footprint)
+    _add('&Move', self.move_footprint)
+    _add('&Export previous', self.export_previous)
+    _add('E&xport', self.export_footprint)
+
+  def _tree_library_selected(self):
+    for action in self.tree.actions():
+      self.tree.removeAction(action)
+    def _add(text, slot):
+      action = QtGui.QAction(text, self.tree)
+      self.tree.addAction(action)
+      action.triggered.connect(slot)
+    _add('&Disconnect', self.disconnect_library)
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -335,19 +358,23 @@ class MainWin(QtGui.QMainWindow):
   def row_changed(self, current, previous):
     x = current.data(QtCore.Qt.UserRole)
     if x == None: return
+    (t,x) = x
+    if t == 'library':
+      self.selected_library = x
+      self._tree_library_selected()
+      return
+    # it is a footprint
+    self.selected_library = None
+    self._tree_footprint_selected()
     (lib_name, fpid) = x
-    if fpid != None:
-      directory = self.libraries[lib_name]
-      fn = fpid + '.coffee'
-      ffn = QtCore.QDir(directory).filePath(fn)
-      with open(ffn) as f:
-        self.te1.setPlainText(f.read())
-        self.is_fresh_from_file = True
-        self.active_footprint_id = fpid
-        self.active_library = lib_name
-    else:
-      # TODO jump back to previous ?
-      pass
+    directory = self.libraries[lib_name]
+    fn = fpid + '.coffee'
+    ffn = QtCore.QDir(directory).filePath(fn)
+    with open(ffn) as f:
+      self.te1.setPlainText(f.read())
+      self.is_fresh_from_file = True
+      self.active_footprint_id = fpid
+      self.active_library = lib_name
 
   def show_footprint_tab(self):
     self.left_qtab.setCurrentIndex(1)

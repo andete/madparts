@@ -18,7 +18,7 @@ class Footprint():
     meta = jydcoffee.eval_coffee_meta(code)
     self.name = meta['name']
     self.id = meta['id']
-    self.identify = (self.lib_name, self.id)
+    self.identify = ('footprint', (self.lib_name, self.id))
     self.desc = oget(meta, 'desc', '')
     self.parent = oget(meta, 'parent', None)
  
@@ -48,7 +48,7 @@ class Library(QtGui.QStandardItem):
   def __init__(self, name, directory):
     super(Library, self).__init__(name)
     self.name = name
-    self.setData(name, QtCore.Qt.UserRole)
+    self.setData(('library', name), QtCore.Qt.UserRole)
     self.directory = directory
     self.selected_foot = None
     self.setEditable(False)
