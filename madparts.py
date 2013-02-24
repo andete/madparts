@@ -50,6 +50,7 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Move', self.move_footprint)
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+X')
+    self.add_action(footprintMenu, '&Print', None)
 
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', None)
@@ -125,18 +126,17 @@ class MainWin(QtGui.QMainWindow):
     first_foot = self._make_model()
     tree = QtGui.QTreeView()
     tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-    deleteAction = QtGui.QAction("&Remove", tree)
-    deleteAction.triggered.connect(self.remove_footprint)
-    tree.addAction(deleteAction)
-    cloneAction = QtGui.QAction('&Clone', tree)
-    cloneAction.triggered.connect(self.clone_footprint)
-    tree.addAction(cloneAction)
-    exportAction = QtGui.QAction('&Export previous', tree)
-    exportAction.triggered.connect(self.export_previous)
-    tree.addAction(exportAction)
-    exportdAction = QtGui.QAction('E&xport', tree)
-    exportdAction.triggered.connect(self.export_footprint)
-    tree.addAction(exportdAction)
+    # TODO avoid duplication of context menu from footprint menu
+    def _add(text, slot):
+      action = QtGui.QAction(text, tree)
+      tree.addAction(action)
+      if slot == None: action.setDisabled(True)
+      else: action.triggered.connect(slot)
+    _add('&Remove', self.remove_footprint)
+    _add('&Clone', self.clone_footprint)
+    _add('&Move', self.move_footprint)
+    _add('&Export previous', self.export_previous)
+    _add('E&xport', self.export_footprint)
     tree.setModel(self.model)
     tree.setRootIsDecorated(False)
     tree.expandAll()
@@ -277,6 +277,8 @@ class MainWin(QtGui.QMainWindow):
     self.status("%s/%s created." % (new_lib, new_name))
 
   def move_footprint(self):
+    dialog = MoveFootprintDialog(self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
     pass
 
   def editor_text_changed(self):

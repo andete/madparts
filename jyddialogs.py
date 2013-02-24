@@ -130,3 +130,22 @@ class NewFootprintDialog(QtGui.QDialog):
 
   def get_data(self):
     return (self.new_id, self.nameLineEdit.text(), self.l_combo.currentText())
+
+class MoveFootprintDialog(QtGui.QDialog):
+
+  def __init__(self, parent):
+    super(MoveFootprintDialog, self).__init__(parent)
+    self.setWindowTitle('Move Footprint')
+    self.resize(640,160) # TODO, there must be a better way to do this
+    vbox = QtGui.QVBoxLayout()
+    gbox_from = QtGui.QGroupBox("from")
+    gbox_to = QtGui.QGroupBox("to")
+    vbox.addWidget(gbox_from) 
+    vbox.addWidget(gbox_to) 
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+    self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    self.button_box.accepted.connect(self.accept)
+    self.button_box.rejected.connect(self.reject)
+    vbox.addWidget(self.button_box)
+    self.setLayout(vbox)
+
