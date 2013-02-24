@@ -349,13 +349,22 @@ class MainWin(QtGui.QMainWindow):
     library = self.rescan_library(self.active_library)
     if library.first_foot != None:
       library.first_foot.select(self.tree_selection_model)
-      return
+      self.active_footprint_id = library.first_foot.id
+      self.active_library = library.first_foot.lib_name
     # else fall back to any first foot...
-    root = self.model.invisibleRootItem()
-    for row_index in range(0, root.rowCount()):
-      library = root.child(row_index)
-      if library.first_foot != None:
-        library.first_foot.select(self.tree_selection_model)
+    else:
+      root = self.model.invisibleRootItem()
+      for row_index in range(0, root.rowCount()):
+        library = root.child(row_index)
+        if library.first_foot != None:
+          library.first_foot.select(self.tree_selection_model)
+          self.active_footprint_id = first_foot.id
+          self.active_library = first_foot.lib_name
+    directory = self.libraries[self.active_library]
+    fn = self.active_footprint_id + '.coffee'
+    ffn = QtCore.QDir(directory).filePath(fn)
+    with open(ffn) as f:
+       self.te1.setPlainText(f.read())
     # else... ?
     # we don't support being completely footless now
 
@@ -452,6 +461,7 @@ class MainWin(QtGui.QMainWindow):
         library.scan(select_id)
         if library.selected_foot != None:
           library.selected_foot.select(self.tree_selection_model)
+        self.tree.expandAll()
         return library
 
   def active_footprint_file(self):

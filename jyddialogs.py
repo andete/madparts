@@ -7,6 +7,14 @@ from PySide import QtGui, QtCore
 
 import export.eagle
 
+def library_combo(libraries, selected = None):
+  l_combo = QtGui.QComboBox()
+  for x in libraries.items():
+    l_combo.addItem(x[0], x)
+    if x == selected:
+      self.l_combo.setCurrentIndex(self.l_combo.count()-1)
+  return l_combo
+
 class LibrarySelectDialog(QtGui.QDialog):
 
   def __init__(self, parent=None):
@@ -56,12 +64,14 @@ class LibrarySelectDialog(QtGui.QDialog):
       QtGui.QMessageBox.critical(self, "error", str(ex))
       
 
+# Clone, New, ... are all quite simular, maybe possible to condense?
+
 class CloneFootprintDialog(QtGui.QDialog):
 
   def __init__(self, parent, old_meta, old_code):
     super(CloneFootprintDialog, self).__init__(parent)
     libraries = parent.libraries
-    self.library = parent.library_by_directory(parent.active_library)
+    library = parent.active_library
     self.new_id = uuid.uuid4().hex
     self.setWindowTitle('Clone Footprint')
     self.resize(640,160) # TODO, there must be a better way to do this
@@ -71,7 +81,7 @@ class CloneFootprintDialog(QtGui.QDialog):
     existing_fl = QtGui.QFormLayout()
     existing_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
     existing_fl.addRow("id:", QtGui.QLabel(old_meta['id']))
-    existing_fl.addRow("library:", QtGui.QLabel(self.library))
+    existing_fl.addRow("library:", QtGui.QLabel(library))
     gbox_existing.setLayout(existing_fl)
     vbox.addWidget(gbox_existing) 
     self.nameLineEdit = QtGui.QLineEdit()
@@ -79,11 +89,7 @@ class CloneFootprintDialog(QtGui.QDialog):
     new_fl = QtGui.QFormLayout()
     new_fl.addRow("name:", self.nameLineEdit)
     new_fl.addRow("id:", QtGui.QLabel(self.new_id))
-    self.l_combo = QtGui.QComboBox()
-    for x in libraries.items():
-      self.l_combo.addItem(x[0], x)
-      if x == self.library:
-        self.l_combo.setCurrentIndex(self.l_combo.count()-1)
+    self.l_combo = library_combo(libraries, library)
     new_fl.addRow("library:", self.l_combo)
     gbox_new.setLayout(new_fl)
     vbox.addWidget(gbox_new) 
@@ -102,7 +108,7 @@ class NewFootprintDialog(QtGui.QDialog):
   def __init__(self, parent):
     super(NewFootprintDialog, self).__init__(parent)
     libraries = parent.libraries
-    self.library = parent.library_by_directory(parent.active_library)
+    library = parent.active_library
     self.new_id = uuid.uuid4().hex
     self.setWindowTitle('New Footprint')
     self.resize(640,160) # TODO, there must be a better way to do this
@@ -113,11 +119,7 @@ class NewFootprintDialog(QtGui.QDialog):
     new_fl = QtGui.QFormLayout()
     new_fl.addRow("name:", self.nameLineEdit)
     new_fl.addRow("id:", QtGui.QLabel(self.new_id))
-    self.l_combo = QtGui.QComboBox()
-    for x in libraries.items():
-      self.l_combo.addItem(x[0], x)
-      if x == self.library:
-        self.l_combo.setCurrentIndex(self.l_combo.count()-1)
+    self.l_combo = library_combo(libraries, library)
     new_fl.addRow("library:", self.l_combo)
     gbox_new.setLayout(new_fl)
     vbox.addWidget(gbox_new) 
@@ -133,14 +135,20 @@ class NewFootprintDialog(QtGui.QDialog):
 
 class MoveFootprintDialog(QtGui.QDialog):
 
-  def __init__(self, parent):
+  def __init__(self, parent, old_meta):
     super(MoveFootprintDialog, self).__init__(parent)
     self.setWindowTitle('Move Footprint')
     self.resize(640,160) # TODO, there must be a better way to do this
+    library = parent.active_library
     vbox = QtGui.QVBoxLayout()
     gbox_from = QtGui.QGroupBox("from")
+    gbox_from.addRow("name:", QtGui.QLabel(old_meta['name']))
+    gbox_from.addRow("library:", QtGui.QLabel(library))
     gbox_to = QtGui.QGroupBox("to")
     vbox.addWidget(gbox_from) 
+    gbox_to.addRow("name:", QtGui.QLabel(old_meta['name']))
+    self.l_combo = library_combo(libraries, library)
+    gbox_to.addRow("library:", self.l_combo)
     vbox.addWidget(gbox_to) 
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
     self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
