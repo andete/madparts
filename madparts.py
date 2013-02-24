@@ -41,43 +41,22 @@ class MainWin(QtGui.QMainWindow):
 
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
-    exitAction = QtGui.QAction('Quit', self)
-    exitAction.setShortcut('Ctrl+Q')
-    exitAction.setStatusTip('Exit application')
-    exitAction.triggered.connect(self.close)
-    fileMenu.addAction(exitAction)
+    self.add_action(fileMenu, '&Quit', self.close, 'Ctrl+Q')
 
     footprintMenu = menuBar.addMenu('&Footprint')
-    cloneAction = QtGui.QAction('&Clone', self)
-    footprintMenu.addAction(cloneAction)
-    cloneAction.triggered.connect(self.clone_footprint)
-    removeAction = QtGui.QAction('&Remove', self)
-    removeAction.triggered.connect(self.remove_footprint)
-    footprintMenu.addAction(removeAction)
-    newAction = QtGui.QAction('&New', self)
-    footprintMenu.addAction(newAction)
-    newAction.triggered.connect(self.new_footprint)
-    exportAction = QtGui.QAction('&Export previous', self)
-    exportAction.setShortcut('Ctrl+E')
-    exportAction.triggered.connect(self.export_previous)
-    footprintMenu.addAction(exportAction)
-    exportdAction = QtGui.QAction('E&xport', self)
-    exportdAction.setShortcut('Ctrl+X')
-    exportdAction.triggered.connect(self.export_footprint)
-    footprintMenu.addAction(exportdAction)
+    self.add_action(footprintMenu, '&Clone', self.clone_footprint)
+    self.add_action(footprintMenu, '&Remove', self.remove_footprint)
+    self.add_action(footprintMenu, '&New', self.new_footprint)
+    self.add_action(footprintMenu, '&Move', self.move_footprint)
+    self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
+    self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+X')
 
     libraryMenu = menuBar.addMenu('&Library')
-    addAction = QtGui.QAction('&Add', self)
-    addAction.setDisabled(True)
-    libraryMenu.addAction(addAction)
-    disconnectAction = QtGui.QAction('&Disconnect', self)
-    disconnectAction.setDisabled(True)
-    libraryMenu.addAction(disconnectAction)
+    self.add_action(libraryMenu, '&Add', None)
+    self.add_action(libraryMenu, '&Disconnect', None)
 
     helpMenu = menuBar.addMenu('&Help')
-    aboutAction = QtGui.QAction("&About", self)
-    aboutAction.triggered.connect(self.about)
-    helpMenu.addAction(aboutAction)
+    self.add_action(helpMenu, '&About', self.about)
 
     self.last_time = time.time() - 10.0
     self.first_keypress = False
@@ -223,6 +202,16 @@ class MainWin(QtGui.QMainWindow):
 """
     QtGui.QMessageBox.about(self, "about madparts", a)
 
+  def add_action(self, menu, text, slot, shortcut=None):
+    action = QtGui.QAction(text, self)
+    menu.addAction(action)
+    if slot == None:
+      action.setDisabled(True)
+    else:
+      action.triggered.connect(slot)
+    if shortcut != None: action.setShortcut(shortcut)
+
+
   ### GUI SLOTS
 
   def settings_restore_defaults(self):
@@ -286,6 +275,9 @@ class MainWin(QtGui.QMainWindow):
     self.active_library = new_lib
     self.show_footprint_tab()
     self.status("%s/%s created." % (new_lib, new_name))
+
+  def move_footprint(self):
+    pass
 
   def editor_text_changed(self):
     key_idle = self.setting("gui/keyidle")
