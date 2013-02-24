@@ -37,7 +37,7 @@ class Footprint():
     self.items = [id_item, desc_item]
 
   def select(self, selection_model):
-    print self.lib_name, self.name, "selected."
+    print "%s/%s selected." % (self.lib_name, self.name)
     selection_model.select(self.item.index(), QtGui.QItemSelectionModel.ClearAndSelect)
     for item in self.items:
       selection_model.select(item.index(), QtGui.QItemSelectionModel.Select)

@@ -23,9 +23,14 @@ class MainWin(QtGui.QMainWindow):
   def __init__(self):
     super(MainWin, self).__init__()
 
-    self.libraries = {example_library[0]:example_library[1]}
 
     self.settings = QtCore.QSettings()
+    if not self.settings.contains('library'):
+      self.libraries = {example_library[0]:example_library[1]}
+      self.save_libraries()
+    else:
+      self.libraries = {}
+      self.load_libraries()
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
     splitter.addWidget(self._left_part())
@@ -456,10 +461,26 @@ class MainWin(QtGui.QMainWindow):
         return library
 
   def active_footprint_file(self):
-   print self.active_library, self.active_footprint_id
    dir = QtCore.QDir(self.libraries[self.active_library])
    return dir.filePath(self.active_footprint_id + '.coffee')
-        
+
+  def save_libraries(self):
+    self.settings.beginWriteArray('library')
+    l = self.libraries.items()
+    for i in range(len(l)):
+      self.settings.setArrayIndex(i)
+      self.settings.setValue('name', l[i][0])
+      self.settings.setValue('file', l[i][1])
+    self.settings.endArray()
+
+  def load_libraries(self):
+    size = self.settings.beginReadArray('library')
+    for i in range(size):
+      self.settings.setArrayIndex(i)
+      name = self.settings.value('name')
+      filen = self.settings.value('file')
+      self.libraries[name] = filen
+    self.settings.endArray()
       
 if __name__ == '__main__':
     QtCore.QCoreApplication.setOrganizationName("madparts")
