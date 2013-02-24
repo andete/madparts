@@ -55,7 +55,7 @@ class MainWin(QtGui.QMainWindow):
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
     self.add_action(libraryMenu, '&Disconnect', self.disconnect_library)
-    self.add_action(libraryMenu, '&Reload', None)
+    self.add_action(libraryMenu, '&Reload', self.reload_library)
 
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
@@ -168,7 +168,7 @@ class MainWin(QtGui.QMainWindow):
       if slot != None: action.triggered.connect(slot)
       else: action.setDisabled(True)
     _add('&Disconnect', self.disconnect_library)
-    _add('&Reload')
+    _add('&Reload', self.reload_library)
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -426,6 +426,13 @@ class MainWin(QtGui.QMainWindow):
     lib = jydlibrary.Library(name, directory)
     root.appendRow(lib)
     self.tree.expandAll()
+
+  def reload_library(self):
+    if self.selected_library != None:
+      lib = self.selected_library
+    else:
+      lib = self.active_library
+    self.rescan_library(lib)
 
   def disconnect_library(self):
     dialog = DisconnectLibraryDialog(self)
