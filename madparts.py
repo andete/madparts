@@ -141,6 +141,7 @@ class MainWin(QtGui.QMainWindow):
     tree.setRootIsDecorated(False)
     tree.expandAll()
     tree.setItemsExpandable(False)
+    tree.resizeColumnToContents(0)
     self.tree_selection_model = tree.selectionModel()
     self.tree_selection_model.currentRowChanged.connect(self.row_changed)
     tree.doubleClicked.connect(self.show_footprint_tab)
