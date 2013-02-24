@@ -128,17 +128,6 @@ class MainWin(QtGui.QMainWindow):
     first_foot = self._make_model()
     tree = QtGui.QTreeView()
     tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-    # TODO avoid duplication of context menu from footprint menu
-    def _add(text, slot):
-      action = QtGui.QAction(text, tree)
-      tree.addAction(action)
-      if slot == None: action.setDisabled(True)
-      else: action.triggered.connect(slot)
-    _add('&Remove', self.remove_footprint)
-    _add('&Clone', self.clone_footprint)
-    _add('&Move', self.move_footprint)
-    _add('&Export previous', self.export_previous)
-    _add('E&xport', self.export_footprint)
     tree.setModel(self.model)
     tree.setRootIsDecorated(False)
     tree.expandAll()
@@ -148,32 +137,38 @@ class MainWin(QtGui.QMainWindow):
     self.tree_selection_model.currentRowChanged.connect(self.row_changed)
     tree.doubleClicked.connect(self.show_footprint_tab)
     first_foot.select(self.tree_selection_model)
+    self.tree = tree
+    self._tree_footprint_selected()
     self.active_footprint_id = first_foot.id
     self.active_library = first_foot.lib_name
-    self.tree = tree
     return tree
 
   def _tree_footprint_selected(self):
     for action in self.tree.actions():
       self.tree.removeAction(action)
-    def _add(text, slot):
+    def _add(text, slot = None):
       action = QtGui.QAction(text, self.tree)
       self.tree.addAction(action)
-      action.triggered.connect(slot)
+      if slot != None: action.triggered.connect(slot)
+      else: action.setDisabled(True)
     _add('&Remove', self.remove_footprint)
     _add('&Clone', self.clone_footprint)
     _add('&Move', self.move_footprint)
     _add('&Export previous', self.export_previous)
     _add('E&xport', self.export_footprint)
+    _add('&Print')
+    _add('&Reload')
 
   def _tree_library_selected(self):
     for action in self.tree.actions():
       self.tree.removeAction(action)
-    def _add(text, slot):
+    def _add(text, slot = None):
       action = QtGui.QAction(text, self.tree)
       self.tree.addAction(action)
-      action.triggered.connect(slot)
+      if slot != None: action.triggered.connect(slot)
+      else: action.setDisabled(True)
     _add('&Disconnect', self.disconnect_library)
+    _add('&Reload')
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
