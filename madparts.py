@@ -50,7 +50,7 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+X')
     self.add_action(footprintMenu, '&Print', None)
-    self.add_action(footprintMenu, '&Reload', None)
+    self.add_action(footprintMenu, '&Reload', self.reload_footprint)
 
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
@@ -157,7 +157,7 @@ class MainWin(QtGui.QMainWindow):
     _add('&Export previous', self.export_previous)
     _add('E&xport', self.export_footprint)
     _add('&Print')
-    _add('&Reload')
+    _add('&Reload', self.reload_footprint)
 
   def _tree_library_selected(self):
     for action in self.tree.actions():
@@ -278,6 +278,10 @@ class MainWin(QtGui.QMainWindow):
     self.active_library = new_lib
     self.show_footprint_tab()
     self.status(s)
+
+  def reload_footprint(self):
+    with open(self.active_footprint_file(), 'r') as f:
+      self.te1.setPlainText(f.read())
 
   def new_footprint(self):
     dialog = NewFootprintDialog(self)
