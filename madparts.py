@@ -264,7 +264,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = NewFootprintDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
-    new_code = jydcoffee.new_coffee_meta(new_id, new_name)
+    new_code = jydcoffee.new_coffee(new_id, new_name)
     lib_dir = QtCore.QDir(self.libraries[new_lib])
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
@@ -281,7 +281,26 @@ class MainWin(QtGui.QMainWindow):
     old_meta = jydcoffee.eval_coffee_meta(old_code)
     dialog = MoveFootprintDialog(self, old_meta)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
-    pass
+    (new_name, new_lib) = dialog.get_data()
+    old_name = old_meta['name']
+    my_id = self.active_footprint_id
+    fn = my_id + '.coffee'
+    old_lib = self.active_library
+    new_code = old_code.replace("#name %s" % (old_name), "#name %s" % (new_name))
+    new_lib_dir = QtCore.QDir(self.libraries[new_lib])
+    new_file_name = new_lib_dir.filePath(fn)
+    with open(new_file_name, 'w+') as f:
+      f.write(new_code)
+    self.te1.setPlainText(new_code)
+    self.status("moved %s/%s to %s/%s." % (old_lib, old_name, new_lib, new_name))
+    if old_lib == new_lib: 
+      self.rescan_library(old_lib, my_id) # just to update the name
+    else:
+      old_lib_dir = QtCore.QDir(self.libraries[old_lib])
+      old_lib_dir.remove(fn)
+      self.rescan_library(old_lib)
+      self.rescan_library(new_lib, my_id)
+      self.active_library = new_lib
 
   def editor_text_changed(self):
     key_idle = self.setting("gui/keyidle")

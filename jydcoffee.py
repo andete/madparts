@@ -98,7 +98,7 @@ def clone_coffee_meta(coffee, old_meta, new_id, new_name):
   new_meta = "#format 1.0\n#name %s\n#id %s\n#parent %s\n" % (new_name, new_id, old_meta['id'])
   return new_meta + no_meta_coffee
 
-def new_coffee_meta(new_id, new_name):
+def new_coffee(new_id, new_name):
   return """\
 #format 1.0
 #name %s
