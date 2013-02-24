@@ -26,22 +26,20 @@ class Footprint():
     # print "adding %s to %s" % (self.name, parent.data(QtCore.Qt.UserRole))
     name_item = QtGui.QStandardItem(self.name)
     name_item.setData(self.identify, QtCore.Qt.UserRole)
+    name_item.setToolTip(self.desc)
     id_item   = QtGui.QStandardItem(self.id)
     id_item.setData(self.identify, QtCore.Qt.UserRole)
-    desc_item = QtGui.QStandardItem(self.desc)
-    desc_item.setData(self.identify, QtCore.Qt.UserRole)
+    id_item.setToolTip(self.desc)
     name_item.setEditable(False) # you edit them in the code
     id_item.setEditable(False)
-    desc_item.setEditable(False)
-    parent.appendRow([name_item, id_item, desc_item])
+    parent.appendRow([name_item, id_item])
     self.item = name_item
-    self.items = [id_item, desc_item]
+    self.id_item = id_item
 
   def select(self, selection_model):
     print "%s/%s selected." % (self.lib_name, self.name)
     selection_model.select(self.item.index(), QtGui.QItemSelectionModel.ClearAndSelect)
-    for item in self.items:
-      selection_model.select(item.index(), QtGui.QItemSelectionModel.Select)
+    selection_model.select(self.id_item.index(), QtGui.QItemSelectionModel.Select)
 
 class Library(QtGui.QStandardItem):
 

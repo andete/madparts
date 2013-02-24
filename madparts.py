@@ -110,8 +110,8 @@ class MainWin(QtGui.QMainWindow):
 
   def _make_model(self):
     self.model = QtGui.QStandardItemModel()
-    self.model.setColumnCount(3)
-    self.model.setHorizontalHeaderLabels(['name','id','desc'])
+    self.model.setColumnCount(2)
+    self.model.setHorizontalHeaderLabels(['name','id'])
     parentItem = self.model.invisibleRootItem()
     first = True
     for (name, directory) in self.libraries.items():
