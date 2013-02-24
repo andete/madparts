@@ -70,6 +70,7 @@ class Library(QtGui.QStandardItem):
       except Exception as ex:
         print "error for file %s:" % (path)
         traceback.print_exc()
+    if self.footprints == []: return # bail on an empty library
     # this algorithm isn't exactly nice
     # once libraries start getting bigger it should be improved
     foots_id = map(lambda fp: fp.id, self.footprints)

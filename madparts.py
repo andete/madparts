@@ -9,13 +9,14 @@ import math, time, traceback, re
 from PySide import QtGui, QtCore
 
 import jydcoffee, jydgldraw, jydlibrary
-from syntax.jydjssyntax import JSHighlighter
-from syntax.jydcoffeesyntax import CoffeeHighlighter
-import export.eagle
 from jyddefaultsettings import default_settings
 from jyddialogs import *
 
-example_library = ('Example Library', 'library')
+from syntax.jydjssyntax import JSHighlighter
+from syntax.jydcoffeesyntax import CoffeeHighlighter
+
+import export.eagle
+
 
 
 class MainWin(QtGui.QMainWindow):
@@ -23,10 +24,10 @@ class MainWin(QtGui.QMainWindow):
   def __init__(self):
     super(MainWin, self).__init__()
 
-
     self.settings = QtCore.QSettings()
-    if not self.settings.contains('library'):
-      self.libraries = {example_library[0]:example_library[1]}
+    if not 'library' in self.settings.childGroups():
+      example_lib = QtCore.QDir('library').absolutePath()
+      self.libraries = {'Example library':example_lib}
       self.save_libraries()
     else:
       self.libraries = {}
@@ -53,8 +54,8 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Print', None)
 
     libraryMenu = menuBar.addMenu('&Library')
-    self.add_action(libraryMenu, '&Add', None)
-    self.add_action(libraryMenu, '&Disconnect', None)
+    self.add_action(libraryMenu, '&Add', self.add_library)
+    self.add_action(libraryMenu, '&Disconnect', self.disconnect_library)
 
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
@@ -389,6 +390,17 @@ class MainWin(QtGui.QMainWindow):
     # else... ?
     # we don't support being completely footless now
 
+  def add_library(self):
+    dialog = AddLibraryDialog(self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (name, directory) = dialog.get_data()
+    self.libraries[name] = directory
+    self.save_libraries()
+    # TODO add library to library browser
+
+  def disconnect_library(self):
+    pass
+
   ### OTHER METHODS
 
   def setting(self, key):
@@ -490,8 +502,8 @@ class MainWin(QtGui.QMainWindow):
    return dir.filePath(self.active_footprint_id + '.coffee')
 
   def save_libraries(self):
-    self.settings.beginWriteArray('library')
     l = self.libraries.items()
+    self.settings.beginWriteArray('library')
     for i in range(len(l)):
       self.settings.setArrayIndex(i)
       self.settings.setValue('name', l[i][0])
@@ -505,6 +517,7 @@ class MainWin(QtGui.QMainWindow):
       name = self.settings.value('name')
       filen = self.settings.value('file')
       self.libraries[name] = filen
+      print "loaded library %s at %s" % (name, filen)
     self.settings.endArray()
       
 if __name__ == '__main__':

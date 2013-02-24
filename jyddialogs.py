@@ -165,3 +165,81 @@ class MoveFootprintDialog(QtGui.QDialog):
 
   def get_data(self):
     return (self.name_edit.text(), self.l_combo.currentText())
+
+class AddLibraryDialog(QtGui.QDialog):
+
+  def __init__(self, parent):
+    super(AddLibraryDialog, self).__init__(parent)
+    self.parent = parent
+    self.setWindowTitle('Add Library')
+    self.resize(640,160) # TODO, there must be a better way to do this
+    vbox = QtGui.QVBoxLayout()
+    fl = QtGui.QFormLayout()
+    self.name_edit = QtGui.QLineEdit()
+    self.name_edit.textChanged.connect(self.name_changed)
+    fl.addRow("name:", self.name_edit)
+    self.dir_edit = QtGui.QLineEdit()
+    self.dir_edit.setReadOnly(True)
+    hbox = QtGui.QHBoxLayout()
+    hbox.addWidget(self.dir_edit)
+    lib_button = QtGui.QPushButton("Browse")
+    self.filename = None
+    lib_button.clicked.connect(self.get_directory)
+    hbox.addWidget(lib_button)
+    hbox_w = QtGui.QWidget()
+    hbox_w.setLayout(hbox)
+    fl.addRow("library", hbox_w)
+    self.dir_error = 'select a directory'
+    self.name_error = 'provide a name'
+    self.name_ok = False
+    self.dir_ok = False
+    self.issue = QtGui.QLineEdit()
+    self.issue.setReadOnly(True)
+    fl.addRow('issue:', self.issue)
+    vbox.addLayout(fl)
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
+    button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    button_box.accepted.connect(self.accept)
+    button_box.rejected.connect(self.reject)
+    self.ok_button = button_box.button(QtGui.QDialogButtonBox.Ok)
+    self.update_ok_button()
+    vbox.addWidget(button_box)
+    self.setLayout(vbox)
+
+  def get_directory(self):
+    result = QtGui.QFileDialog.getExistingDirectory(self, "Select Directory")
+    if result == '': return
+    self.dir_edit.setText(result)
+    if result in self.parent.libraries.values():
+      self.dir_error = 'directory already exists as library'
+      self.dir_ok = False
+    else:
+      self.dir_ok = True
+    self.update_ok_button()
+
+  def name_changed(self):
+    name = self.name_edit.text()
+    if name == '':
+      self.name_error = 'please provide a name'
+      self.name_ok = False
+    elif name in self.parent.libraries.keys():
+      self.name_error = 'name is already in use'
+      self.name_ok = False
+    else:
+      self.name_ok = True
+    self.update_ok_button()
+
+  def update_ok_button(self):
+    self.ok_button.setDisabled(not (self.name_ok and self.dir_ok))
+    if (not self.name_ok) and (not self.dir_ok):
+      self.issue.setText(self.name_error + " and " + self.dir_error)
+    elif not self.name_ok:
+      self.issue.setText(self.name_error)
+    elif not self.dir_ok:
+      self.issue.setText(self.dir_error)
+    else:
+      self.issue.clear()
+   
+
+  def get_data(self):
+    return (self.name_edit.text(), self.dir_edit.text())
