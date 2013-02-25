@@ -86,12 +86,15 @@ lines = (wi, a) ->
     )
 
 quad = (pad, num, step, dist) ->
+  adj = 0
+  if pad.adj?
+    adj = pad.adj
   n = num / 4
   d = dist / 2
-  l1  = modl (range pad, 'y', (steps n,  -step)), ['x', -d]
-  l2  = modl (range pad, 'x', (steps n,  step)),  ['y', -d], ['rot', 90]
-  l3  = modl (range pad, 'y', (steps n,  step)),  ['x', d], ['rot', 180]
-  l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d], ['rot', 270]
+  l1  = modl (range pad, 'y', (steps n,  -step)), ['x', -d-adj]
+  l2  = modl (range pad, 'x', (steps n,  step)),  ['y', -d-adj], ['rot', 90]
+  l3  = modl (range pad, 'y', (steps n,  step)),  ['x', d+adj], ['rot', 180]
+  l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d+adj], ['rot', 270]
   combine [l1, l2, l3, l4]
 
 class Name

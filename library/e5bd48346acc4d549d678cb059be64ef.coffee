@@ -12,15 +12,17 @@ footprint = () ->
   line_width = 0.25
   num_pads = 32
   e = 0.8
+  pad_len_adj = 0.0
 
-  name = new Name (half + 1.5)
-  value = new Value (-half - 1.5)
+  name = new Name (half + 1.5 + pad_len_adj)
+  value = new Value (-half - 1.5 - pad_len_adj)
 
   pad = new Smd
 
-  pad.dx = 1.67
+  pad.dx = 1.67 + pad_len_adj
   pad.dy = 0.36
   pad.ro = 50
+  pad.adj = pad_len_adj/2
 
   pads = quad pad, num_pads, e, size
 
