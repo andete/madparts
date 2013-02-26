@@ -55,6 +55,7 @@ class MainWin(QtGui.QMainWindow):
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
     self.add_action(libraryMenu, '&Disconnect', self.disconnect_library)
+    self.add_action(libraryMenu, '&Import', self.import_footprint)
     self.add_action(libraryMenu, '&Reload', self.reload_library)
 
     helpMenu = menuBar.addMenu('&Help')
@@ -168,6 +169,7 @@ class MainWin(QtGui.QMainWindow):
       if slot != None: action.triggered.connect(slot)
       else: action.setDisabled(True)
     _add('&Disconnect', self.disconnect_library)
+    _add('&Import', self.import_footprint)
     _add('&Reload', self.reload_library)
 
   def _footprint(self):
@@ -459,6 +461,10 @@ class MainWin(QtGui.QMainWindow):
         with open(ffn) as f:
           self.te1.setPlainText(f.read())
     # TODO we don't support being completely footless now
+
+  def import_footprint(self):
+    pass
+    # TODO
 
   ### OTHER METHODS
 
