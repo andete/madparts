@@ -165,4 +165,4 @@ def list_names(fn):
   def desc(p):
     if p.description != None: return p.description.string
     else: return None
-  return [(p['name'], desc(p)) for p in packages]
+  return ([(p['name'], desc(p)) for p in packages], soup)

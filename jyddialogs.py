@@ -328,7 +328,8 @@ class ImportFootprintsDialog(QtGui.QDialog):
 
   def populate_model(self):
     self.root.removeRows(0, self.root.rowCount())
-    for (name, desc) in export.eagle.list_names(self.filename):
+    (name_desc_list, self.soup) = export.eagle.list_names(self.filename)
+    for (name, desc) in name_desc_list:
       name_item = QtGui.QStandardItem(name)
       name_item.setToolTip(desc)
       self.root.appendRow([name_item])
@@ -339,4 +340,4 @@ class ImportFootprintsDialog(QtGui.QDialog):
 
   def get_data(self):
     indices = self.tree_selection_model.selectedIndexes()
-    return [self.model.data(i) for i in indices]
+    return ([self.model.data(i) for i in indices], self.soup)
