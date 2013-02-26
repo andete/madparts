@@ -289,7 +289,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
     lib_hbox.addWidget(self.lib_filename)
     lib_hbox.addWidget(lib_button)
     lib_widget.setLayout(lib_hbox)
-    form_layout.addRow("library", lib_widget) 
+    form_layout.addRow("import from:", lib_widget) 
     self.lib_type = QtGui.QLineEdit()
     self.lib_type.setReadOnly(True)
     form_layout.addRow("type", self.lib_type) 
@@ -303,6 +303,12 @@ class ImportFootprintsDialog(QtGui.QDialog):
     self.tree_selection_model = tree.selectionModel()
     self.tree_selection_model.selectionChanged.connect(self.selection_changed)
     vbox.addWidget(tree)
+    form_layout2 = QtGui.QFormLayout()
+    libraries = parent.libraries
+    library = parent.active_library
+    self.l_combo = library_combo(libraries, library)
+    form_layout2.addRow("import to:", self.l_combo)
+    vbox.addLayout(form_layout2)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
     self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
     self.button_box.accepted.connect(self.accept)
@@ -340,4 +346,4 @@ class ImportFootprintsDialog(QtGui.QDialog):
 
   def get_data(self):
     indices = self.tree_selection_model.selectedIndexes()
-    return ([self.model.data(i) for i in indices], self.soup)
+    return ([self.model.data(i) for i in indices], self.soup, self.l_combo.currentText())

@@ -465,8 +465,8 @@ class MainWin(QtGui.QMainWindow):
   def import_footprints(self):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (footprint_names, soup) = dialog.get_data()
-    print footprint_names
+    (footprint_names, soup, selected_library) = dialog.get_data()
+    print footprint_names, selected_library
 
   ### OTHER METHODS
 
