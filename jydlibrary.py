@@ -57,6 +57,7 @@ class Library(QtGui.QStandardItem):
     self.removeRows(0, self.rowCount())
     self.row_data = []
     d = QtCore.QDir(self.directory)
+    if not d.exists(): raise IOError("directory does not exist")
     self.footprints = []
     for f in d.entryList(['*.coffee']):
       path = d.filePath(f)

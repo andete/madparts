@@ -25,7 +25,7 @@ class MainWin(QtGui.QMainWindow):
     self.settings = QtCore.QSettings()
     if not 'library' in self.settings.childGroups():
       example_lib = QtCore.QDir('library').absolutePath()
-      self.libraries = {'Example library':example_lib}
+      self.libraries = {'Examples':example_lib}
       self.save_libraries()
     else:
       self.libraries = {}
@@ -118,11 +118,15 @@ class MainWin(QtGui.QMainWindow):
     parentItem = self.model.invisibleRootItem()
     first = True
     for (name, directory) in self.libraries.items():
-      lib = jydlibrary.Library(name, directory)
-      parentItem.appendRow(lib)
-      if first:
-        first = False
-        first_foot = lib.first_footprint()
+      try:
+        lib = jydlibrary.Library(name, directory)
+        parentItem.appendRow(lib)
+        if first:
+          first = False
+          first_foot = lib.first_footprint()
+      except IOError:
+        print "library %s at %s not found (skipping)" % (name, directory)
+        pass
     return first_foot
 
   def _tree(self):
@@ -584,7 +588,6 @@ class MainWin(QtGui.QMainWindow):
       name = self.settings.value('name')
       filen = self.settings.value('file')
       self.libraries[name] = filen
-      print "loaded library %s at %s" % (name, filen)
     self.settings.endArray()
       
 if __name__ == '__main__':
