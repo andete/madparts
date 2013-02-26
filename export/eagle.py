@@ -157,3 +157,12 @@ def export(fn, shapes):
     found['name'] = name
   generate(soup, shapes, found)
   save(fn, soup)
+
+def list_names(fn):
+  soup = load(fn)
+  v = _check(soup)
+  packages = soup.eagle.drawing.packages('package')
+  def desc(p):
+    if p.description != None: return p.description.string
+    else: return None
+  return [(p['name'], desc(p)) for p in packages]
