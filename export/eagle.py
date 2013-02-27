@@ -167,6 +167,57 @@ def list_names(fn):
     else: return None
   return ([(p['name'], desc(p)) for p in packages], soup)
 
+def handle_text(text):
+  res = {}
+  res['type'] = 'label'
+  s = text.string
+  layer = int(text['layer'])
+  size = float(text['size'])
+  y = float(text['y'])
+  x = float(text['x']) + len(s)*size/2
+  res['value'] = s
+  if layer == 25 and s == '>NAME':
+    res['value'] = 'NAME'
+  elif layer == 27 and s == '>VALUE':
+    res['value'] = 'VALUE'
+  if x != 0: res['x'] = x
+  if y != 0: res['y'] = y
+  return res
+
+# {'name': '5', 'type': 'smd', 'shape': 'rect', 'dx': 1.67, 'dy': 0.36, 'y': -0.4, 'x': -4.5, 'ro': 50, 'adj': 0}
+
+def handle_smd(smd):
+  res = {}
+  res['type'] = 'smd'
+  res['name'] = smd['name']
+  res['dx'] = float(smd['dx'])
+  res['dy'] = float(smd['dy'])
+  res['x'] = float(smd['x'])
+  res['y'] = float(smd['y'])
+  res['ro'] = smd['roundness']
+  rot = smd['rot']
+  if rot != None:
+    res['rot'] = int(rot[1:])
+  ro = smd['roundness']
+  if ro != None:
+    res['ro'] = int(ro)
+  return res
+
+def handle_wire(wire):
+  res = {}
+  return res
+
+def handle_circle(circle):
+  res = {}
+  return res
+
+def handle_description(desc):
+  res = {}
+  return res
+
+def handle_unknown(x):
+  raise Exception("unknown element %s" % (x))
+
 def import_footprint(soup, name):
   def package_has_name(tag):
     if tag.name == 'package' and tag.has_key('name'):
@@ -174,5 +225,14 @@ def import_footprint(soup, name):
       if n == name:
         return True
     return False
-  packages = soup.find_all(package_has_name)
-  print packages
+  [package] = soup.find_all(package_has_name)
+  for x in package.contents:
+    if type(x) == Tag:
+      result = {
+        'text': handle_text,
+        'smd': handle_smd,
+        'wire': handle_wire,
+        'circle': handle_circle,
+        'description': handle_description,
+      }.get(x.name, handle_unknown)(x)
+      print result
