@@ -45,6 +45,7 @@ class Library(QtGui.QStandardItem):
 
   def __init__(self, name, directory):
     super(Library, self).__init__(name)
+    print "making %s" % (name)
     self.name = name
     self.setData(('library', name), QtCore.Qt.UserRole)
     self.directory = directory
@@ -56,9 +57,12 @@ class Library(QtGui.QStandardItem):
     self.selected_foot = None
     self.removeRows(0, self.rowCount())
     self.row_data = []
-    d = QtCore.QDir(self.directory)
-    if not d.exists(): raise IOError("directory does not exist")
     self.footprints = []
+    self.first_foot = None
+    d = QtCore.QDir(self.directory)
+    if not d.exists(): 
+      self.setEnabled(False)
+      return
     for f in d.entryList(['*.coffee']):
       path = d.filePath(f)
       try:
