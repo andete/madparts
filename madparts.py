@@ -25,12 +25,12 @@ class MainWin(QtGui.QMainWindow):
     self.settings = QtCore.QSettings()
     if not 'library' in self.settings.childGroups():
       example_lib = QtCore.QDir('library').absolutePath()
-      self.libraries = {'Examples':example_lib}
-      self.libraries_exists = {'Examples':True}
+      self.lib_dir = {'Examples':example_lib}
+      self.lib_exist = {'Examples':True}
       self.save_libraries()
     else:
-      self.libraries = {}
-      self.libraries_exists = {}
+      self.lib_dir = {}
+      self.lib_exist = {}
       self.load_libraries()
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
@@ -119,7 +119,7 @@ class MainWin(QtGui.QMainWindow):
     self.model.setHorizontalHeaderLabels(['name','id'])
     parentItem = self.model.invisibleRootItem()
     first = True
-    for (name, directory) in self.libraries.items():
+    for (name, directory) in self.lib_dir.items():
       lib = jydlibrary.Library(name, directory)
       parentItem.appendRow(lib)
       if first:
@@ -469,6 +469,8 @@ class MainWin(QtGui.QMainWindow):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, soup, selected_library) = dialog.get_data()
     print footprint_names, selected_library
+    for footprint_name in footprint_names:
+      export.eagle.import_footprint(soup, footprint_name)
 
   ### OTHER METHODS
 
@@ -567,11 +569,11 @@ class MainWin(QtGui.QMainWindow):
         return library
 
   def active_footprint_file(self):
-   dir = QtCore.QDir(self.libraries[self.active_library])
+   dir = QtCore.QDir(self.lib_dir[self.active_library])
    return dir.filePath(self.active_footprint_id + '.coffee')
 
   def save_libraries(self):
-    l = self.libraries.items()
+    l = self.lib_dir.items()
     self.settings.beginWriteArray('library')
     for i in range(len(l)):
       self.settings.setArrayIndex(i)
@@ -586,8 +588,8 @@ class MainWin(QtGui.QMainWindow):
       name = self.settings.value('name')
       filen = self.settings.value('file')
       exists = QtCore.QDir(filen).exists()
-      self.libraries[name] = filen
-      self.libraries_exists[name] = exists
+      self.lib_dir[name] = filen
+      self.lib_exist[name] = exists
     self.settings.endArray()
       
 if __name__ == '__main__':

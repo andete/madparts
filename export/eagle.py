@@ -166,3 +166,13 @@ def list_names(fn):
     if p.description != None: return p.description.string
     else: return None
   return ([(p['name'], desc(p)) for p in packages], soup)
+
+def import_footprint(soup, name):
+  def package_has_name(tag):
+    if tag.name == 'package' and tag.has_key('name'):
+      n = tag['name']
+      if n == name:
+        return True
+    return False
+  packages = soup.find_all(package_has_name)
+  print packages

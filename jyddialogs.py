@@ -7,12 +7,14 @@ from PySide import QtGui, QtCore
 
 import export.eagle
 
-def library_combo(libraries, libraries_exists, selected = None):
+def library_combo(parent):
   l_combo = QtGui.QComboBox()
-  for x in libraries.items():
+  selected = parent.active_library
+  for x in parent.lib_dir.items():
     l_combo.addItem(x[0], x)
-    if not libraries_exists[x[0]]:
-      i = l_combo.model().index(l_combo.count()-1, 0)
+    if not parent.lib_exist[x[0]]:
+      i = l_combo.model().index(l_combo.count()-1, 0) 
+      # trick to make disabled
       l_combo.model().setData(i, 0, QtCore.Qt.UserRole-1)
     elif selected == None:
       selected = x[0]
@@ -80,8 +82,6 @@ class CloneFootprintDialog(QtGui.QDialog):
 
   def __init__(self, parent, old_meta, old_code):
     super(CloneFootprintDialog, self).__init__(parent)
-    libraries = parent.libraries
-    library = parent.active_library
     self.new_id = uuid.uuid4().hex
     self.setWindowTitle('Clone Footprint')
     self.resize(640,160) # TODO, there must be a better way to do this
@@ -91,7 +91,7 @@ class CloneFootprintDialog(QtGui.QDialog):
     existing_fl = QtGui.QFormLayout()
     existing_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
     existing_fl.addRow("id:", QtGui.QLabel(old_meta['id']))
-    existing_fl.addRow("library:", QtGui.QLabel(library))
+    existing_fl.addRow("library:", QtGui.QLabel(parent.active_library))
     gbox_existing.setLayout(existing_fl)
     vbox.addWidget(gbox_existing) 
     self.name_edit = QtGui.QLineEdit()
@@ -99,7 +99,7 @@ class CloneFootprintDialog(QtGui.QDialog):
     new_fl = QtGui.QFormLayout()
     new_fl.addRow("name:", self.name_edit)
     new_fl.addRow("id:", QtGui.QLabel(self.new_id))
-    self.l_combo = library_combo(libraries, parent.libraries_exists, library)
+    self.l_combo = library_combo(parent)
     new_fl.addRow("library:", self.l_combo)
     gbox_new.setLayout(new_fl)
     vbox.addWidget(gbox_new) 
@@ -117,8 +117,6 @@ class NewFootprintDialog(QtGui.QDialog):
 
   def __init__(self, parent):
     super(NewFootprintDialog, self).__init__(parent)
-    libraries = parent.libraries
-    library = parent.active_library
     self.new_id = uuid.uuid4().hex
     self.setWindowTitle('New Footprint')
     self.resize(640,160) # TODO, there must be a better way to do this
@@ -129,7 +127,7 @@ class NewFootprintDialog(QtGui.QDialog):
     new_fl = QtGui.QFormLayout()
     new_fl.addRow("name:", self.name_edit)
     new_fl.addRow("id:", QtGui.QLabel(self.new_id))
-    self.l_combo = library_combo(libraries, parent.libraries_exists, library)
+    self.l_combo = library_combo(parent)
     new_fl.addRow("library:", self.l_combo)
     gbox_new.setLayout(new_fl)
     vbox.addWidget(gbox_new) 
@@ -153,7 +151,6 @@ class MoveFootprintDialog(QtGui.QDialog):
     gbox_from = QtGui.QGroupBox("from")
     from_fl = QtGui.QFormLayout()
     from_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
-    library = parent.active_library
     from_fl.addRow("library:", QtGui.QLabel(library))
     gbox_from.setLayout(from_fl)
     vbox.addWidget(gbox_from) 
@@ -162,7 +159,7 @@ class MoveFootprintDialog(QtGui.QDialog):
     self.name_edit = QtGui.QLineEdit()
     self.name_edit.setText(old_meta['name'])
     to_fl.addRow("name:", self.name_edit)
-    self.l_combo = library_combo(parent.libraries, parent.libraries_exists, library)
+    self.l_combo = library_combo(parent)
     to_fl.addRow("library:", self.l_combo)
     gbox_to.setLayout(to_fl)
     vbox.addWidget(gbox_to) 
@@ -184,7 +181,7 @@ class DisconnectLibraryDialog(QtGui.QDialog):
     self.resize(640,160) # TODO, there must be a better way to do this
     vbox = QtGui.QVBoxLayout()
     fl = QtGui.QFormLayout()
-    self.l_combo = library_combo(parent.libraries, parent.libraries_exists)
+    self.l_combo = library_combo(parent)
     fl.addRow("library:", self.l_combo)
     vbox.addLayout(fl)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
@@ -309,9 +306,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
     self.tree_selection_model.selectionChanged.connect(self.selection_changed)
     vbox.addWidget(tree)
     form_layout2 = QtGui.QFormLayout()
-    libraries = parent.libraries
-    library = parent.active_library
-    self.l_combo = library_combo(libraries, parent.libaries_exists, library)
+    self.l_combo = library_combo(parent)
     form_layout2.addRow("import to:", self.l_combo)
     vbox.addLayout(form_layout2)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
