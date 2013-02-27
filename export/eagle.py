@@ -203,10 +203,12 @@ def handle_smd(smd):
     res['ro'] = int(ro)
   return res
 
+# {'y2': 3, 'x2': 3, 'shape': 'line', 'w': 0.25, 'y1': 3, 'x1': -3, 'type': 'silk'}
 def handle_wire(wire):
   res = {}
   return res
 
+# {'y': 3.5, 'x': -4.5, 'shape': 'circle', 'r': 0.25, 'type': 'silk'}
 def handle_circle(circle):
   res = {}
   return res
