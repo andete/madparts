@@ -234,7 +234,10 @@ def handle_description(desc, meta):
   return None
 
 def handle_unknown(x, meta):
-  raise Exception("unknown element %s" % (x))
+  res = {}
+  res['type'] = 'unknown'
+  res['value'] = str(x)
+  return res
 
 def import_footprint(soup, name):
   def package_has_name(tag):
