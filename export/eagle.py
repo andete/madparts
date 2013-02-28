@@ -1,7 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import StringIO
+import StringIO, uuid
 
 from xml.sax.saxutils import escape
 
@@ -9,18 +9,23 @@ from bs4 import BeautifulSoup, Tag
 
 from jydutil import *
 
-# TODO: get from eagle XML isof hardcoded; however in practice this is quite low prio
-def layer_to_eagle_layer(layer):
-  type_to_layer_dict = {
-    'top': 1,
-    'silk': 21,
-    'name': 25,
-    'value': 27,
-    }
-  return type_to_layer_dict[layer]
+type_to_layer_number_dict = {
+  'smd': 1,
+  'silk': 21,
+  'name': 25,
+  'value': 27,
+}
 
-def type_to_eagle_layer(shape):
-  return layer_to_eagle_layer(type_to_layer(shape))
+layer_number_to_type_dict = dict([(y,x) for (x,y) in type_to_layer_number_dict.items()])
+
+# TODO: get from eagle XML isof hardcoded; 
+# however in practice this is quite low prio as everybody probably
+# uses the same layer numbers
+def type_to_layer_number(layer):
+  return type_to_layer_number_dict[layer]
+
+def layer_number_to_type(layer):
+  return layer_number_to_type_dict[layer]
 
 # this can still use plenty of abstraction
 def rect(soup, package, shape):
@@ -32,7 +37,7 @@ def rect(soup, package, shape):
   smd['dy'] = fget(shape, 'dy')
   smd['roundness'] = iget(shape, 'ro')
   smd['rot'] = "R%d" % (fget(shape, 'rot'))
-  smd['layer'] = type_to_eagle_layer(shape)
+  smd['layer'] = type_to_layer_number(shape['type'])
   package.append(smd)
 
 def label(soup, package, shape):
@@ -48,7 +53,7 @@ def label(soup, package, shape):
   label['x'] = x - len(s)*dy/2
   label['y'] = y - dy/2
   label['size'] = dy
-  label['layer'] = type_to_eagle_layer(shape)
+  label['layer'] = type_to_layer_number(shape['type'])
   label.string = s
   package.append(label)
   
@@ -63,13 +68,13 @@ def circle(soup, package, shape):
     ry = fget(shape, 'ry', r)
   x = fget(shape,'x')
   y = fget(shape,'y')
-  w = 0.25
+  w = 0.25 # TODO
   circle = soup.new_tag('circle')
   circle['x'] = x
   circle['y'] = y
   circle['radius'] = (r-w/2)
   circle['width'] = w
-  circle['layer'] = type_to_eagle_layer(shape)
+  circle['layer'] = type_to_layer_number(shape['type'])
   package.append(circle)
 
 def line(soup, package, shape):
@@ -84,7 +89,7 @@ def line(soup, package, shape):
   line['x2'] = x2
   line['y2'] = y2
   line['width'] = w
-  line['layer'] = type_to_eagle_layer(shape)
+  line['layer'] = type_to_layer_number(shape['type'])
   package.append(line)
 
 def load(fn):
@@ -115,8 +120,7 @@ def generate(soup, shapes, package):
       if shape['shape'] == 'rect': rect(soup, package, shape)
       if shape['shape'] == 'circle': circle(soup, package, shape)
       if shape['shape'] == 'line': line(soup, package, shape)
-    elif shape['type'] == 'label':
-      label(soup, package, shape)
+      if shape['shape'] == 'label': label(soup, package, shape)
 
 def _check(soup):
   if soup.eagle == None:
@@ -167,9 +171,10 @@ def list_names(fn):
     else: return None
   return ([(p['name'], desc(p)) for p in packages], soup)
 
-def handle_text(text):
+def handle_text(text, meta):
   res = {}
-  res['type'] = 'label'
+  res['type'] = 'silk'
+  res['shape'] = 'label'
   s = text.string
   layer = int(text['layer'])
   size = float(text['size'])
@@ -186,7 +191,7 @@ def handle_text(text):
 
 # {'name': '5', 'type': 'smd', 'shape': 'rect', 'dx': 1.67, 'dy': 0.36, 'y': -0.4, 'x': -4.5, 'ro': 50, 'adj': 0}
 
-def handle_smd(smd):
+def handle_smd(smd, meta):
   res = {}
   res['type'] = 'smd'
   res['name'] = smd['name']
@@ -203,21 +208,32 @@ def handle_smd(smd):
     res['ro'] = int(ro)
   return res
 
-# {'y2': 3, 'x2': 3, 'shape': 'line', 'w': 0.25, 'y1': 3, 'x1': -3, 'type': 'silk'}
-def handle_wire(wire):
+def handle_wire(wire, meta):
   res = {}
+  res['type'] = layer_number_to_type(int(wire['layer']))
+  res['shape'] = 'line'
+  res['x1'] = float(wire['x1'])
+  res['y1'] = float(wire['y1'])
+  res['x2'] = float(wire['x2'])
+  res['y2'] = float(wire['y2'])
+  res['w'] = float(wire['width'])
   return res
 
-# {'y': 3.5, 'x': -4.5, 'shape': 'circle', 'r': 0.25, 'type': 'silk'}
-def handle_circle(circle):
+def handle_circle(circle, meta):
   res = {}
+  res['type'] = layer_number_to_type(int(circle['layer']))
+  res['shape'] = 'circle'
+  w = 0.25 # TODO
+  res['r'] = float(circle['radius']) + w/2
+  res['x'] = float(circle['x'])
+  res['y'] = float(circle['y'])
   return res
 
-def handle_description(desc):
-  res = {}
-  return res
+def handle_description(desc, meta):
+  meta['desc'] = desc.string
+  return None
 
-def handle_unknown(x):
+def handle_unknown(x, meta):
   raise Exception("unknown element %s" % (x))
 
 def import_footprint(soup, name):
@@ -228,6 +244,11 @@ def import_footprint(soup, name):
         return True
     return False
   [package] = soup.find_all(package_has_name)
+  meta = {}
+  meta['type'] = 'meta'
+  meta['name'] = name
+  meta['id'] = uuid.uuid4().hex
+  l = [meta]
   for x in package.contents:
     if type(x) == Tag:
       result = {
@@ -236,5 +257,6 @@ def import_footprint(soup, name):
         'wire': handle_wire,
         'circle': handle_circle,
         'description': handle_description,
-      }.get(x.name, handle_unknown)(x)
-      print result
+      }.get(x.name, handle_unknown)(x, meta)
+      if result != None: l.append(result)
+  return l

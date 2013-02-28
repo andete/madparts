@@ -468,9 +468,13 @@ class MainWin(QtGui.QMainWindow):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, soup, selected_library) = dialog.get_data()
-    print footprint_names, selected_library
+    #print footprint_names, selected_library
+    l = []
     for footprint_name in footprint_names:
-      export.eagle.import_footprint(soup, footprint_name)
+      footprint_list = export.eagle.import_footprint(soup, footprint_name) 
+      l.append(footprint_list)
+    print l
+    # BUSY
 
   ### OTHER METHODS
 

@@ -99,12 +99,14 @@ quad = (pad, num, step, dist) ->
 
 class Name
   constructor: (@y) ->
-    @type = 'label'
+    @type = 'silk'
+    @shape = 'label'
     @value = 'NAME'
 
 class Value
   constructor: (@y) ->
-    @type = 'label'
+    @type = 'silk'
+    @shape = 'label'
     @value = 'VALUE'
 
 silk_square = (half_line_size, line_width) ->
