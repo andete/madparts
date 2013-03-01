@@ -335,6 +335,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
   def populate_model(self):
     self.root.removeRows(0, self.root.rowCount())
     (name_desc_list, self.soup) = export.eagle.list_names(self.filename)
+    name_desc_list = sorted(name_desc_list, lambda (n1,d1),(n2,d2): cmp(n1,n2))
     for (name, desc) in name_desc_list:
       name_item = QtGui.QStandardItem(name)
       name_item.setToolTip(desc)
