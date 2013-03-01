@@ -8,7 +8,7 @@ import math, time, traceback, re
 
 from PySide import QtGui, QtCore
 
-import jydcoffee, jydgldraw, jydlibrary
+import jydcoffee, jydgldraw, jydlibrary, jydinter
 from jyddefaultsettings import default_settings
 from jyddialogs import *
 
@@ -471,10 +471,10 @@ class MainWin(QtGui.QMainWindow):
     #print footprint_names, selected_library
     l = []
     for footprint_name in footprint_names:
-      footprint_list = export.eagle.import_footprint(soup, footprint_name) 
-      l.append(footprint_list)
-    print l
-    # BUSY
+      footprint_inter = export.eagle.import_footprint(soup, footprint_name) 
+      l.append(footprint_inter)
+    for footprint_inter in l:
+      print jydcofee.generate_simple_cofee(footprint_inter)
 
   ### OTHER METHODS
 
@@ -509,10 +509,12 @@ class MainWin(QtGui.QMainWindow):
     code = self.te1.toPlainText()
     self.executed_footprint = []
     try:
-      result = jydcoffee.eval_coffee_footprint(code)
-      self.executed_footprint = _add_names(result)
-      self.te2.setPlainText(str(self.executed_footprint))
-      self.glw.set_shapes(self.executed_footprint)
+      inter = jydcoffee.eval_coffee_footprint(code)
+      if inter != None:
+        inter = jydinter.add_names(inter)
+      self.executed_footprint = inter
+      self.te2.setPlainText(str(inter))
+      self.glw.set_shapes(inter)
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)

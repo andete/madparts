@@ -101,15 +101,12 @@ def save(fn, soup):
   with open(fn, 'w+') as f:
     f.write(str(soup))
   
-def generate(soup, shapes, package):
-  # get all meta from shapes:
-  for shape in shapes:
-    if shape['type'] == 'meta':
-      name = eget(shape, 'name', 'Name not found')
-      idx = eget(shape, 'id', 'Id not found')
-      desc = oget(shape, 'desc', '')
-      parent_idx = oget(shape, 'parent', None)
-      break
+def generate(soup, inter, package):
+  meta = jydinter.get_meta(inter)
+  name = eget(meta, 'name', 'Name not found')
+  idx = eget(meta, 'id', 'Id not found')
+  desc = oget(meta, 'desc', '')
+  parent_idx = oget(meta, 'parent', None)
   description = soup.new_tag('description')
   package.append(description)
   parent_str = ""
@@ -142,10 +139,8 @@ def export(fn, shapes):
   soup = load(fn)
   _check(soup) # just to be sure, check again
   # get name from meta from shapes:
-  for shape in shapes:
-    if shape['type'] == 'meta':
-      name = eget(shape, 'name', 'Name not found')
-      break
+  meta = get_meta(shapes)
+  name = eget(meta, 'name', 'Name not found')
   # check if there is an existing package
   # and if so, replace it
   packages = soup.eagle.drawing.packages('package')
@@ -287,6 +282,7 @@ def import_footprint(soup, name):
   meta['type'] = 'meta'
   meta['name'] = name
   meta['id'] = uuid.uuid4().hex
+  meta['desc'] = None
   l = [meta]
   for x in package.contents:
     if type(x) == Tag:

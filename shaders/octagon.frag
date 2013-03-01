@@ -27,7 +27,7 @@ void main() {
     // abs position within corner
     float x = abs(pos2.x) - ax;
     float y = abs(pos2.y) - ay;
-    # are we inside the triangle ?
+    // are we inside the triangle ?
     if (x + y < corner_size) {
       gl_FragColor = gl_Color;
     }

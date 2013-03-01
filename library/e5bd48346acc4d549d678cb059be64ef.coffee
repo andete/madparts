@@ -35,5 +35,7 @@ footprint = () ->
   dot = new Dot line_width
   dot.x = -half
   dot.y = half - 1
+  #dot.dx = 1
+  #dot.shape = 'octagon'
 
   combine [name, value, pads, silk, dot]

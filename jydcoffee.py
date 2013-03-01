@@ -108,3 +108,7 @@ def new_coffee(new_id, new_name):
 footprint = () ->
   []
 """ % (new_name, new_id)
+
+def generate_simple_coffee(footprint_inter):
+  return "foo"
+  # BUSY
