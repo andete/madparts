@@ -44,7 +44,9 @@ class GLDraw:
 
     self.circle_shader = make_shader("circle")
     self.circle_move_loc = self.circle_shader.uniformLocation("move")
-    self.circle_radius_loc = self.circle_shader.uniformLocation("radiusin")
+    self.circle_radius_loc = self.circle_shader.uniformLocation("radius")
+    self.circle_drill_loc = self.circle_shader.uniformLocation("drill")
+    self.circle_drill_offset_loc = self.circle_shader.uniformLocation("drill_offset")
     self.rect_shader = make_shader("rect")
     self.rect_size_loc = self.rect_shader.uniformLocation("size")
     self.rect_move_loc = self.rect_shader.uniformLocation("move")
@@ -88,13 +90,15 @@ class GLDraw:
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     self._txt(shape, dx, dy, x, y)
 
-  def _circle(self, x, y, rx, ry):
+  def _circle(self, x, y, rx, ry, drill, drill_dx, drill_dy):
     self.circle_shader.bind()
     self.circle_shader.setUniformValue(self.circle_move_loc, x, y)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     self.circle_shader.setUniformValue(self.circle_radius_loc, rx, ry)
+    self.circle_shader.setUniformValue(self.circle_drill_loc, drill, 0.0)
+    self.circle_shader.setUniformValue(self.circle_drill_offset_loc, drill_dx, drill_dy)
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release() 
 
@@ -109,7 +113,11 @@ class GLDraw:
       ry = fget(shape, 'ry', r)
     x = fget(shape,'x')
     y = fget(shape,'y')
-    self._circle(x, y, rx, ry)
+    drill = fget(shape,'drill')
+    drill_dx = fget(shape,'drill_dx')
+    drill_dy = fget(shape,'drill_dy')
+ 
+    self._circle(x, y, rx, ry, drill, drill_dx, drill_dy)
     if 'name' in shape:
       self._txt(shape, rx*2, ry*2, x, y)
 
@@ -173,8 +181,8 @@ class GLDraw:
     glVertex3f(x2+ddx, y2-ddy, 0)
     glVertex3f(x2-ddx, y2+ddy, 0)
     glEnd()
-    self._circle(x1, y1, r, r)
-    self._circle(x2, y2, r, r)
+    self._circle(x1, y1, r, r, 0.0, 0.0, 0.0)
+    self._circle(x2, y2, r, r, 0.0, 0.0, 0.0)
     
   def draw(self, shapes):
     for shape in shapes:
