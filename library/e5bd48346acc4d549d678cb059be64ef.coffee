@@ -23,6 +23,8 @@ footprint = () ->
   pad.dy = 0.36
   pad.ro = 50
   pad.adj = pad_len_adj/2
+  #pad.drill = 0.1
+  #pad.drill_dx = -0.5
 
   pads = quad pad, num_pads, e, size
 

@@ -6,7 +6,8 @@
 varying vec2 pos2;    // position
 varying float round2; // roundness of corners
 varying vec2 size2;   // size in x and y direction
-varying vec2 drill2;  // drill: radius, offset in x
+varying float drill2; // drill: radius
+varying vec2 drill_offset2;
 
 void main() {
   float rx = (size2.x / 2) * round2;
@@ -25,9 +26,9 @@ void main() {
     }
   // else we're in a normal square zone:
   } else {
-    float drill_r = drill2.x;
-    float drill_dx = drill2.y;
-    if ((pos2.x-drill_dx)*(pos2.x-drill_dx) + pos2.y*pos2.y >= drill_r*drill_r) {
+    float x2 = pos2.x-drill_offset2.x;
+    float y2 = pos2.y-drill_offset2.y;
+    if (x2*x2 + y2*y2 >= drill2*drill2) {
       gl_FragColor = gl_Color;
     }
   }

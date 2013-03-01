@@ -50,6 +50,7 @@ class GLDraw:
     self.rect_move_loc = self.rect_shader.uniformLocation("move")
     self.rect_round_loc = self.rect_shader.uniformLocation("round")
     self.rect_drill_loc = self.rect_shader.uniformLocation("drill")
+    self.rect_drill_offset_loc = self.rect_shader.uniformLocation("drill_offset")
 
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
@@ -121,15 +122,23 @@ class GLDraw:
     rot = fget(shape, 'rot')
     drill = fget(shape, 'drill')
     drill_dx = fget(shape, 'drill_dx')
+    drill_dy = fget(shape, 'drill_dy')
     if rot not in [0, 90, 180, 270]:
       raise Exception("only 0, 90, 180, 270 rotation supported for now")
     if rot in [90, 270]:
       (dx, dy) = (dy, dx)
+    if rot == 90:
+      (drill_dx, drill_dy) = (drill_dy, drill_dx)
+    if rot == 180:
+      (drill_dx, drill_dy) = (-drill_dx, drill_dy)
+    if rot == 270:
+      (drill_dx, drill_dy) = (-drill_dy, -drill_dx)
     self.rect_shader.bind()
     self.rect_shader.setUniformValue(self.rect_size_loc, dx, dy)
     self.rect_shader.setUniformValue(self.rect_move_loc, x, y)
     self.rect_shader.setUniformValue(self.rect_round_loc, ro, 0)
-    self.rect_shader.setUniformValue(self.rect_drill_loc, drill, drill_dx)
+    self.rect_shader.setUniformValue(self.rect_drill_loc, drill, 0)
+    self.rect_shader.setUniformValue(self.rect_drill_offset_loc, drill_dx, drill_dy)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)

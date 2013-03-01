@@ -10,13 +10,15 @@
 uniform vec2 size;  // size in x and y direction
 uniform vec2 move;  // location
 uniform vec2 round; // roundness of corners
-uniform vec2 drill; // drill: radius, offset in x
+uniform vec2 drill; // drill: radius
+uniform vec2 drill_offset;
 
 // output:
 varying vec2 pos2;    // adjusted position
 varying float round2; // roundness of corners
 varying vec2 size2;   // size in x and y direction
-varying vec2 drill2;  // drill: radius, offset in x
+varying float drill2; // drill: radius
+varying vec2 drill_offset2;
 
 void main() {
   gl_FrontColor = gl_Color;
@@ -29,6 +31,7 @@ void main() {
   gl_Position = gl_ModelViewProjectionMatrix * vert2;
   pos2 = vec2(vert);
   round2 = round.x;
-  drill2 = drill;
+  drill2 = drill.x;
   size2 = size;
+  drill_offset2 = drill_offset;
 }
