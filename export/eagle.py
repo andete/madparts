@@ -11,6 +11,7 @@ from jydutil import *
 
 type_to_layer_number_dict = {
   'smd': 1,
+  'pad': 17,
   'silk': 21,
   'name': 25,
   'value': 27,
@@ -200,9 +201,8 @@ def handle_smd(smd, meta):
   res['x'] = float(smd['x'])
   res['y'] = float(smd['y'])
   res['ro'] = smd['roundness']
-  rot = smd['rot']
-  if rot != None:
-    res['rot'] = int(rot[1:])
+  if smd.has_key('rot'):
+    res['rot'] = int(smd['rot'][1:])
   ro = smd['roundness']
   if ro != None:
     res['ro'] = int(ro)
@@ -233,6 +233,42 @@ def handle_description(desc, meta):
   meta['desc'] = desc.string
   return None
 
+def handle_pad(pad, meta):
+  res = {}
+  res['type'] = 'pad'
+  res['name'] = pad['name']
+  res['x'] = pad['x']
+  res['y'] = pad['y']
+  dia = float(pad['diameter'])
+  res['drill'] = float(pad['drill'])
+  if pad.has_key('rot'):
+    res['rot'] = int(pad['rot'][1:])
+  shape = 'round'
+  if pad.has_key('shape'): shape = pad['shape']
+  if shape == 'round':
+    res['shape'] = 'circle'
+    res['r'] = dia/2
+  elif shape == 'square':
+    res['shape'] = 'rect'
+    res['dx'] = dia
+    res['dy'] = dia
+  elif shape == 'long':
+    res['shape'] = 'rect'
+    res['ro'] = 100
+    res['dx'] = 2*dia
+    res['dy'] = dia
+  elif shape == 'offset':
+    res['shape'] = 'rect'
+    res['ro'] = 100
+    res['dx'] = 2*dia
+    res['dy'] = dia
+    res['drill_dx'] = -dia/2
+  elif shape == 'octagon':
+    res['shape'] == 'octagon'
+    res['r'] = dia/2
+  return res
+    
+
 def handle_unknown(x, meta):
   res = {}
   res['type'] = 'unknown'
@@ -255,11 +291,12 @@ def import_footprint(soup, name):
   for x in package.contents:
     if type(x) == Tag:
       result = {
-        'text': handle_text,
-        'smd': handle_smd,
-        'wire': handle_wire,
         'circle': handle_circle,
         'description': handle_description,
+        'pad': handle_pad,
+        'smd': handle_smd,
+        'text': handle_text,
+        'wire': handle_wire,
       }.get(x.name, handle_unknown)(x, meta)
       if result != None: l.append(result)
   return l
