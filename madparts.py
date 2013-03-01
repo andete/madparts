@@ -24,7 +24,7 @@ class MainWin(QtGui.QMainWindow):
 
     self.settings = QtCore.QSettings()
     if not 'library' in self.settings.childGroups():
-      example_lib = QtCore.QDir('library').absolutePath()
+      example_lib = QtCore.QDir('examples').absolutePath()
       self.lib_dir = {'Examples':example_lib}
       self.lib_exist = {'Examples':True}
       self.save_libraries()
