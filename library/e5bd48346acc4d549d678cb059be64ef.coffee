@@ -32,11 +32,8 @@ footprint = () ->
 
   pads[0].ro = 100
 
-  dot = new Dot(line_width)
+  dot = new Dot line_width
   dot.x = -half
   dot.y = half - 1
-  #dot.drill = 0.1
-  #dot.drill_dx = 0.1
-  #dot.drill_dy = 0.1
 
   combine [name, value, pads, silk, dot]

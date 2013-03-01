@@ -53,6 +53,11 @@ class GLDraw:
     self.rect_round_loc = self.rect_shader.uniformLocation("round")
     self.rect_drill_loc = self.rect_shader.uniformLocation("drill")
     self.rect_drill_offset_loc = self.rect_shader.uniformLocation("drill_offset")
+    self.octagon_shader = make_shader("octagon")
+    self.octagon_size_loc = self.octagon_shader.uniformLocation("size")
+    self.octagon_move_loc = self.octagon_shader.uniformLocation("move")
+    self.octagon_drill_loc = self.octagon_shader.uniformLocation("drill")
+    self.octagon_drill_offset_loc = self.octagon_shader.uniformLocation("drill_offset")
 
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
@@ -118,6 +123,32 @@ class GLDraw:
     drill_dy = fget(shape,'drill_dy')
  
     self._circle(x, y, rx, ry, drill, drill_dx, drill_dy)
+    if 'name' in shape:
+      self._txt(shape, rx*2, ry*2, x, y)
+
+  def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
+    self.octagon_shader.bind()
+    self.octagon_shader.setUniformValue(self.octagon_move_loc, x, y)
+    self.square_data_vbo.bind()
+    glEnableClientState(GL_VERTEX_ARRAY)
+    glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
+    self.octagon_shader.setUniformValue(self.octagon_size_loc, dx, dy)
+    self.octagon_shader.setUniformValue(self.octagon_drill_loc, drill, 0.0)
+    self.octagon_shader.setUniformValue(self.octagon_drill_offset_loc, drill_dx, drill_dy)
+    glDrawArrays(GL_QUADS, 0, 4)
+    self.octagon_shader.release() 
+
+  def octagon(self, shape):
+    r = fget(shape, 'r', 0.0)
+    dx = fget(shape, 'dx', r*2)
+    dy = fget(shape, 'dy', r*2)
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    drill = fget(shape,'drill')
+    drill_dx = fget(shape,'drill_dx')
+    drill_dy = fget(shape,'drill_dy')
+ 
+    self._octagon(x, y, dx, dy, drill, drill_dx, drill_dy)
     if 'name' in shape:
       self._txt(shape, rx*2, ry*2, x, y)
 
@@ -191,6 +222,7 @@ class GLDraw:
       if 'shape' in shape:
         if shape['shape'] == 'rect': self.rect(shape)
         if shape['shape'] == 'circle': self.circle(shape)
+        if shape['shape'] == 'octagon': self.octagon(shape)
         if shape['shape'] == 'line': self.line(shape)
       elif shape['type'] == 'label':
         self.label(shape)
