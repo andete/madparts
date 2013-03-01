@@ -17,7 +17,14 @@ type_to_layer_number_dict = {
   'value': 27,
 }
 
-layer_number_to_type_dict = dict([(y,x) for (x,y) in type_to_layer_number_dict.items()])
+# assymetric
+layer_number_to_type_dict = {
+  1: 'smd',
+  16: 'pad',
+  21: 'silk',
+  25: 'silk',
+  27: 'silk',
+}
 
 # TODO: get from eagle XML isof hardcoded; 
 # however in practice this is quite low prio as everybody probably
@@ -30,6 +37,7 @@ def layer_number_to_type(layer):
 
 # this can still use plenty of abstraction
 def rect(soup, package, shape):
+  # TODO deal with type=pad
   smd = soup.new_tag('smd')
   smd['name'] = shape['name']
   smd['x'] = fget(shape, 'x')
@@ -59,6 +67,7 @@ def label(soup, package, shape):
   package.append(label)
   
 def circle(soup, package, shape):
+  # TODO deal with type=pad
   r = fget(shape, 'dx') / 2
   r = fget(shape, 'r', r)
   rx = fget(shape, 'rx', r)
@@ -69,7 +78,7 @@ def circle(soup, package, shape):
     ry = fget(shape, 'ry', r)
   x = fget(shape,'x')
   y = fget(shape,'y')
-  w = 0.25 # TODO
+  w = fget(shape,'w')
   circle = soup.new_tag('circle')
   circle['x'] = x
   circle['y'] = y
@@ -119,6 +128,7 @@ def generate(soup, inter, package):
       if shape['shape'] == 'circle': circle(soup, package, shape)
       if shape['shape'] == 'line': line(soup, package, shape)
       if shape['shape'] == 'label': label(soup, package, shape)
+      # TODO deal with shape=octagon
 
 def _check(soup):
   if soup.eagle == None:
@@ -190,6 +200,7 @@ def handle_text(text, meta):
 def handle_smd(smd, meta):
   res = {}
   res['type'] = 'smd'
+  res['shape'] = 'rect'
   res['name'] = smd['name']
   res['dx'] = float(smd['dx'])
   res['dy'] = float(smd['dy'])
@@ -218,7 +229,8 @@ def handle_circle(circle, meta):
   res = {}
   res['type'] = layer_number_to_type(int(circle['layer']))
   res['shape'] = 'circle'
-  w = 0.25 # TODO
+  w =float(circle['width'])
+  res['w'] = w
   res['r'] = float(circle['radius']) + w/2
   res['x'] = float(circle['x'])
   res['y'] = float(circle['y'])
@@ -268,6 +280,7 @@ def handle_unknown(x, meta):
   res = {}
   res['type'] = 'unknown'
   res['value'] = str(x)
+  res['shape'] = 'unknown'
   return res
 
 def import_footprint(soup, name):

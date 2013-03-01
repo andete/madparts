@@ -58,6 +58,11 @@ class Dot
     @type = 'silk'
     @shape = 'circle'
 
+class Line
+   constructor: ->
+     @type = 'silk'
+     @shape = 'line'
+
 rot = (o) ->
    b = clone(o)
    b.dx = o.dy
@@ -108,6 +113,11 @@ class Value
     @type = 'silk'
     @shape = 'label'
     @value = 'VALUE'
+
+class Label
+  constructor: (@value) ->
+    @type = 'silk'
+    @shape = 'label'
 
 silk_square = (half_line_size, line_width) ->
     ls = half_line_size

@@ -5,6 +5,8 @@ import os.path, re, string
 
 import PyV8
 
+import jydinter
+
 supported_formats = ['1.0']
 
 from PyV8 import JSError
@@ -108,7 +110,3 @@ def new_coffee(new_id, new_name):
 footprint = () ->
   []
 """ % (new_name, new_id)
-
-def generate_simple_coffee(footprint_inter):
-  return "foo"
-  # BUSY

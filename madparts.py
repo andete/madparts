@@ -8,7 +8,7 @@ import math, time, traceback, re
 
 from PySide import QtGui, QtCore
 
-import jydcoffee, jydgldraw, jydlibrary, jydinter
+import jydcoffee, jydgldraw, jydlibrary, jydinter, jydcoffeesimple
 from jyddefaultsettings import default_settings
 from jyddialogs import *
 
@@ -471,10 +471,10 @@ class MainWin(QtGui.QMainWindow):
     #print footprint_names, selected_library
     l = []
     for footprint_name in footprint_names:
-      footprint_inter = export.eagle.import_footprint(soup, footprint_name) 
-      l.append(footprint_inter)
-    for footprint_inter in l:
-      print jydcofee.generate_simple_cofee(footprint_inter)
+      inter = export.eagle.import_footprint(soup, footprint_name) 
+      l.append(inter)
+    for inter in l:
+      print jydcoffeesimple.generate_coffee(inter)
 
   ### OTHER METHODS
 
@@ -493,9 +493,6 @@ class MainWin(QtGui.QMainWindow):
   def compile(self):
     def _add_names(res):
       if res == None: return None
-      def generate_ints():
-        for i in xrange(1, 10000):
-          yield i
       g = generate_ints()
       def _c(x):
         if 'type' in x:
