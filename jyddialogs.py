@@ -9,7 +9,9 @@ import export.eagle
 
 def library_combo(parent):
   l_combo = QtGui.QComboBox()
-  selected = parent.active_library
+  selected = parent.selected_library
+  if selected == None:
+    selected = parent.active_library
   for x in parent.lib_dir.items():
     l_combo.addItem(x[0], x)
     if not parent.lib_exist[x[0]]:

@@ -16,6 +16,8 @@ class Footprint():
     with open(path) as f:
       code = f.read()
     meta = jydcoffee.eval_coffee_meta(code)
+    if not 'name' in meta:
+      raise Exception('Error loading footprint from %s' % (path))
     self.name = meta['name']
     self.id = meta['id']
     self.identify = ('footprint', (self.lib_name, self.id))

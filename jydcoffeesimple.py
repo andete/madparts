@@ -153,8 +153,10 @@ def generate_coffee(inter):
       result = simple_dispatch.get(key, simple_unknown)(g, x)
       l.append(result)
   l = sorted(l, lambda (n1,s1),(n2,s2): cmp(n1,n2))
-  l = map(lambda (n,s): s, l)
-  lj = ''.join(l)
-  lj = '  ' + lj.replace('\n', '\n  ')
-  return meta + "footprint = () ->\n" + lj
+  lines = map(lambda (n,s): s, l)
+  varnames = map(lambda (n,s): n, l)
+  combine = '['+ (','.join(varnames)) + ']\n'
+  lines_joined = ''.join(lines)
+  lines_joined = '  ' + lines_joined.replace('\n', '\n  ')
+  return meta + "footprint = () ->\n" + lines_joined + combine
     

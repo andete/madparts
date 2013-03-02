@@ -11,7 +11,8 @@ def add_names(inter):
   def _c(x):
     if 'type' in x:
       if x['type'] in ['smd', 'pad']:
-        x['name'] = str(g.next())
+        if not 'name' in x:
+          x['name'] = str(g.next())
     else:
       x['type'] = 'silk' # default type
     return x

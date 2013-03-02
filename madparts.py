@@ -471,13 +471,27 @@ class MainWin(QtGui.QMainWindow):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, soup, selected_library) = dialog.get_data()
-    #print footprint_names, selected_library
+    lib_dir = QtCore.QDir(self.lib_dir[selected_library])
     l = []
     for footprint_name in footprint_names:
       inter = export.eagle.import_footprint(soup, footprint_name) 
-      l.append(inter)
-    for inter in l:
-      print jydcoffeesimple.generate_coffee(inter)
+      l.append((footprint_name, inter))
+    cl = []
+    for (footprint_name, inter) in l:
+      try:
+       coffee = jydcoffeesimple.generate_coffee(inter)
+       cl.append((footprint_name, coffee))
+      except Exception as ex:
+        tb = traceback.format_exc()
+        s = "warning: skipping footprint %s\nerror: %s" % (footprint_name, str(ex) + '\n' + tb)
+        QtGui.QMessageBox.warning(self, "warning", s)
+    for (footprint_name, coffee) in cl:
+      meta = jydcoffee.eval_coffee_meta(coffee)
+      new_file_name = lib_dir.filePath("%s.coffee" % (meta['id']))
+      with open(new_file_name, 'w+') as f:
+        f.write(coffee)
+    self.status('Importing done.')
+
 
   ### OTHER METHODS
 
