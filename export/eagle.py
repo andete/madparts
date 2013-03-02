@@ -184,7 +184,7 @@ def handle_text(text, meta):
   s = text.string
   layer = int(text['layer'])
   size = float(text['size'])
-  y = float(text['y'])
+  y = float(text['y']) + size/2
   x = float(text['x']) + len(s)*size/2
   res['value'] = s
   if layer == 25 and s == '>NAME':

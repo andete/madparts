@@ -490,8 +490,8 @@ class MainWin(QtGui.QMainWindow):
       new_file_name = lib_dir.filePath("%s.coffee" % (meta['id']))
       with open(new_file_name, 'w+') as f:
         f.write(coffee)
+    self.rescan_library(selected_library)
     self.status('Importing done.')
-
 
   ### OTHER METHODS
 

@@ -19,6 +19,7 @@ def new_coffee_meta(meta):
 def _add_if(x, a, varname, key):
   if key in x:
     a = a + "%s.%s = %s\n" % (varname, key, x[key])
+  return a
 
 def _simple_rect(prefix, constructor, x):
   varname = "%s%s" % (prefix, x['name'])
@@ -32,8 +33,8 @@ def _simple_rect(prefix, constructor, x):
 """ % (varname, constructor, varname, x['name'], 
        varname, x['x'], varname, x['y'], 
        varname, x['dx'], varname, x['dy'])
-  _add_if(x, a, varname, 'rot')
-  _add_if(x, a, varname, 'ro')
+  a = _add_if(x, a, varname, 'rot')
+  a = _add_if(x, a, varname, 'ro')
   return (varname, a)
 
 def simple_smd_rect(g, x):
