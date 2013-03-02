@@ -271,7 +271,7 @@ class MainWin(QtGui.QMainWindow):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = jydcoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
-    lib_dir = QtCore.QDir(self.libraries[new_lib])
+    lib_dir = QtCore.QDir(self.lib_dir[new_lib])
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -292,7 +292,7 @@ class MainWin(QtGui.QMainWindow):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = jydcoffee.new_coffee(new_id, new_name)
-    lib_dir = QtCore.QDir(self.libraries[new_lib])
+    lib_dir = QtCore.QDir(self.lib_dir[new_lib])
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -314,7 +314,7 @@ class MainWin(QtGui.QMainWindow):
     fn = my_id + '.coffee'
     old_lib = self.active_library
     new_code = old_code.replace("#name %s" % (old_name), "#name %s" % (new_name))
-    new_lib_dir = QtCore.QDir(self.libraries[new_lib])
+    new_lib_dir = QtCore.QDir(self.lib_dir[new_lib])
     new_file_name = new_lib_dir.filePath(fn)
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -323,7 +323,7 @@ class MainWin(QtGui.QMainWindow):
     if old_lib == new_lib: 
       self.rescan_library(old_lib, my_id) # just to update the name
     else:
-      old_lib_dir = QtCore.QDir(self.libraries[old_lib])
+      old_lib_dir = QtCore.QDir(self.lib_dir[old_lib])
       old_lib_dir.remove(fn)
       self.rescan_library(old_lib)
       self.rescan_library(new_lib, my_id)
@@ -373,7 +373,7 @@ class MainWin(QtGui.QMainWindow):
     self.selected_library = None
     self._tree_footprint_selected()
     (lib_name, fpid) = x
-    directory = self.libraries[lib_name]
+    directory = self.lib_dir[lib_name]
     fn = fpid + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
@@ -394,7 +394,7 @@ class MainWin(QtGui.QMainWindow):
     self.glw.updateGL()
 
   def remove_footprint(self):
-    directory = self.libraries[self.active_library]
+    directory = self.lib_dir[self.active_library]
     fn = self.active_footprint_id + '.coffee'
     QtCore.QDir(directory).remove(fn)
     # fall back to first_foot in library, if any
@@ -412,7 +412,7 @@ class MainWin(QtGui.QMainWindow):
           library.first_foot.select(self.tree_selection_model)
           self.active_footprint_id = first_foot.id
           self.active_library = first_foot.lib_name
-    directory = self.libraries[self.active_library]
+    directory = self.lib_dir[self.active_library]
     fn = self.active_footprint_id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
@@ -424,7 +424,8 @@ class MainWin(QtGui.QMainWindow):
     dialog = AddLibraryDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (name, directory) = dialog.get_data()
-    self.libraries[name] = directory
+    self.lib_dir[name] = directory
+    self.lib_exists[name] = True
     self.save_libraries()
     root = self.model.invisibleRootItem()
     lib = jydlibrary.Library(name, directory)
@@ -442,7 +443,8 @@ class MainWin(QtGui.QMainWindow):
     dialog = DisconnectLibraryDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     lib_name = dialog.get_data()
-    del self.libraries[lib_name]
+    del self.lib_dir[lib_name]
+    del self.lib_exist[lib_name]
     self.save_libraries()
     root = self.model.invisibleRootItem()
     for row_index in range(0, root.rowCount()):
@@ -457,7 +459,7 @@ class MainWin(QtGui.QMainWindow):
         library.first_foot.select(self.tree_selection_model)
         self.active_footprint_id = library.first_foot.id
         self.active_library = library.first_foot.lib_name
-        directory = self.libraries[self.active_library]
+        directory = self.lib_dir[self.active_library]
         fn = self.active_footprint_id + '.coffee'
         ffn = QtCore.QDir(directory).filePath(fn)
         with open(ffn) as f:
@@ -482,8 +484,8 @@ class MainWin(QtGui.QMainWindow):
     return self.settings.value(key, default_settings[key])
 
   def library_by_directory(self, directory):
-    for x in self.libraries.keys():
-      if self.libraries[x] == directory:
+    for x in self.lib_dir.keys():
+      if self.lib_dir[x] == directory:
         return x
     return None
 
