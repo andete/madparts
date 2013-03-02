@@ -10,7 +10,7 @@
 uniform vec2 size;  // size in x and y direction
 uniform vec2 move;  // location
 uniform vec2 round; // roundness of corners
-uniform vec2 drill; // drill: radius
+uniform vec2 drill; // drill diameter
 uniform vec2 drill_offset;
 
 // output:

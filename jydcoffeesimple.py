@@ -44,8 +44,7 @@ def simple_pad_rect(g, x):
   (varname, a) = _simple_rect('rpad', 'Pad', x)
   a = a + "%s.shape = 'rect'\n" % (varname)
   a = a + "%s.drill = %s\n" % (varname, x['drill'])
-  if 'drill_dx' in x:
-    a = a + "%s.drill_dx = %s\n" % (varname, x['drill_dx'])
+  a = _add_if(x, a, varname, 'drill_dx')
   return (varname, a)
 
 def _simple_pad_circle_octagon(prefix, x):
@@ -57,9 +56,11 @@ def _simple_pad_circle_octagon(prefix, x):
 %s.x = %s
 %s.y = %s
 %s.r = %s
+%s.drill = %s
 """ % (varname, varname, x['name'],
-       varname, x['x'], varname, x['y'], 
-       varname, x['r'])
+       varname, x['shape'], varname, x['x'],
+       varname, x['y'], varname, x['r'], varname, x['drill'])
+  a = _add_if(x, a, varname, 'drill_dx')
   return (varname, a)
 
 def simple_pad_circle(g, x):

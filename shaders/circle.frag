@@ -9,13 +9,14 @@ varying float drill2; // drill: radius
 varying vec2 drill_offset2;
 
 void main() {
+  float drill3 = drill2/2;
   float x = pos2.x / radius2.x;
   float y = pos2.y / radius2.y;
   float dist = x * x + y * y;
   if (dist <= 1) {
     float x2 = pos2.x-drill_offset2.x;
     float y2 = pos2.y-drill_offset2.y;
-    if (x2*x2 + y2*y2 >= drill2*drill2) {
+    if (x2*x2 + y2*y2 >= drill3*drill3) {
       gl_FragColor = gl_Color;
     }
   }

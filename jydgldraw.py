@@ -143,7 +143,7 @@ class GLDraw:
  
     self._octagon(x, y, dx, dy, drill, drill_dx, drill_dy)
     if 'name' in shape:
-      self._txt(shape, rx*2, ry*2, x, y)
+      self._txt(shape, dx, dy, x, y)
 
   def rect(self, shape):
     x = fget(shape, 'x')
@@ -177,7 +177,8 @@ class GLDraw:
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
     if 'name' in shape:
-      self._txt(shape ,dx, dy, x, y)
+      m = min(dx, dy)
+      self._txt(shape ,m, m, x, y)
 
   def line(self, shape):
     x1 = fget(shape, 'x1')

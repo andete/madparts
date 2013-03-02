@@ -53,6 +53,10 @@ class Smd
     @shape = 'rect'
     @ro = 0
 
+class Pad
+  constructor: ->
+    @type = 'pad'
+
 class Dot
   constructor: (@r) ->
     @type = 'silk'

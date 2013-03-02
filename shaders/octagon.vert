@@ -9,13 +9,13 @@
 // input:
 uniform vec2 size;  // size in x and y direction
 uniform vec2 move;  // location
-uniform vec2 drill; // drill: radius
+uniform vec2 drill; // drill diameter
 uniform vec2 drill_offset;
 
 // output:
 varying vec2 pos2;    // adjusted position
 varying vec2 size2;   // size in x and y direction
-varying float drill2; // drill: radius
+varying float drill2; // drill diameter
 varying vec2 drill_offset2;
 
 void main() {
