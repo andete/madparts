@@ -27,17 +27,10 @@ class GLDraw:
 
   def __init__(self, font, zoom):
     self.color = {}
-    self.txt_color = {}
     self.color['silk'] = (1.0, 1.0, 1.0)
-    self.txt_color['silk'] = (0.0, 0.0, 0.0)
     self.color['smd'] =  (0.0, 0.0, 1.0)
-    self.txt_color['smd'] =  (1.0, 1.0, 1.0)
     self.color['pad'] =  (0.0, 1.0, 0.0)
-    self.txt_color['pad'] =  (1.0, 1.0, 1.0)
-    self.color['label'] =  (1.0, 1.0, 1.0)
-    self.txt_color['label'] =  (1.0, 1.0, 1.0)
     self.color['meta'] =  (1.0, 1.0, 1.0)
-    self.txt_color['meta'] =  (1.0, 1.0, 1.0)
 
     self.font = font
     self.set_zoom(zoom)
@@ -70,7 +63,7 @@ class GLDraw:
       s = shape['name']
     else:
       s = shape['value']
-    (r,g,b) = self.txt_color[shape['type']]
+    (r,g,b) = self.color[shape['type']]
     glColor3f(r,g,b)
     l = len(s)
     dxp = dx * self.zoom # dx in pixels
@@ -224,8 +217,7 @@ class GLDraw:
         if shape['shape'] == 'circle': self.circle(shape)
         if shape['shape'] == 'octagon': self.octagon(shape)
         if shape['shape'] == 'line': self.line(shape)
-      elif shape['type'] == 'label':
-        self.label(shape)
+        if shape['shape'] == 'label': self.label(shape)
 
 class JYDGLWidget(QGLWidget):
 
