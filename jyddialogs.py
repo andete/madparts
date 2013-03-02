@@ -238,7 +238,7 @@ class AddLibraryDialog(QtGui.QDialog):
     result = QtGui.QFileDialog.getExistingDirectory(self, "Select Directory")
     if result == '': return
     self.dir_edit.setText(result)
-    if result in self.parent.libraries.values():
+    if result in self.parent.lib_dir.values():
       self.dir_error = 'directory already exists as library'
       self.dir_ok = False
     else:
@@ -250,7 +250,7 @@ class AddLibraryDialog(QtGui.QDialog):
     if name == '':
       self.name_error = 'please provide a name'
       self.name_ok = False
-    elif name in self.parent.libraries.keys():
+    elif name in self.parent.lib_dir.keys():
       self.name_error = 'name is already in use'
       self.name_ok = False
     else:

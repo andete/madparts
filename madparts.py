@@ -173,6 +173,7 @@ class MainWin(QtGui.QMainWindow):
     _add('&Disconnect', self.disconnect_library)
     _add('&Import', self.import_footprints)
     _add('&Reload', self.reload_library)
+    _add('&New', self.new_footprint)
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -425,7 +426,7 @@ class MainWin(QtGui.QMainWindow):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (name, directory) = dialog.get_data()
     self.lib_dir[name] = directory
-    self.lib_exists[name] = True
+    self.lib_exist[name] = True
     self.save_libraries()
     root = self.model.invisibleRootItem()
     lib = jydlibrary.Library(name, directory)
