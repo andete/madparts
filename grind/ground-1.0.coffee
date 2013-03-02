@@ -59,7 +59,7 @@ class Dot
     @shape = 'circle'
 
 class Line
-   constructor: ->
+   constructor: (@w) ->
      @type = 'silk'
      @shape = 'line'
 

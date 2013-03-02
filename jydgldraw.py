@@ -63,8 +63,8 @@ class GLDraw:
       s = shape['name']
     else:
       s = shape['value']
-    (r,g,b) = self.color[shape['type']]
-    glColor3f(r,g,b)
+    #(r,g,b) = self.color[shape['type']]
+    glColor3f(1.0, 1.0, 1.0)
     l = len(s)
     dxp = dx * self.zoom # dx in pixels
     dyp = dy * self.zoom # dy in pixels
