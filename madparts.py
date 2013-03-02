@@ -526,20 +526,30 @@ class MainWin(QtGui.QMainWindow):
       self.executed_footprint = []
       s = str(ex)
       s = s.replace('JSError: Error: ', '')
-      self.te2.setPlainText(s)
+      self.te2.setPlainText('coffee error:\n' + s)
       self.status(s)
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2-150, 150])
     except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
       self.executed_footprint = []
-      self.te2.setPlainText(str(ex))
+      self.te2.setPlainText('coffee error:\n' + str(ex))
       self.status(str(ex))
+      [s1, s2] = self.lsplitter.sizes()
+      self.lsplitter.setSizes([s1+s2-150, 150])
+    except RuntimeError as ex:
+      if str(ex) == 'maximum recursion depth exceeded while calling a Python object':
+        msg = 'Error: please make sure your coffeescript does not contain self-referencing recursive elements because those can\'t be compiled into a result at the moment'
+      else:
+        tb = traceback.format_exc()
+        msg = str(ex) + "\n"+tb
+      self.executed_footprint = []
+      self.te2.setPlainText(msg)
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2-150, 150])
     except Exception as ex:
       self.executed_footprint = []
       tb = traceback.format_exc()
-      self.te2.setPlainText(str(ex) + "\n"+tb)
+      self.te2.setPlainText('other error:\n' + str(ex) + "\n"+tb)
       self.status(str(ex))
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2-150, 150])
