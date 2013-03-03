@@ -248,8 +248,11 @@ def handle_pad(pad, meta):
   res['name'] = pad['name']
   res['x'] = pad['x']
   res['y'] = pad['y']
-  dia = float(pad['diameter'])
   res['drill'] = float(pad['drill'])
+  if pad.has_key('diameter'):
+    dia = float(pad['diameter'])
+  else:
+    dia = res['drill'] * 1.5
   if pad.has_key('rot'):
     res['rot'] = int(pad['rot'][1:])
   shape = 'round'
@@ -273,7 +276,7 @@ def handle_pad(pad, meta):
     res['dy'] = dia
     res['drill_dx'] = -dia/2
   elif shape == 'octagon':
-    res['shape'] == 'octagon'
+    res['shape'] = 'octagon'
     res['r'] = dia/2
   return res
     
