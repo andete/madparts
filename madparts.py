@@ -508,17 +508,6 @@ class MainWin(QtGui.QMainWindow):
     self.statusBar().showMessage(s)
 
   def compile(self):
-    def _add_names(res):
-      if res == None: return None
-      g = generate_ints()
-      def _c(x):
-        if 'type' in x:
-          if x['type'] in ['smd', 'pad']:
-            x['name'] = str(g.next())
-        else:
-          x['type'] = 'silk' # default type
-        return x
-      return [_c(x) for x in res]
 
     code = self.te1.toPlainText()
     self.executed_footprint = []
@@ -528,7 +517,7 @@ class MainWin(QtGui.QMainWindow):
         inter = jydinter.add_names(inter)
       self.executed_footprint = inter
       self.te2.setPlainText(str(inter))
-      self.glw.set_shapes(inter)
+      self.glw.set_shapes(jydinter.sort_for_display(inter))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)

@@ -23,3 +23,16 @@ def get_meta(inter):
     if shape['type'] == 'meta':
       return shape
   return None
+
+def sort_for_display(inter):
+  h = {
+    'silk': 2,
+    'docu': 1,
+    'smd': 3,
+    'pad': 4,
+  }
+  def _sort(x1, x2):
+    t1 = h.get(x1['type'], 0)
+    t2 = h.get(x2['type'], 0)
+    return cmp(t1, t2)
+  return sorted(inter, _sort)
