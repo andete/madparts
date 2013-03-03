@@ -15,6 +15,7 @@ type_to_layer_number_dict = {
   'silk': 21,
   'name': 25,
   'value': 27,
+  'docu': 51,
 }
 
 # assymetric
@@ -24,6 +25,7 @@ layer_number_to_type_dict = {
   21: 'silk',
   25: 'silk',
   27: 'silk',
+  51: 'docu',
 }
 
 # TODO: get from eagle XML isof hardcoded; 
@@ -193,6 +195,8 @@ def handle_text(text, meta):
     res['value'] = 'VALUE'
   if x != 0: res['x'] = x
   if y != 0: res['y'] = y
+  if text.has_key('size'):
+    res['dy'] = text['size']
   return res
 
 # {'name': '5', 'type': 'smd', 'shape': 'rect', 'dx': 1.67, 'dy': 0.36, 'y': -0.4, 'x': -4.5, 'ro': 50, 'adj': 0}
@@ -206,12 +210,10 @@ def handle_smd(smd, meta):
   res['dy'] = float(smd['dy'])
   res['x'] = float(smd['x'])
   res['y'] = float(smd['y'])
-  res['ro'] = smd['roundness']
   if smd.has_key('rot'):
     res['rot'] = int(smd['rot'][1:])
-  ro = smd['roundness']
-  if ro != None:
-    res['ro'] = int(ro)
+  if smd.has_key('roundness'):
+    res['ro'] = smd['roundness']
   return res
 
 def handle_wire(wire, meta):

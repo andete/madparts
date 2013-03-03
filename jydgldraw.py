@@ -28,6 +28,7 @@ class GLDraw:
   def __init__(self, font, zoom):
     self.color = {}
     self.color['silk'] = (1.0, 1.0, 1.0)
+    self.color['docu'] = (1.0, 1.0, 0.0)
     self.color['smd'] =  (0.0, 0.0, 1.0)
     self.color['pad'] =  (0.0, 1.0, 0.0)
     self.color['meta'] =  (1.0, 1.0, 1.0)

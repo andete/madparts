@@ -80,8 +80,8 @@ def simple_silk_circle(g, x):
        varname, x['y'], varname, x['r'])
   return (varname, a)
 
-def simple_silk_line(g, x):
-  varname = "silk%s" % (g.next())
+def _simple_line(prefix, g, x):
+  varname = "%s%s" % (prefix, g.next())
   a = """\
 %s = new Line %s
 %s.x1 = %s
@@ -93,6 +93,14 @@ def simple_silk_line(g, x):
        varname, x['y2'])
   return (varname, a)
 
+def simple_silk_line(g, x):
+  return _simple_line('silk', g, x)
+
+def simple_docu_line(g, x):
+  (varname, a) = _simple_line('docu', g, x)
+  a = a + ("%s.type = 'docu'\n" % (varname))
+  return (varname, a)
+
 def _simple_name_value(prefix, constructor, g, x):
   varname = "%s%s" % (prefix, g.next())
   a = """\
@@ -102,13 +110,14 @@ def _simple_name_value(prefix, constructor, g, x):
   return (varname, a)
 
 def _simple_silk_label(g, x):
-  print x
   varname = "label%s" % (g.next())
   a = """\
 %s = new Label '%s'
 %s.x = %s
 %s.y = %s
-""" % (varname, x['value'], varname, x['x']. varname, x['y'])
+%s.dy = %s
+""" % (varname, x['value'], varname, x['x'], varname, x['y'],
+       varname, x['dy'])
   return (varname, a)
 
 def simple_silk_label(g, x):
@@ -140,6 +149,7 @@ simple_dispatch = {
  'silk_circle': simple_silk_circle,
  'silk_line': simple_silk_line,
  'silk_label': simple_silk_label,
+ 'docu_line': simple_docu_line,
 }
 
 def generate_coffee(inter):
