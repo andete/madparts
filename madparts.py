@@ -411,8 +411,8 @@ class MainWin(QtGui.QMainWindow):
         library = root.child(row_index)
         if library.first_foot != None:
           library.first_foot.select(self.tree_selection_model)
-          self.active_footprint_id = first_foot.id
-          self.active_library = first_foot.lib_name
+          self.active_footprint_id = library.first_foot.id
+          self.active_library = library.first_foot.lib_name
     directory = self.lib_dir[self.active_library]
     fn = self.active_footprint_id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
@@ -517,7 +517,7 @@ class MainWin(QtGui.QMainWindow):
         inter = jydinter.add_names(inter)
       self.executed_footprint = inter
       self.te2.setPlainText(str(inter))
-      self.glw.set_shapes(jydinter.sort_for_display(inter))
+      self.glw.set_shapes(jydinter.prepare_for_display(inter))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)

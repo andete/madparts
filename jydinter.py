@@ -24,7 +24,7 @@ def get_meta(inter):
       return shape
   return None
 
-def sort_for_display(inter):
+def prepare_for_display(inter):
   h = {
     'silk': 2,
     'docu': 1,
@@ -35,4 +35,13 @@ def sort_for_display(inter):
     t1 = h.get(x1['type'], 0)
     t2 = h.get(x2['type'], 0)
     return cmp(t1, t2)
-  return sorted(inter, _sort)
+  sinter = sorted(inter, _sort)
+  def check(x):
+    if 'shape' in x and x['shape'] == 'rect':
+      if 'x1' in x and 'x2' in x and 'y1' in x and 'y2' in x:
+        x['x'] = (x['x1'] + x['x2'])/2
+        x['y'] = (x['y1'] + x['y2'])/2
+        x['dx'] = abs(x['x1'] - x['x2'])
+        x['dy'] = abs(x['y1'] - x['y2'])
+    return x
+  return map(check, sinter)

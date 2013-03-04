@@ -51,7 +51,11 @@ class Smd
   constructor: ->
     @type = 'smd'
     @shape = 'rect'
-    @ro = 0
+    
+class Rect
+  constructor: ->
+    @type = 'silk'
+    @shape = 'rect'
 
 class Pad
   constructor: ->

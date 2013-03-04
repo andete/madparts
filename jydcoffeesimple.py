@@ -16,35 +16,49 @@ def new_coffee_meta(meta):
     a = a + ("#desc %s\n" % (line))
   return a
 
-def _add_if(x, a, varname, key):
+def _add_if(x, a, varname, key, quote = False):
   if key in x:
-    a = a + "%s.%s = %s\n" % (varname, key, x[key])
+    if not quote:
+      a = a + "%s.%s = %s\n" % (varname, key, x[key])
+    else:
+      a = a + "%s.%s = '%s'\n" % (varname, key, x[key])
   return a
 
-def _simple_rect(prefix, constructor, x):
-  varname = "%s%s" % (prefix, x['name'])
+def _simple_rect(prefix, constructor, x, g):
+  if 'name' in x:
+    name = x['name']
+  else:
+    name = str(g.next())
+  varname = "%s%s" % (prefix, name)
   a = """\
 %s = new %s
-%s.name = '%s'
-%s.x = %s
-%s.y = %s
-%s.dx = %s
-%s.dy = %s
-""" % (varname, constructor, varname, x['name'], 
-       varname, x['x'], varname, x['y'], 
-       varname, x['dx'], varname, x['dy'])
+""" % (varname, constructor)
+  a = _add_if(x, a, varname, 'name', True)
   a = _add_if(x, a, varname, 'rot')
   a = _add_if(x, a, varname, 'ro')
+  a = _add_if(x, a, varname, 'x')
+  a = _add_if(x, a, varname, 'y')
+  a = _add_if(x, a, varname, 'dx')
+  a = _add_if(x, a, varname, 'dy')
+  a = _add_if(x, a, varname, 'x1')
+  a = _add_if(x, a, varname, 'y1')
+  a = _add_if(x, a, varname, 'x2')
+  a = _add_if(x, a, varname, 'y2')
   return (varname, a)
 
 def simple_smd_rect(g, x):
-  return _simple_rect('smd', 'Smd', x)
+  return _simple_rect('smd', 'Smd', x, g)
 
 def simple_pad_rect(g, x):
-  (varname, a) = _simple_rect('rpad', 'Pad', x)
+  (varname, a) = _simple_rect('rpad', 'Pad', x, g)
   a = a + "%s.shape = 'rect'\n" % (varname)
   a = a + "%s.drill = %s\n" % (varname, x['drill'])
   a = _add_if(x, a, varname, 'drill_dx')
+  return (varname, a)
+
+def simple_docu_rect(g, x):
+  (varname, a) = _simple_rect('rect', 'Rect', x, g)
+  a = a + ("%s.type = 'docu'\n" % (varname))
   return (varname, a)
 
 def _simple_pad_circle_octagon(prefix, x):
@@ -150,6 +164,7 @@ simple_dispatch = {
  'silk_line': simple_silk_line,
  'silk_label': simple_silk_label,
  'docu_line': simple_docu_line,
+ 'docu_rect': simple_docu_rect,
 }
 
 def generate_coffee(inter):

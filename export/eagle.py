@@ -130,7 +130,7 @@ def generate(soup, inter, package):
       if shape['shape'] == 'circle': circle(soup, package, shape)
       if shape['shape'] == 'line': line(soup, package, shape)
       if shape['shape'] == 'label': label(soup, package, shape)
-      # TODO deal with shape=octagon
+      # TODO deal with shape octagon
 
 def _check(soup):
   if soup.eagle == None:
@@ -214,6 +214,18 @@ def handle_smd(smd, meta):
     res['rot'] = int(smd['rot'][1:])
   if smd.has_key('roundness'):
     res['ro'] = smd['roundness']
+  return res
+
+def handle_rect(rect, meta):
+  res = {}
+  res['type'] = layer_number_to_type(int(rect['layer']))
+  res['shape'] = 'rect'
+  res['x1'] = float(rect['x1'])
+  res['y1'] = float(rect['y1'])
+  res['x2'] = float(rect['x2'])
+  res['y2'] = float(rect['y2'])
+  if rect.has_key('rot'):
+    res['rot'] = int(rect['rot'][1:])
   return res
 
 def handle_wire(wire, meta):
@@ -311,6 +323,8 @@ def import_footprint(soup, name):
         'smd': handle_smd,
         'text': handle_text,
         'wire': handle_wire,
+        'rectangle': handle_rect,
       }.get(x.name, handle_unknown)(x, meta)
       if result != None: l.append(result)
   return l
+

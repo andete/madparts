@@ -63,8 +63,9 @@ class GLDraw:
   def _txt(self, shape, dx, dy, x, y):
     if 'name' in shape:
       s = shape['name']
-    else:
+    elif 'value' in shape:
       s = shape['value']
+    else: return
     #(r,g,b) = self.color[shape['type']]
     glColor3f(1.0, 1.0, 1.0)
     l = len(s)
