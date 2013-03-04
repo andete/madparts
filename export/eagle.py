@@ -1,7 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import StringIO, uuid
+import StringIO, uuid, re
 
 from xml.sax.saxutils import escape
 
@@ -179,6 +179,13 @@ def list_names(fn):
     else: return None
   return ([(p['name'], desc(p)) for p in packages], soup)
 
+def clean_name(name):
+  if len(name) > 2 and name[0:1] == 'P$':
+    name = name[2:]
+    # this might cause name clashes :(
+  # get rid of @ suffixes
+  return re.sub('@\d+$', '', name)
+
 def handle_text(text, meta):
   res = {}
   res['type'] = 'silk'
@@ -205,7 +212,7 @@ def handle_smd(smd, meta):
   res = {}
   res['type'] = 'smd'
   res['shape'] = 'rect'
-  res['name'] = smd['name']
+  res['name'] = clean_name(smd['name'])
   res['dx'] = float(smd['dx'])
   res['dy'] = float(smd['dy'])
   res['x'] = float(smd['x'])
@@ -257,7 +264,7 @@ def handle_description(desc, meta):
 def handle_pad(pad, meta):
   res = {}
   res['type'] = 'pad'
-  res['name'] = pad['name']
+  res['name'] = clean_name(pad['name'])
   res['x'] = pad['x']
   res['y'] = pad['y']
   res['drill'] = float(pad['drill'])
