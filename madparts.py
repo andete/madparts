@@ -9,7 +9,6 @@ import math, time, traceback, re
 from PySide import QtGui, QtCore
 
 import jydcoffee, jydgldraw, jydlibrary, jydinter, jydcoffeesimple
-from jyddefaultsettings import default_settings
 from jyddialogs import *
 
 from syntax.jydjssyntax import JSHighlighter
@@ -44,6 +43,9 @@ class MainWin(QtGui.QMainWindow):
     fileMenu = menuBar.addMenu('&File')
     self.add_action(fileMenu, '&Quit', self.close, 'Ctrl+Q')
 
+    editMenu = menuBar.addMenu('&Edit')
+    self.add_action(editMenu, '&Preferences', self.preferences)
+
     footprintMenu = menuBar.addMenu('&Footprint')
     self.add_action(footprintMenu, '&Clone', self.clone_footprint)
     self.add_action(footprintMenu, '&Remove', self.remove_footprint)
@@ -76,42 +78,6 @@ class MainWin(QtGui.QMainWindow):
     self.selected_library = None
 
   ### GUI HELPERS
-
-  def _settings(self):
-    vbox = QtGui.QVBoxLayout()
-    form_layout = QtGui.QFormLayout()
-    self.settings_gldx = QtGui.QLineEdit(str(self.setting('gl/dx')))
-    self.settings_gldx.setValidator(QtGui.QIntValidator(100,1000))
-    form_layout.addRow("GL dx", self.settings_gldx) 
-    self.settings_gldy = QtGui.QLineEdit(str(self.setting('gl/dy')))
-    self.settings_gldy.setValidator(QtGui.QIntValidator(100,1000))
-    form_layout.addRow("GL dy", self.settings_gldy) 
-    self.settings_glzoomf = QtGui.QLineEdit(str(self.setting('gl/zoomfactor')))
-    self.settings_glzoomf.setValidator(QtGui.QIntValidator(1,250))
-    form_layout.addRow("zoom factor", self.settings_glzoomf) 
-    font_hbox = QtGui.QHBoxLayout()
-    self.settings_font_filename = QtGui.QLineEdit(str(self.setting('gl/fontfile')))
-    self.settings_font_filename.setReadOnly(True)
-    font_button = QtGui.QPushButton("Browse")
-    font_button.clicked.connect(self.get_font)
-    font_hbox.addWidget(self.settings_font_filename)
-    font_hbox.addWidget(font_button)
-    font_widget = QtGui.QWidget()
-    font_widget.setLayout(font_hbox)
-    form_layout.addRow("font", font_widget) 
-    self.settings_key_idle = QtGui.QLineEdit(str(self.setting('gui/keyidle')))
-    self.settings_key_idle.setValidator(QtGui.QDoubleValidator(0.0,5.0,2))
-    form_layout.addRow("key idle", self.settings_key_idle) 
-    vbox.addLayout(form_layout)
-    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.RestoreDefaults
-    button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
-    rest_but = button_box.button(QtGui.QDialogButtonBox.RestoreDefaults)
-    rest_but.clicked.connect(self.settings_restore_defaults)
-    button_box.accepted.connect(self.settings_accepted)
-    vbox.addWidget(button_box)
-    settings_widget = QtGui.QWidget()
-    settings_widget.setLayout(vbox)
-    return settings_widget
 
   def _make_model(self):
     self.model = QtGui.QStandardItemModel()
@@ -200,7 +166,6 @@ class MainWin(QtGui.QMainWindow):
     lqtab = QtGui.QTabWidget()
     lqtab.addTab(self._tree(), "library")
     lqtab.addTab(self._footprint(), "footprint")
-    lqtab.addTab(self._settings(), "settings")
     lqtab.setCurrentIndex(1)
     self.left_qtab = lqtab
     return lqtab
@@ -241,27 +206,9 @@ class MainWin(QtGui.QMainWindow):
 
   ### GUI SLOTS
 
-  def settings_restore_defaults(self):
-    self.settings_gldx.setText(str(default_settings['gl/dx']))
-    self.settings_gldy.setText(str(default_settings['gl/dy']))
-    self.settings_glzoomf.setText(str(default_settings['gl/zoomfactor']))
-    self.settings_font_filename.setText(str(default_settings['gl/fontfile']))
-    self.settings_key_idle.setText(str(default_settings['gui/keyidle']))
-
-  def settings_accepted(self):
-    self.settings.setValue('gl/dx', self.settings_gldx.text())
-    self.settings.setValue('gl/dy', self.settings_gldy.text())
-    self.settings.setValue('gl/zoomfactor', self.settings_glzoomf.text())
-    self.settings.setValue('gl/fontfile', self.settings_font_filename.text())
-    self.settings.setValue('gui/keyidle', self.settings_key_idle.text())
-    self.status("Settings updated.")
-
-  def get_font(self):
-    result = QtGui.QFileDialog.getOpenFileName(self,
-      "Select Font", filter="Truetype Font (*.ttf)")
-    font_filename = result[0]
-    if (font_filename == ''): return
-    self.settings_font_filename.setText(font_filename)
+  def preferences(self):
+    dialog = PreferencesDialog(self)
+    dialog.exec_()
 
   def clone_footprint(self):    
     if self.executed_footprint == []:

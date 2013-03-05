@@ -5,6 +5,8 @@ import uuid
 
 from PySide import QtGui, QtCore
 
+from jyddefaultsettings import default_settings
+
 import export.eagle
 
 def library_combo(parent):
@@ -350,3 +352,67 @@ class ImportFootprintsDialog(QtGui.QDialog):
   def get_data(self):
     indices = self.tree_selection_model.selectedIndexes()
     return ([self.model.data(i) for i in indices], self.soup, self.l_combo.currentText())
+
+class PreferencesDialog(QtGui.QDialog):
+
+  def __init__(self, parent):
+    super(PreferencesDialog, self).__init__(parent)
+    self.parent = parent
+    vbox = QtGui.QVBoxLayout()
+    form_layout = QtGui.QFormLayout()
+    self.settings_gldx = QtGui.QLineEdit(str(parent.setting('gl/dx')))
+    self.settings_gldx.setValidator(QtGui.QIntValidator(100,1000))
+    form_layout.addRow("GL dx", self.settings_gldx) 
+    self.settings_gldy = QtGui.QLineEdit(str(parent.setting('gl/dy')))
+    self.settings_gldy.setValidator(QtGui.QIntValidator(100,1000))
+    form_layout.addRow("GL dy", self.settings_gldy) 
+    self.settings_glzoomf = QtGui.QLineEdit(str(parent.setting('gl/zoomfactor')))
+    self.settings_glzoomf.setValidator(QtGui.QIntValidator(1,250))
+    form_layout.addRow("zoom factor", self.settings_glzoomf) 
+    font_hbox = QtGui.QHBoxLayout()
+    self.settings_font_filename = QtGui.QLineEdit(str(parent.setting('gl/fontfile')))
+    self.settings_font_filename.setReadOnly(True)
+    font_button = QtGui.QPushButton("Browse")
+    font_button.clicked.connect(self.get_font)
+    font_hbox.addWidget(self.settings_font_filename)
+    font_hbox.addWidget(font_button)
+    font_widget = QtGui.QWidget()
+    font_widget.setLayout(font_hbox)
+    form_layout.addRow("font", font_widget) 
+    self.settings_key_idle = QtGui.QLineEdit(str(parent.setting('gui/keyidle')))
+    self.settings_key_idle.setValidator(QtGui.QDoubleValidator(0.0,5.0,2))
+    form_layout.addRow("key idle", self.settings_key_idle) 
+    vbox.addLayout(form_layout)
+    buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.RestoreDefaults | QtGui.QDialogButtonBox.Cancel
+    button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    rest_but = button_box.button(QtGui.QDialogButtonBox.RestoreDefaults)
+    rest_but.clicked.connect(self.settings_restore_defaults)
+    button_box.accepted.connect(self.settings_accepted)
+    button_box.rejected.connect(self.reject)
+    vbox.addWidget(button_box)
+    settings_widget = QtGui.QWidget()
+    self.setLayout(vbox)
+
+  def settings_restore_defaults(self):
+    self.settings_gldx.setText(str(default_settings['gl/dx']))
+    self.settings_gldy.setText(str(default_settings['gl/dy']))
+    self.settings_glzoomf.setText(str(default_settings['gl/zoomfactor']))
+    self.settings_font_filename.setText(str(default_settings['gl/fontfile']))
+    self.settings_key_idle.setText(str(default_settings['gui/keyidle']))
+
+  def settings_accepted(self):
+    settings = self.parent.settings
+    settings.setValue('gl/dx', self.settings_gldx.text())
+    settings.setValue('gl/dy', self.settings_gldy.text())
+    settings.setValue('gl/zoomfactor', self.settings_glzoomf.text())
+    settings.setValue('gl/fontfile', self.settings_font_filename.text())
+    settings.setValue('gui/keyidle', self.settings_key_idle.text())
+    self.parent.status("Settings updated.")
+    self.accept()
+
+  def get_font(self):
+    result = QtGui.QFileDialog.getOpenFileName(self,
+      "Select Font", filter="Truetype Font (*.ttf)")
+    font_filename = result[0]
+    if (font_filename == ''): return
+    self.settings_font_filename.setText(font_filename)
