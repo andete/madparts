@@ -286,7 +286,7 @@ class MainWin(QtGui.QMainWindow):
       t = time.time()
       if (t - self.last_time < float(key_idle)/1000.0):
         self.timer.stop()
-        self.timer.start(key_idle)
+        self.timer.start(float(key_idle))
         return
       self.last_time = t
       if self.first_keypress:

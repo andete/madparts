@@ -32,7 +32,7 @@ footprint = () ->
 
   pads[0].ro = 100
 
-  dot = new Dot line_width
+  dot = new Disc line_width
   dot.x = -half
   dot.y = half - 1
   #dot.dx = 1

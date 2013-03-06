@@ -91,7 +91,7 @@ class GLDraw:
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     self._txt(shape, dx, dy, x, y)
 
-  def _circle(self, x, y, rx, ry, drill, drill_dx, drill_dy):
+  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy):
     self.circle_shader.bind()
     self.circle_shader.setUniformValue(self.circle_move_loc, x, y)
     self.square_data_vbo.bind()
@@ -103,7 +103,7 @@ class GLDraw:
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release() 
 
-  def circle(self, shape):
+  def disc(self, shape):
     r = fget(shape, 'dx') / 2
     r = fget(shape, 'r', r)
     rx = fget(shape, 'rx', r)
@@ -118,7 +118,7 @@ class GLDraw:
     drill_dx = fget(shape,'drill_dx')
     drill_dy = fget(shape,'drill_dy')
  
-    self._circle(x, y, rx, ry, drill, drill_dx, drill_dy)
+    self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
     if 'name' in shape:
       self._txt(shape, rx*2, ry*2, x, y)
 
@@ -209,8 +209,8 @@ class GLDraw:
     glVertex3f(x2+ddx, y2-ddy, 0)
     glVertex3f(x2-ddx, y2+ddy, 0)
     glEnd()
-    self._circle(x1, y1, r, r, 0.0, 0.0, 0.0)
-    self._circle(x2, y2, r, r, 0.0, 0.0, 0.0)
+    self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
+    self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)
     
   def draw(self, shapes):
     for shape in shapes:
@@ -218,7 +218,7 @@ class GLDraw:
       glColor3f(r,g,b)
       if 'shape' in shape:
         if shape['shape'] == 'rect': self.rect(shape)
-        if shape['shape'] == 'circle': self.circle(shape)
+        if shape['shape'] == 'disc': self.disc(shape)
         if shape['shape'] == 'octagon': self.octagon(shape)
         if shape['shape'] == 'line': self.line(shape)
         if shape['shape'] == 'label': self.label(shape)

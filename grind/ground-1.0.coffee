@@ -61,10 +61,10 @@ class Pad
   constructor: ->
     @type = 'pad'
 
-class Dot
+class Disc
   constructor: (@r) ->
     @type = 'silk'
-    @shape = 'dot'
+    @shape = 'disc'
 
 class Circle
   constructor: (@r) ->
