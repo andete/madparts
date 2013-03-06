@@ -292,7 +292,7 @@ class MainWin(QtGui.QMainWindow):
       if self.first_keypress:
         self.first_keypress = False
         self.timer.stop()
-        self.timer.start(key_idle)
+        self.timer.start(float(key_idle))
         return
     self.first_keypress = True
     self.compile()

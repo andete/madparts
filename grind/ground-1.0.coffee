@@ -64,6 +64,11 @@ class Pad
 class Dot
   constructor: (@r) ->
     @type = 'silk'
+    @shape = 'dot'
+
+class Circle
+  constructor: (@r) ->
+    @type = 'silk'
     @shape = 'circle'
 
 class Line

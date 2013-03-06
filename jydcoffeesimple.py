@@ -5,6 +5,14 @@ import string
 
 from jydutil import *
 
+def valid(varname, g):
+  def make_valid(c):
+    if not c in (string.ascii_letters + string.digits):
+      return "_%s_" % (g.next())
+    else:
+      return c
+  return ''.join([make_valid(x) for x in varname])
+
 def new_coffee_meta(meta):
   a = """
 #format 1.0
@@ -29,7 +37,7 @@ def _simple_rect(prefix, constructor, x, g):
     name = x['name']
   else:
     name = str(g.next())
-  varname = "%s%s" % (prefix, name)
+  varname = valid("%s%s" % (prefix, name), g)
   a = """\
 %s = new %s
 """ % (varname, constructor)
@@ -62,7 +70,7 @@ def simple_docu_rect(g, x):
   return (varname, a)
 
 def _simple_pad_circle_octagon(prefix, x):
-  varname = "%s%s" % (prefix, x['name'])
+  varname = valid("%s%s" % (prefix, x['name']), g)
   a = """\
 %s = new Pad
 %s.name = '%s'
@@ -86,7 +94,7 @@ def simple_pad_octagon(g, x):
 def simple_silk_circle(g, x):
   varname = "silk%s" % (g.next())
   a = """\
-%s = new Dot %s
+%s = new Circle %s
 %s.x = %s
 %s.y = %s
 %s.r = %s
