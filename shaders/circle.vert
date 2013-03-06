@@ -6,12 +6,14 @@
 // input
 uniform vec2 move;   // location
 uniform vec2 radius; // radius
-uniform vec2 drill; // drill diameter
+uniform vec2 inner;  // inner radius
+uniform vec2 drill;  // drill diameter
 uniform vec2 drill_offset;
 
 // output
 varying vec2 pos2;    // adjusted position
 varying vec2 radius2; // radius
+varying vec2 inner2;  // inner radius
 varying float drill2; // drill diameter
 varying vec2 drill_offset2;
 
@@ -28,4 +30,5 @@ void main() {
   radius2 = radius;
   drill2 = drill.x;
   drill_offset2 = drill_offset;
+  inner2 = inner;
 }
