@@ -92,14 +92,14 @@ class GLDraw:
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     self._txt(shape, dx, dy, x, y)
 
-  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy):
+  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
     self.circle_shader.bind()
     self.circle_shader.setUniformValue(self.circle_move_loc, x, y)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     self.circle_shader.setUniformValue(self.circle_radius_loc, rx, ry)
-    self.circle_shader.setUniformValue(self.circle_inner_loc, 0.0, 0.0)
+    self.circle_shader.setUniformValue(self.circle_inner_loc, irx, iry)
     self.circle_shader.setUniformValue(self.circle_drill_loc, drill, 0.0)
     self.circle_shader.setUniformValue(self.circle_drill_offset_loc, drill_dx, drill_dy)
     glDrawArrays(GL_QUADS, 0, 4)
@@ -121,6 +121,28 @@ class GLDraw:
     drill_dy = fget(shape,'drill_dy')
  
     self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
+    if 'name' in shape:
+      self._txt(shape, rx*2, ry*2, x, y)
+
+  def circle(self, shape):
+    r = fget(shape, 'dx') / 2
+    r = fget(shape, 'r', r)
+    rx = fget(shape, 'rx', r)
+    dy = fget(shape, 'dy') / 2
+    if dy > 0:
+      ry = fget(shape, 'ry', dy)
+    else:
+      ry = fget(shape, 'ry', r)
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    w = fget(shape,'w')
+    irx = fget(shape, 'irx', rx-w)
+    iry = fget(shape, 'iry', ry-w)
+    drill = fget(shape,'drill')
+    drill_dx = fget(shape,'drill_dx')
+    drill_dy = fget(shape,'drill_dy')
+ 
+    self._disc(x, y, rx, ry, drill, drill_dx, drill_dy, irx, iry)
     if 'name' in shape:
       self._txt(shape, rx*2, ry*2, x, y)
 
@@ -219,11 +241,12 @@ class GLDraw:
       (r,g,b) = self.color[shape['type']]
       glColor3f(r,g,b)
       if 'shape' in shape:
-        if shape['shape'] == 'rect': self.rect(shape)
+        if shape['shape'] == 'circle': self.circle(shape)
         if shape['shape'] == 'disc': self.disc(shape)
-        if shape['shape'] == 'octagon': self.octagon(shape)
-        if shape['shape'] == 'line': self.line(shape)
         if shape['shape'] == 'label': self.label(shape)
+        if shape['shape'] == 'line': self.line(shape)
+        if shape['shape'] == 'octagon': self.octagon(shape)
+        if shape['shape'] == 'rect': self.rect(shape)
 
 class JYDGLWidget(QGLWidget):
 

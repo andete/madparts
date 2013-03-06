@@ -67,7 +67,7 @@ class Disc
     @shape = 'disc'
 
 class Circle
-  constructor: (@r) ->
+  constructor: (@w) ->
     @type = 'silk'
     @shape = 'circle'
 

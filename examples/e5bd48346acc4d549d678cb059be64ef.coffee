@@ -35,7 +35,12 @@ footprint = () ->
   dot = new Disc line_width
   dot.x = -half
   dot.y = half - 1
-  #dot.dx = 1
-  #dot.shape = 'octagon'
+ 
+  dut = new Circle line_width
+  dut.r = 2
+  dut.irx = 2
+  dut.iry = 0.5
+  dut.drill = 2
+  dut.drill_dy = 0.25
 
-  combine [name, value, pads, silk, dot]
+  combine [name, value, pads, silk, dot, dut]
