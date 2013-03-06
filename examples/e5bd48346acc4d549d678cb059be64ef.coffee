@@ -37,10 +37,10 @@ footprint = () ->
   dot.y = half - 1
  
   dut = new Circle line_width
-  dut.r = 2
-  dut.irx = 2
-  dut.iry = 0.5
-  dut.drill = 2
-  dut.drill_dy = 0.25
+  dut.r = 1
+  #dut.irx = 2
+  #dut.iry = 0.5
+  #dut.drill = 2
+  #dut.drill_dy = 0.25
 
   combine [name, value, pads, silk, dot, dut]

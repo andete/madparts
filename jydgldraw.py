@@ -136,8 +136,12 @@ class GLDraw:
     x = fget(shape,'x')
     y = fget(shape,'y')
     w = fget(shape,'w')
-    irx = fget(shape, 'irx', rx-w)
-    iry = fget(shape, 'iry', ry-w)
+    irx = fget(shape, 'irx', rx)
+    rx = rx + w/2
+    irx = irx - w/2
+    iry = fget(shape, 'iry', ry)
+    ry = ry + w/2
+    iry = iry - w/2
     drill = fget(shape,'drill')
     drill_dx = fget(shape,'drill_dx')
     drill_dy = fget(shape,'drill_dy')
