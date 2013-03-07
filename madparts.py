@@ -520,7 +520,9 @@ class MainWin(QtGui.QMainWindow):
       self.status(s)
       return
     try:
-      export.eagle.export(self.export_library_filename, self.executed_footprint)
+      exporter = export.eagle.Export(self.export_library_filename)
+      exporter.export_footprint(self.executed_footprint)
+      exporter.save()
       self.status("Exported to "+self.export_library_filename+".")
     except Exception as ex:
       self.status(str(ex))
