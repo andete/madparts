@@ -420,11 +420,11 @@ class MainWin(QtGui.QMainWindow):
   def import_footprints(self):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (footprint_names, soup, selected_library) = dialog.get_data()
+    (footprint_names, importer, selected_library) = dialog.get_data()
     lib_dir = QtCore.QDir(self.lib_dir[selected_library])
     l = []
     for footprint_name in footprint_names:
-      inter = export.eagle.import_footprint(soup, footprint_name) 
+      inter = importer.import_footprint(footprint_name) 
       l.append((footprint_name, inter))
     cl = []
     for (footprint_name, inter) in l:

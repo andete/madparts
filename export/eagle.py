@@ -1,7 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import StringIO, uuid, re
+import StringIO, uuid, re, copy
 
 from xml.sax.saxutils import escape
 
@@ -172,168 +172,173 @@ def export(fn, shapes):
   generate(soup, shapes, found)
   save(fn, soup)
 
-def list_names(fn):
-  soup = load(fn)
-  v = _check(soup)
-  packages = soup.eagle.drawing.packages('package')
-  def desc(p):
-    if p.description != None: return p.description.string
-    else: return None
-  return ([(p['name'], desc(p)) for p in packages], soup)
+class Import:
 
-def clean_name(name):
-  if len(name) > 2 and name[0:1] == 'P$':
-    name = name[2:]
-    # this might cause name clashes :(
-  # get rid of @ suffixes
-  return re.sub('@\d+$', '', name)
+  def __init__(self, fn):
+    self.soup = load(fn)
+    _check(self.soup)
 
-def handle_text(text, meta):
-  res = {}
-  res['type'] = 'silk'
-  res['shape'] = 'label'
-  s = text.string
-  layer = int(text['layer'])
-  size = float(text['size'])
-  y = float(text['y']) + size/2
-  x = float(text['x']) + len(s)*size/2
-  res['value'] = s
-  if layer == 25 and s == '>NAME':
-    res['value'] = 'NAME'
-  elif layer == 27 and s == '>VALUE':
-    res['value'] = 'VALUE'
-  if x != 0: res['x'] = x
-  if y != 0: res['y'] = y
-  if text.has_key('size'):
-    res['dy'] = text['size']
-  return res
+  def list_names(self):
+    packages = self.soup.eagle.drawing.packages('package')
+    def desc(p):
+      if p.description != None: return p.description.string
+      else: return None
+    return [(p['name'], desc(p)) for p in packages]
 
-# {'name': '5', 'type': 'smd', 'shape': 'rect', 'dx': 1.67, 'dy': 0.36, 'y': -0.4, 'x': -4.5, 'ro': 50, 'adj': 0}
+  def import_footprint(self, name):
 
-def handle_smd(smd, meta):
-  res = {}
-  res['type'] = 'smd'
-  res['shape'] = 'rect'
-  res['name'] = clean_name(smd['name'])
-  res['dx'] = float(smd['dx'])
-  res['dy'] = float(smd['dy'])
-  res['x'] = float(smd['x'])
-  res['y'] = float(smd['y'])
-  if smd.has_key('rot'):
-    res['rot'] = int(smd['rot'][1:])
-  if smd.has_key('roundness'):
-    res['ro'] = smd['roundness']
-  return res
+    def package_has_name(tag):
+      if tag.name == 'package' and tag.has_key('name'):
+        n = tag['name']
+        if n == name:
+          return True
+        return False
 
-def handle_rect(rect, meta):
-  res = {}
-  res['type'] = layer_number_to_type(int(rect['layer']))
-  res['shape'] = 'rect'
-  res['x1'] = float(rect['x1'])
-  res['y1'] = float(rect['y1'])
-  res['x2'] = float(rect['x2'])
-  res['y2'] = float(rect['y2'])
-  if rect.has_key('rot'):
-    res['rot'] = int(rect['rot'][1:])
-  return res
+    [package] = self.soup.find_all(package_has_name)
+    meta = {}
+    meta['type'] = 'meta'
+    meta['name'] = name
+    meta['id'] = uuid.uuid4().hex
+    meta['desc'] = None
+    l = [meta]
 
-def handle_wire(wire, meta):
-  res = {}
-  res['type'] = layer_number_to_type(int(wire['layer']))
-  res['shape'] = 'line'
-  res['x1'] = float(wire['x1'])
-  res['y1'] = float(wire['y1'])
-  res['x2'] = float(wire['x2'])
-  res['y2'] = float(wire['y2'])
-  res['w'] = float(wire['width'])
-  return res
+    def clean_name(name):
+      if len(name) > 2 and name[0:1] == 'P$':
+        name = name[2:]
+        # this might cause name clashes :(
+        # get rid of @ suffixes
+      return re.sub('@\d+$', '', name)
 
-def handle_circle(circle, meta):
-  res = {}
-  res['type'] = layer_number_to_type(int(circle['layer']))
-  res['shape'] = 'circle'
-  w =float(circle['width'])
-  res['w'] = w
-  res['r'] = float(circle['radius']) + w/2
-  res['x'] = float(circle['x'])
-  res['y'] = float(circle['y'])
-  return res
+    def text(text):
+      res = {}
+      res['type'] = 'silk'
+      res['shape'] = 'label'
+      s = text.string
+      layer = int(text['layer'])
+      size = float(text['size'])
+      y = float(text['y']) + size/2
+      x = float(text['x']) + len(s)*size/2
+      res['value'] = s
+      if layer == 25 and s == '>NAME':
+        res['value'] = 'NAME'
+      elif layer == 27 and s == '>VALUE':
+        res['value'] = 'VALUE'
+      if x != 0: res['x'] = x
+      if y != 0: res['y'] = y
+      if text.has_key('size'):
+        res['dy'] = text['size']
+      return res
 
-def handle_description(desc, meta):
-  meta['desc'] = desc.string
-  return None
+    def smd(smd):
+      res = {}
+      res['type'] = 'smd'
+      res['shape'] = 'rect'
+      res['name'] = clean_name(smd['name'])
+      res['dx'] = float(smd['dx'])
+      res['dy'] = float(smd['dy'])
+      res['x'] = float(smd['x'])
+      res['y'] = float(smd['y'])
+      if smd.has_key('rot'):
+        res['rot'] = int(smd['rot'][1:])
+      if smd.has_key('roundness'):
+        res['ro'] = smd['roundness']
+      return res
 
-def handle_pad(pad, meta):
-  res = {}
-  res['type'] = 'pad'
-  res['name'] = clean_name(pad['name'])
-  res['x'] = pad['x']
-  res['y'] = pad['y']
-  res['drill'] = float(pad['drill'])
-  if pad.has_key('diameter'):
-    dia = float(pad['diameter'])
-  else:
-    dia = res['drill'] * 1.5
-  if pad.has_key('rot'):
-    res['rot'] = int(pad['rot'][1:])
-  shape = 'round'
-  if pad.has_key('shape'): shape = pad['shape']
-  if shape == 'round':
-    res['shape'] = 'circle'
-    res['r'] = dia/2
-  elif shape == 'square':
-    res['shape'] = 'rect'
-    res['dx'] = dia
-    res['dy'] = dia
-  elif shape == 'long':
-    res['shape'] = 'rect'
-    res['ro'] = 100
-    res['dx'] = 2*dia
-    res['dy'] = dia
-  elif shape == 'offset':
-    res['shape'] = 'rect'
-    res['ro'] = 100
-    res['dx'] = 2*dia
-    res['dy'] = dia
-    res['drill_dx'] = -dia/2
-  elif shape == 'octagon':
-    res['shape'] = 'octagon'
-    res['r'] = dia/2
-  return res
-    
+    def rect(rect):
+      res = {}
+      res['type'] = layer_number_to_type(int(rect['layer']))
+      res['shape'] = 'rect'
+      res['x1'] = float(rect['x1'])
+      res['y1'] = float(rect['y1'])
+      res['x2'] = float(rect['x2'])
+      res['y2'] = float(rect['y2'])
+      if rect.has_key('rot'):
+        res['rot'] = int(rect['rot'][1:])
+      return res
 
-def handle_unknown(x, meta):
-  res = {}
-  res['type'] = 'unknown'
-  res['value'] = str(x)
-  res['shape'] = 'unknown'
-  return res
+    def wire(wire):
+      res = {}
+      res['type'] = layer_number_to_type(int(wire['layer']))
+      res['shape'] = 'line'
+      res['x1'] = float(wire['x1'])
+      res['y1'] = float(wire['y1'])
+      res['x2'] = float(wire['x2'])
+      res['y2'] = float(wire['y2'])
+      res['w'] = float(wire['width'])
+      return res
 
-def import_footprint(soup, name):
-  def package_has_name(tag):
-    if tag.name == 'package' and tag.has_key('name'):
-      n = tag['name']
-      if n == name:
-        return True
-    return False
-  [package] = soup.find_all(package_has_name)
-  meta = {}
-  meta['type'] = 'meta'
-  meta['name'] = name
-  meta['id'] = uuid.uuid4().hex
-  meta['desc'] = None
-  l = [meta]
-  for x in package.contents:
-    if type(x) == Tag:
-      result = {
-        'circle': handle_circle,
-        'description': handle_description,
-        'pad': handle_pad,
-        'smd': handle_smd,
-        'text': handle_text,
-        'wire': handle_wire,
-        'rectangle': handle_rect,
-      }.get(x.name, handle_unknown)(x, meta)
-      if result != None: l.append(result)
-  return l
+    def circle(circle):
+      res = {}
+      res['type'] = layer_number_to_type(int(circle['layer']))
+      res['shape'] = 'circle'
+      w =float(circle['width'])
+      res['w'] = w
+      res['r'] = float(circle['radius']) + w/2
+      res['x'] = float(circle['x'])
+      res['y'] = float(circle['y'])
+      return res
+
+    def description(desc):
+      meta['desc'] = desc.string
+      return None
+
+    def pad(pad):
+      res = {}
+      res['type'] = 'pad'
+      res['name'] = clean_name(pad['name'])
+      res['x'] = pad['x']
+      res['y'] = pad['y']
+      res['drill'] = float(pad['drill'])
+      if pad.has_key('diameter'):
+        dia = float(pad['diameter'])
+      else:
+        dia = res['drill'] * 1.5
+      if pad.has_key('rot'):
+        res['rot'] = int(pad['rot'][1:])
+      shape = 'round'
+      if pad.has_key('shape'): shape = pad['shape']
+      if shape == 'round':
+        res['shape'] = 'circle'
+        res['r'] = dia/2
+      elif shape == 'square':
+        res['shape'] = 'rect'
+        res['dx'] = dia
+        res['dy'] = dia
+      elif shape == 'long':
+        res['shape'] = 'rect'
+        res['ro'] = 100
+        res['dx'] = 2*dia
+        res['dy'] = dia
+      elif shape == 'offset':
+        res['shape'] = 'rect'
+        res['ro'] = 100
+        res['dx'] = 2*dia
+        res['dy'] = dia
+        res['drill_dx'] = -dia/2
+      elif shape == 'octagon':
+        res['shape'] = 'octagon'
+        res['r'] = dia/2
+      return res
+      
+
+    def unknown(x):
+      res = {}
+      res['type'] = 'unknown'
+      res['value'] = str(x)
+      res['shape'] = 'unknown'
+      return res
+
+    for x in package.contents:
+      if type(x) == Tag:
+        result = {
+          'circle': circle,
+          'description': description,
+          'pad': pad,
+          'smd': smd,
+          'text': text,
+          'wire': wire,
+          'rectangle': rect,
+          }.get(x.name, unknown)(x)
+        if result != None: l.append(result)
+    return l
 
