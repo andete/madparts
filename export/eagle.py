@@ -91,8 +91,33 @@ class Export:
       package['name'] = name
 
     def pad(shape, layer):
-      # TODO
-      pass
+      pad = self.soup.new_tag('pad')
+      pad['name'] = shape['name']
+      pad['layer'] = type_to_layer_number('pad')
+      pad['x'] = fget(shape, 'x')
+      pad['y'] = fget(shape, 'y')
+      pad['drill'] = fget(shape, 'drill')
+      pad['rot'] = "R%d" % (fget(shape, 'rot'))
+      shape = 'circle'
+      if 'shape' in pad: shape = pad['shape']
+      if shape == 'circle':
+        pad['shape'] = 'round'
+        pad['diameter'] = pad['r']/2
+      elif shape == 'octagon':
+        pad['shape'] = 'octagon'
+        pad['diameter'] = pad['r']/2
+      elif shape == 'rect':
+        ro = iget(shape, 'ro')
+        if ro == 0: 
+          res['shape'] = 'square'
+          res['diameter'] = pad['dx']
+        elif 'drill_dx' in shape:
+          pad['shape'] = 'offset'
+          pad['diameter'] = pad['dy']
+        else:
+          pad['shape'] = 'long'
+          pad['diameter'] = pad['dy']
+      package.append(pad)
 
     def smd(shape):
       smd = self.soup.new_tag('smd')
@@ -103,7 +128,7 @@ class Export:
       smd['dy'] = fget(shape, 'dy')
       smd['roundness'] = iget(shape, 'ro')
       smd['rot'] = "R%d" % (fget(shape, 'rot'))
-      smd['layer'] = type_to_layer_number(shape['type'])
+      smd['layer'] = type_to_layer_number('smd')
       package.append(smd)
 
     def rect(shape, layer):
