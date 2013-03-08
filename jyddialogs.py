@@ -352,6 +352,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
     for (name, desc) in name_desc_list:
       name_item = QtGui.QStandardItem(name)
       name_item.setToolTip(desc)
+      name_item.setEditable(False)
       self.root.appendRow([name_item])
 
   def selection_changed(self, selected, deselected):
