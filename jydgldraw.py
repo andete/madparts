@@ -13,6 +13,7 @@ import numpy as np
 import math
 
 from jydutil import *
+from jyddefaultsettings import color_schemes
 
 def make_shader(name):
   print "compiling %s shaders" % (name)
@@ -25,17 +26,11 @@ def make_shader(name):
 
 class GLDraw:
 
-  def __init__(self, font, zoom):
-    self.color = {}
-    self.color['silk'] = (1.0, 1.0, 1.0)
-    self.color['docu'] = (1.0, 1.0, 0.0)
-    self.color['smd'] =  (0.0, 0.0, 1.0)
-    self.color['pad'] =  (0.0, 1.0, 0.0)
-    self.color['meta'] =  (1.0, 1.0, 1.0)
-    self.color['unknown'] =  (1.0, 0.0, 1.0)
+  def __init__(self, font, zoom, colorscheme):
 
     self.font = font
     self.set_zoom(zoom)
+    self.color = colorscheme
 
     self.circle_shader = make_shader("circle")
     self.circle_move_loc = self.circle_shader.uniformLocation("move")
@@ -67,8 +62,7 @@ class GLDraw:
     elif 'value' in shape:
       s = shape['value']
     else: return
-    #(r,g,b) = self.color[shape['type']]
-    glColor3f(1.0, 1.0, 1.0)
+    (r,g,b) = self.color[shape['type']]
     l = len(s)
     dxp = dx * self.zoom # dx in pixels
     dyp = dy * self.zoom # dy in pixels
@@ -257,6 +251,7 @@ class JYDGLWidget(QGLWidget):
   def __init__(self, parent):
     super(JYDGLWidget, self).__init__(parent)
     self.parent = parent
+    self.colorscheme = color_schemes[str(parent.setting('gl/colorscheme'))]
     start_zoomfactor = int(parent.setting('gl/zoomfactor'))
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
@@ -279,16 +274,25 @@ class JYDGLWidget(QGLWidget):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_LINE_SMOOTH)
-    glClearColor(0.0, 0.0, 0.0, 1.0)
+    (r,g,b) = self.colorscheme['background']
+    glClearColor(r, g, b, 0.0)
     glClear(GL_COLOR_BUFFER_BIT)
     self.make_dot_field_vbo()
-    self.gldraw = GLDraw(self.font, self.zoomfactor)
+    self.gldraw = GLDraw(self.font, self.zoomfactor, self.colorscheme)
 
   def paintGL(self):
+    new_colorscheme = color_schemes[str(self.parent.setting('gl/colorscheme'))]
+    if new_colorscheme != self.colorscheme:
+      (r,g,b) = new_colorscheme['background']
+      glClearColor(r, g, b, 0.0)
+      glClear(GL_COLOR_BUFFER_BIT)
+    self.colorscheme = new_colorscheme
+    self.gldraw.color = self.colorscheme
     if self.zoom_changed:
       self.gldraw.set_zoom(self.zoomfactor)
     glClear(GL_COLOR_BUFFER_BIT)
-    glColor3f(0.5, 0.5, 0.5)
+    (r, g, b) = self.colorscheme['grid']
+    glColor3f(r, g, b)
     self.dot_field_vbo.bind() # make this vbo the active one
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.dot_field_vbo)
@@ -296,7 +300,8 @@ class JYDGLWidget(QGLWidget):
     gldy = int(self.parent.setting('gl/dy'))
     glDrawArrays(GL_POINTS, 0, gldx * gldy)
 
-    glColor3f(1.0, 0.0, 0.0)
+    (r, g, b) = self.colorscheme['axes']
+    glColor3f(r, g, b)
     glLineWidth(1)
     glBegin(GL_LINES)
     glVertex3f(-100, 0, 0)

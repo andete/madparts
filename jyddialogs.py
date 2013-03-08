@@ -5,9 +5,17 @@ import uuid
 
 from PySide import QtGui, QtCore
 
-from jyddefaultsettings import default_settings
+from jyddefaultsettings import default_settings, color_schemes
 
 import export.eagle
+
+def color_scheme_combo(parent, current):
+  l_combo = QtGui.QComboBox()
+  for k in color_schemes.keys():
+    l_combo.addItem(k, k)
+    if k == current:
+      l_combo.setCurrentIndex(l_combo.count()-1)
+  return l_combo
 
 def library_combo(parent):
   l_combo = QtGui.QComboBox()
@@ -361,28 +369,30 @@ class PreferencesDialog(QtGui.QDialog):
     self.parent = parent
     vbox = QtGui.QVBoxLayout()
     form_layout = QtGui.QFormLayout()
-    self.settings_gldx = QtGui.QLineEdit(str(parent.setting('gl/dx')))
-    self.settings_gldx.setValidator(QtGui.QIntValidator(100,1000))
-    form_layout.addRow("GL dx", self.settings_gldx) 
-    self.settings_gldy = QtGui.QLineEdit(str(parent.setting('gl/dy')))
-    self.settings_gldy.setValidator(QtGui.QIntValidator(100,1000))
-    form_layout.addRow("GL dy", self.settings_gldy) 
-    self.settings_glzoomf = QtGui.QLineEdit(str(parent.setting('gl/zoomfactor')))
-    self.settings_glzoomf.setValidator(QtGui.QIntValidator(1,250))
-    form_layout.addRow("zoom factor", self.settings_glzoomf) 
+    self.gldx = QtGui.QLineEdit(str(parent.setting('gl/dx')))
+    self.gldx.setValidator(QtGui.QIntValidator(100,1000))
+    form_layout.addRow("GL dx", self.gldx) 
+    self.gldy = QtGui.QLineEdit(str(parent.setting('gl/dy')))
+    self.gldy.setValidator(QtGui.QIntValidator(100,1000))
+    form_layout.addRow("GL dy", self.gldy) 
+    self.glzoomf = QtGui.QLineEdit(str(parent.setting('gl/zoomfactor')))
+    self.glzoomf.setValidator(QtGui.QIntValidator(1,250))
+    form_layout.addRow("zoom factor", self.glzoomf) 
     font_hbox = QtGui.QHBoxLayout()
-    self.settings_font_filename = QtGui.QLineEdit(str(parent.setting('gl/fontfile')))
-    self.settings_font_filename.setReadOnly(True)
+    self.font_filename = QtGui.QLineEdit(str(parent.setting('gl/fontfile')))
+    self.font_filename.setReadOnly(True)
     font_button = QtGui.QPushButton("Browse")
     font_button.clicked.connect(self.get_font)
-    font_hbox.addWidget(self.settings_font_filename)
+    font_hbox.addWidget(self.font_filename)
     font_hbox.addWidget(font_button)
     font_widget = QtGui.QWidget()
     font_widget.setLayout(font_hbox)
     form_layout.addRow("font", font_widget) 
-    self.settings_key_idle = QtGui.QLineEdit(str(parent.setting('gui/keyidle')))
-    self.settings_key_idle.setValidator(QtGui.QDoubleValidator(0.0,5.0,2))
-    form_layout.addRow("key idle", self.settings_key_idle) 
+    self.key_idle = QtGui.QLineEdit(str(parent.setting('gui/keyidle')))
+    self.key_idle.setValidator(QtGui.QDoubleValidator(0.0,5.0,2))
+    form_layout.addRow("key idle", self.key_idle) 
+    self.color_scheme = color_scheme_combo(self, str(parent.setting('gl/colorscheme')))
+    form_layout.addRow("color scheme", self.color_scheme) 
     vbox.addLayout(form_layout)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.RestoreDefaults | QtGui.QDialogButtonBox.Cancel
     button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
@@ -395,19 +405,25 @@ class PreferencesDialog(QtGui.QDialog):
     self.setLayout(vbox)
 
   def settings_restore_defaults(self):
-    self.settings_gldx.setText(str(default_settings['gl/dx']))
-    self.settings_gldy.setText(str(default_settings['gl/dy']))
-    self.settings_glzoomf.setText(str(default_settings['gl/zoomfactor']))
-    self.settings_font_filename.setText(str(default_settings['gl/fontfile']))
-    self.settings_key_idle.setText(str(default_settings['gui/keyidle']))
+    self.gldx.setText(str(default_settings['gl/dx']))
+    self.gldy.setText(str(default_settings['gl/dy']))
+    self.glzoomf.setText(str(default_settings['gl/zoomfactor']))
+    self.font_filename.setText(str(default_settings['gl/fontfile']))
+    self.key_idle.setText(str(default_settings['gui/keyidle']))
+    default_color_scheme = str(default_settings['gui/colorscheme'])
+    for i in range(0, self.color_scheme.count()):
+      if self.color_scheme.itemText(i) == default_color_scheme:
+        self.color_scheme.setCurrentIndex(i)
+        break
 
   def settings_accepted(self):
     settings = self.parent.settings
-    settings.setValue('gl/dx', self.settings_gldx.text())
-    settings.setValue('gl/dy', self.settings_gldy.text())
-    settings.setValue('gl/zoomfactor', self.settings_glzoomf.text())
-    settings.setValue('gl/fontfile', self.settings_font_filename.text())
-    settings.setValue('gui/keyidle', self.settings_key_idle.text())
+    settings.setValue('gl/dx', self.gldx.text())
+    settings.setValue('gl/dy', self.gldy.text())
+    settings.setValue('gl/zoomfactor', self.glzoomf.text())
+    settings.setValue('gl/fontfile', self.font_filename.text())
+    settings.setValue('gui/keyidle', self.key_idle.text())
+    settings.setValue('gl/colorscheme', self.color_scheme.currentText())
     self.parent.status("Settings updated.")
     self.accept()
 
