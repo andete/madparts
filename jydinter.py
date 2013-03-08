@@ -36,7 +36,7 @@ def prepare_for_display(inter):
     t2 = h.get(x2['type'], 0)
     return cmp(t1, t2)
   sinter = sorted(inter, _sort)
-  def check(x):
+  def convert(x):
     if 'shape' in x and x['shape'] == 'rect':
       if 'x1' in x and 'x2' in x and 'y1' in x and 'y2' in x:
         x['x'] = (x['x1'] + x['x2'])/2
@@ -44,4 +44,4 @@ def prepare_for_display(inter):
         x['dx'] = abs(x['x1'] - x['x2'])
         x['dy'] = abs(x['y1'] - x['y2'])
     return x
-  return map(check, sinter)
+  return map(convert, sinter)

@@ -36,15 +36,15 @@ def layer_number_to_type(layer):
     }
   return layer_number_to_type_dict[layer]
 
-def _load(fn):
+def _load_xml_file(fn):
   with open(fn) as f:
     return BeautifulSoup(f, "xml")
   
-def _save(fn, soup):
+def _save_xml_file(fn, soup):
   with open(fn, 'w+') as f:
     f.write(str(soup))
 
-def _check(soup):
+def _check_xml(soup):
   if soup.eagle == None:
     raise Exception("Unknown file format")
   v = soup.eagle.get('version')
@@ -54,9 +54,9 @@ def _check(soup):
     raise Exception("Eagle 6.0 or later is required.")
   return v
 
-def check(fn):
-  soup = _load(fn)
-  v = _check(soup)
+def check_xml_file(fn):
+  soup = _load_xml_file(fn)
+  v = _check_xml(soup)
   return "Eagle CAD %s library" % (v)
 
 
@@ -66,11 +66,11 @@ class Export:
 
   def __init__(self, fn):
     self.fn = fn
-    self.soup = _load(fn)
-    _check(self.soup)
+    self.soup = _load_xml_file(fn)
+    _check_xml(self.soup)
 
   def save(self):
-    _save(self.fn, self.soup)
+    _save_xml_file(self.fn, self.soup)
 
   def export_footprint(self, inter):
     meta = jydinter.get_meta(inter)
@@ -181,8 +181,8 @@ class Export:
 class Import:
 
   def __init__(self, fn):
-    self.soup = _load(fn)
-    _check(self.soup)
+    self.soup = _load_xml_file(fn)
+    _check_xml(self.soup)
 
   def list_names(self):
     packages = self.soup.eagle.drawing.packages('package')

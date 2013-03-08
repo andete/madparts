@@ -33,7 +33,7 @@ def select_library(obj):
   filename = result[0]
   if (filename == ''): return
   try:
-    version = export.eagle.check(filename)
+    version = export.eagle.check_xml_file(filename)
     return ('eagle', version, filename)
   except Exception as ex:
     QtGui.QMessageBox.critical(obj, "error", str(ex))
