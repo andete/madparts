@@ -78,6 +78,9 @@ class Export:
     _save_xml_file(self.fn, self.soup)
 
   def export_footprint(self, inter):
+    # make a deep copy so we can make mods without harm
+    inter = copy.deepcopy(inter)
+    inter = self.add_ats_to_names(inter)
     meta = jydinter.get_meta(inter)
     name = eget(meta, 'name', 'Name not found')
     # check if there is an existing package
@@ -253,6 +256,27 @@ class Export:
           'smd': smd,
           }.get(shape['type'], unknown)(shape)
         # TODO octagon
+
+  def add_ats_to_names(self, inter):
+    t = {}
+    for x in inter:
+      if x['type'] == 'smd' or x['type'] == 'pad':
+        name = x['name']
+        if not name in t:
+          t[name] = 0
+        t[name] = t[name] + 1
+    multi_names = {}
+    for k in t.keys():
+      if t[k] > 1:
+        multi_names[k] = 1
+    def adapt(x):
+      if x['type'] == 'smd' or x['type'] == 'pad':
+        name = x['name']
+        if name in multi_names:
+          x['name'] = "%s@%d" % (name, multi_names[name])
+          multi_names[name] = multi_names[name] + 1
+      return x
+    return [adapt(x) for x in inter]
 
 ### IMPORT
 
