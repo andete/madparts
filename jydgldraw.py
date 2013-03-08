@@ -337,3 +337,21 @@ class JYDGLWidget(QGLWidget):
   def set_shapes(self, s):
     self.shapes = s
     self.updateGL()
+
+  def wheelEvent(self, event):
+    if (event.delta() != 0.0):
+      if event.delta() < 0.0:
+        if self.zoomfactor > 5:
+          self.zoomfactor = self.zoomfactor - 5
+          self.parent.zoom_selector.setText(str(self.zoomfactor))
+          self.zoom_changed = True
+          self.updateGL()
+      else:
+        if self.zoomfactor < 245:
+          self.zoom_changed = True
+          self.updateGL()
+          self.zoomfactor = self.zoomfactor + 5
+          self.parent.zoom_selector.setText(str(self.zoomfactor))
+          self.zoom_changed = True
+          self.updateGL()
+    event.ignore()
