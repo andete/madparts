@@ -53,6 +53,10 @@ class GLDraw:
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
 
+  def set_color(self, t):
+    (r,g,b,a) = self.color[t]
+    glColor4f(r,g,b,a)
+
   def set_zoom(self, zoom):
     self.zoom = float(zoom)
 
@@ -63,10 +67,9 @@ class GLDraw:
       s = shape['value']
     else: return
     if not on_pad:
-      (r,g,b) = self.color[shape['type']]
+      self.set_color(shape['type'])
     else:
-      (r,g,b) = self.color['silk']
-    glColor3f(r, g, b)
+      self.set_color('silk')
     l = len(s)
     dxp = dx * self.zoom # dx in pixels
     dyp = dy * self.zoom # dy in pixels
@@ -240,8 +243,7 @@ class GLDraw:
     
   def draw(self, shapes):
     for shape in shapes:
-      (r,g,b) = self.color[shape['type']]
-      glColor3f(r,g,b)
+      self.set_color(shape['type'])
       if 'shape' in shape:
         if shape['shape'] == 'circle': self.circle(shape)
         if shape['shape'] == 'disc': self.disc(shape)
@@ -278,8 +280,8 @@ class JYDGLWidget(QGLWidget):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_LINE_SMOOTH)
-    (r,g,b) = self.colorscheme['background']
-    glClearColor(r, g, b, 0.0)
+    (r,g,b,a) = self.colorscheme['background']
+    glClearColor(r, g, b, a)
     glClear(GL_COLOR_BUFFER_BIT)
     self.make_dot_field_vbo()
     self.gldraw = GLDraw(self.font, self.zoomfactor, self.colorscheme)
@@ -287,16 +289,16 @@ class JYDGLWidget(QGLWidget):
   def paintGL(self):
     new_colorscheme = color_schemes[str(self.parent.setting('gl/colorscheme'))]
     if new_colorscheme != self.colorscheme:
-      (r,g,b) = new_colorscheme['background']
-      glClearColor(r, g, b, 0.0)
+      (r,g,b,a) = new_colorscheme['background']
+      glClearColor(r, g, b, a)
       glClear(GL_COLOR_BUFFER_BIT)
     self.colorscheme = new_colorscheme
     self.gldraw.color = self.colorscheme
     if self.zoom_changed:
       self.gldraw.set_zoom(self.zoomfactor)
     glClear(GL_COLOR_BUFFER_BIT)
-    (r, g, b) = self.colorscheme['grid']
-    glColor3f(r, g, b)
+    (r, g, b, a) = self.colorscheme['grid']
+    glColor4f(r, g, b, a)
     self.dot_field_vbo.bind() # make this vbo the active one
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.dot_field_vbo)
@@ -304,8 +306,8 @@ class JYDGLWidget(QGLWidget):
     gldy = int(self.parent.setting('gl/dy'))
     glDrawArrays(GL_POINTS, 0, gldx * gldy)
 
-    (r, g, b) = self.colorscheme['axes']
-    glColor3f(r, g, b)
+    (r, g, b, a) = self.colorscheme['axes']
+    glColor4f(r, g, b, a)
     glLineWidth(1)
     glBegin(GL_LINES)
     glVertex3f(-100, 0, 0)
