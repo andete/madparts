@@ -4,6 +4,7 @@
 # TODO: rework approach
 
 import string
+from functools import partial
 
 from jydutil import *
 
@@ -71,15 +72,6 @@ def _simple_t_rect(t, g, x):
   a = a + ("%s.type = '%s'\n" % (varname, t))
   return (varname, a)
 
-def simple_docu_rect(g, x):
-  return _simple_t_rect('docu', g, x)
-
-def simple_restrict_rect(g, x):
-  return _simple_t_rect('restrict', g, x)
-
-def simple_stop_rect(g, x):
-  return _simple_t_rect('stop', g, x)
-
 def _simple_pad_circle_octagon(g, prefix, x):
   varname = valid("%s%s" % (prefix, x['name']), g)
   a = """\
@@ -121,13 +113,6 @@ def _simple_t_circle(t, g, x):
   a = a + ("%s.type = '%s'\n" % (varname, t))
   return (varname, a)
 
-def simple_docu_circle(g, x):
-  return _simple_t_circle('docu', g, x)
-def simple_restrict_circle(g, x):
-  return _simple_t_circle('restrict', g, x)
-def simple_stop_circle(g, x):
-  return _simple_t_circle('stop', g, x)
-
 def _simple_line(prefix, g, x):
   varname = "%s%s" % (prefix, g.next())
   a = """\
@@ -148,15 +133,6 @@ def _simple_t_line(t, g, x):
   (varname, a) = _simple_line(t, g, x)
   a = a + ("%s.type = '%s'\n" % (varname, t))
   return (varname, a)
-
-def simple_docu_line(g, x):
-  return _simple_t_line('docu', g, x)
-
-def simple_stop_line(g, x):
-  return _simple_t_line('stop', g, x)
-
-def simple_restrict_line(g, x):
-  return _simple_t_line('restrict', g, x)
 
 def _simple_name_value(prefix, constructor, g, x):
   varname = "%s%s" % (prefix, g.next())
@@ -206,15 +182,15 @@ simple_dispatch = {
  'silk_circle': simple_silk_circle,
  'silk_line': simple_silk_line,
  'silk_label': simple_silk_label,
- 'docu_circle': simple_docu_circle,
- 'docu_line': simple_docu_line,
- 'docu_rect': simple_docu_rect,
- 'restrict_circle': simple_restrict_circle,
- 'restrict_line': simple_restrict_line,
- 'restrict_rect': simple_restrict_rect,
- 'stop_circle': simple_stop_circle,
- 'stop_line': simple_stop_line,
- 'stop_rect': simple_stop_rect,
+ 'docu_circle': partial(_simple_t_circle, 'docu'),
+ 'docu_line': partial(_simple_t_line, 'docu'),
+ 'docu_rect': partial(_simple_t_rect, 'docu'),
+ 'restrict_circle': partial(_simple_t_circle, 'restrict'),
+ 'restrict_line': partial(_simple_t_line, 'restrict'),
+ 'restrict_rect': partial(_simple_t_rect, 'restrict'),
+ 'stop_circle': partial(_simple_t_circle, 'stop'),
+ 'stop_line': partial(_simple_t_line, 'stop'),
+ 'stop_rect': partial(_simple_t_rect, 'stop'),
 }
 
 def generate_coffee(inter):

@@ -416,7 +416,6 @@ class Import:
 
     for x in package.contents:
       if type(x) == Tag:
-        print x.name
         result = {
           'circle': circle,
           'description': description,
