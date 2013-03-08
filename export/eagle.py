@@ -32,6 +32,11 @@ def layer_number_to_type(layer):
     21: 'silk',
     25: 'silk',
     27: 'silk',
+    29: 'stop',
+    35: 'glue',
+    39: 'keepout',
+    41: 'restrict',
+    43: 'vrestrict',
     51: 'docu',
     }
   return layer_number_to_type_dict[layer]
@@ -367,7 +372,8 @@ class Import:
       res['name'] = clean_name(pad['name'])
       res['x'] = pad['x']
       res['y'] = pad['y']
-      res['drill'] = float(pad['drill'])
+      drill = float(pad['drill'])
+      res['drill'] = drill
       if pad.has_key('diameter'):
         dia = float(pad['diameter'])
       else:
@@ -378,7 +384,8 @@ class Import:
       if pad.has_key('shape'): shape = pad['shape']
       if shape == 'round':
         res['shape'] = 'circle'
-        res['r'] = dia/2
+        res['r'] = 0.0
+        if dia/2 > drill: res['r'] = dia/2
       elif shape == 'square':
         res['shape'] = 'rect'
         res['dx'] = dia
@@ -409,6 +416,7 @@ class Import:
 
     for x in package.contents:
       if type(x) == Tag:
+        print x.name
         result = {
           'circle': circle,
           'description': description,

@@ -142,7 +142,7 @@ class GLDraw:
  
     self._disc(x, y, rx, ry, drill, drill_dx, drill_dy, irx, iry)
     if 'name' in shape:
-      self._txt(shape, rx*2, ry*2, x, y)
+      self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y)
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
     self.octagon_shader.bind()

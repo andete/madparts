@@ -1,6 +1,8 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+# TODO: rework approach
+
 import string
 
 from jydutil import *
@@ -14,7 +16,7 @@ def valid(varname, g):
   return ''.join([make_valid(x) for x in varname])
 
 def new_coffee_meta(meta):
-  a = """
+  a = """\
 #format 1.0
 #name %s
 #id %s
@@ -64,12 +66,21 @@ def simple_pad_rect(g, x):
   a = _add_if(x, a, varname, 'drill_dx')
   return (varname, a)
 
-def simple_docu_rect(g, x):
-  (varname, a) = _simple_rect('rect', 'Rect', x, g)
-  a = a + ("%s.type = 'docu'\n" % (varname))
+def _simple_t_rect(t, g, x):
+  (varname, a) = _simple_rect(t, 'Rect', x, g)
+  a = a + ("%s.type = '%s'\n" % (varname, t))
   return (varname, a)
 
-def _simple_pad_circle_octagon(prefix, x):
+def simple_docu_rect(g, x):
+  return _simple_t_rect('docu', g, x)
+
+def simple_restrict_rect(g, x):
+  return _simple_t_rect('restrict', g, x)
+
+def simple_stop_rect(g, x):
+  return _simple_t_rect('stop', g, x)
+
+def _simple_pad_circle_octagon(g, prefix, x):
   varname = valid("%s%s" % (prefix, x['name']), g)
   a = """\
 %s = new Pad
@@ -86,13 +97,13 @@ def _simple_pad_circle_octagon(prefix, x):
   return (varname, a)
 
 def simple_pad_circle(g, x):
-  return _simple_pad_circle_octagon('cpad', x)
+  return _simple_pad_circle_octagon(g, 'cpad', x)
 
 def simple_pad_octagon(g, x):
-  return _simple_pad_circle_octagon('opad', x)
+  return _simple_pad_circle_octagon(g, 'opad', x)
 
-def simple_silk_circle(g, x):
-  varname = "silk%s" % (g.next())
+def _simple_circle(prefix, g, x):
+  varname = "%s%s" % (prefix, g.next())
   a = """\
 %s = new Circle %s
 %s.x = %s
@@ -101,6 +112,21 @@ def simple_silk_circle(g, x):
 """ % (varname, x['w'], varname, x['x'],
        varname, x['y'], varname, x['r'])
   return (varname, a)
+
+def simple_silk_circle(g, x):
+  return _simple_circle('silk', g, x)
+
+def _simple_t_circle(t, g, x):
+  (varname, a) = _simple_circle(t, g, x)
+  a = a + ("%s.type = '%s'\n" % (varname, t))
+  return (varname, a)
+
+def simple_docu_circle(g, x):
+  return _simple_t_circle('docu', g, x)
+def simple_restrict_circle(g, x):
+  return _simple_t_circle('restrict', g, x)
+def simple_stop_circle(g, x):
+  return _simple_t_circle('stop', g, x)
 
 def _simple_line(prefix, g, x):
   varname = "%s%s" % (prefix, g.next())
@@ -118,10 +144,19 @@ def _simple_line(prefix, g, x):
 def simple_silk_line(g, x):
   return _simple_line('silk', g, x)
 
-def simple_docu_line(g, x):
-  (varname, a) = _simple_line('docu', g, x)
-  a = a + ("%s.type = 'docu'\n" % (varname))
+def _simple_t_line(t, g, x):
+  (varname, a) = _simple_line(t, g, x)
+  a = a + ("%s.type = '%s'\n" % (varname, t))
   return (varname, a)
+
+def simple_docu_line(g, x):
+  return _simple_t_line('docu', g, x)
+
+def simple_stop_line(g, x):
+  return _simple_t_line('stop', g, x)
+
+def simple_restrict_line(g, x):
+  return _simple_t_line('restrict', g, x)
 
 def _simple_name_value(prefix, constructor, g, x):
   varname = "%s%s" % (prefix, g.next())
@@ -171,8 +206,15 @@ simple_dispatch = {
  'silk_circle': simple_silk_circle,
  'silk_line': simple_silk_line,
  'silk_label': simple_silk_label,
+ 'docu_circle': simple_docu_circle,
  'docu_line': simple_docu_line,
  'docu_rect': simple_docu_rect,
+ 'restrict_circle': simple_restrict_circle,
+ 'restrict_line': simple_restrict_line,
+ 'restrict_rect': simple_restrict_rect,
+ 'stop_circle': simple_stop_circle,
+ 'stop_line': simple_stop_line,
+ 'stop_rect': simple_stop_rect,
 }
 
 def generate_coffee(inter):
