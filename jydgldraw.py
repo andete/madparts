@@ -56,13 +56,17 @@ class GLDraw:
   def set_zoom(self, zoom):
     self.zoom = float(zoom)
 
-  def _txt(self, shape, dx, dy, x, y):
+  def _txt(self, shape, dx, dy, x, y, on_pad=False):
     if 'name' in shape:
       s = shape['name']
     elif 'value' in shape:
       s = shape['value']
     else: return
-    (r,g,b) = self.color[shape['type']]
+    if not on_pad:
+      (r,g,b) = self.color[shape['type']]
+    else:
+      (r,g,b) = self.color['silk']
+    glColor3f(r, g, b)
     l = len(s)
     dxp = dx * self.zoom # dx in pixels
     dyp = dy * self.zoom # dy in pixels
@@ -116,7 +120,7 @@ class GLDraw:
  
     self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
     if 'name' in shape:
-      self._txt(shape, rx*2, ry*2, x, y)
+      self._txt(shape, rx*2, ry*2, x, y, True)
 
   def circle(self, shape):
     r = fget(shape, 'dx') / 2
@@ -142,7 +146,7 @@ class GLDraw:
  
     self._disc(x, y, rx, ry, drill, drill_dx, drill_dy, irx, iry)
     if 'name' in shape:
-      self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y)
+      self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True)
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
     self.octagon_shader.bind()
@@ -168,7 +172,7 @@ class GLDraw:
  
     self._octagon(x, y, dx, dy, drill, drill_dx, drill_dy)
     if 'name' in shape:
-      self._txt(shape, dx, dy, x, y)
+      self._txt(shape, dx, dy, x, y, True)
 
   def rect(self, shape):
     x = fget(shape, 'x')
@@ -203,7 +207,7 @@ class GLDraw:
     self.rect_shader.release()
     if 'name' in shape:
       m = min(dx, dy)
-      self._txt(shape ,m, m, x, y)
+      self._txt(shape ,m, m, x, y, True)
 
   def line(self, shape):
     x1 = fget(shape, 'x1')
