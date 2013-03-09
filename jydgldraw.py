@@ -228,6 +228,8 @@ class GLDraw:
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
       m = min(dx, dy)
       self._txt(shape ,m, m, x, y, True)
