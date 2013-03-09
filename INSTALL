@@ -23,7 +23,26 @@ to be part of your favorite linux distrubution.
 MacOS-X
 =======
 
-TODO
+* python
+ 
+The latest MACOS-X comes with python 2.7 pre-installed. That being said,
+that python version is not supported by most 3rd party libraries, they
+recommend installing vanilla python from the python website.
+
+Get it at: http://python.org/download/
+Get the file: "Python 2.7.3 Mac OS X 64-bit/32-bit x86-64/i386 Installer"
+
+* pyside
+
+Get pyside from http://qt-project.org/wiki/PySide_Binaries_MacOSX
+Get the 1.1.0 version for python 2.7.
+
+* numpy
+
+Get it at http://sourceforge.net/projects/numpy/files/NumPy/1.7.0/
+Get the numpy-1.7.0-py2.7-python.org-macosx10.6.dmg
+
+* 
 
 Windows
 =======
