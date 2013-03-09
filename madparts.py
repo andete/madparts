@@ -14,7 +14,9 @@ import gui.gldraw
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple
 
-import jydlibrary, jydinter
+import inter.util
+
+import jydlibrary
 
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
@@ -431,12 +433,12 @@ class MainWin(QtGui.QMainWindow):
     lib_dir = QtCore.QDir(self.lib_dir[selected_library])
     l = []
     for footprint_name in footprint_names:
-      inter = importer.import_footprint(footprint_name) 
-      l.append((footprint_name, inter))
+      interim = importer.import_footprint(footprint_name) 
+      l.append((footprint_name, interim))
     cl = []
-    for (footprint_name, inter) in l:
+    for (footprint_name, interim) in l:
       try:
-       coffee = coffee.generatesimple.generate_coffee(inter)
+       coffee = coffee.generatesimple.generate_coffee(interim)
        cl.append((footprint_name, coffee))
       except Exception as ex:
         tb = traceback.format_exc()
@@ -469,12 +471,12 @@ class MainWin(QtGui.QMainWindow):
     code = self.te1.toPlainText()
     self.executed_footprint = []
     try:
-      inter = pycoffee.eval_coffee_footprint(code)
-      if inter != None:
-        inter = jydinter.add_names(inter)
-      self.executed_footprint = inter
-      self.te2.setPlainText(str(inter))
-      self.glw.set_shapes(jydinter.prepare_for_display(inter))
+      interim = pycoffee.eval_coffee_footprint(code)
+      if interim != None:
+        interim = inter.util.add_names(interim)
+      self.executed_footprint = interim
+      self.te2.setPlainText(str(interim))
+      self.glw.set_shapes(inter.util.prepare_for_display(interim))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)
@@ -493,6 +495,7 @@ class MainWin(QtGui.QMainWindow):
     except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
       self.executed_footprint = []
       self.te2.setPlainText('coffee error:\n' + str(ex))
+      print traceback.format_exc()
       self.status(str(ex))
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2-150, 150])

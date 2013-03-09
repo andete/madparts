@@ -5,8 +5,6 @@ import os.path, re, string
 
 import PyV8
 
-import jydinter
-
 supported_formats = ['1.0']
 
 from PyV8 import JSError

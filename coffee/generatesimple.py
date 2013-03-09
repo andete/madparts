@@ -193,11 +193,11 @@ simple_dispatch = {
  'stop_rect': partial(_simple_t_rect, 'stop'),
 }
 
-def generate_coffee(inter):
+def generate_coffee(interim):
   g = generate_ints()
   l = []
   meta = None
-  for x in inter:
+  for x in interim:
     t = x['type']
     if t == 'meta': meta = new_coffee_meta(x)
     else:
