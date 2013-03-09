@@ -47,20 +47,20 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(editMenu, '&Preferences', self.preferences)
 
     footprintMenu = menuBar.addMenu('&Footprint')
-    self.add_action(footprintMenu, '&Clone', self.clone_footprint)
-    self.add_action(footprintMenu, '&Remove', self.remove_footprint)
-    self.add_action(footprintMenu, '&New', self.new_footprint)
-    self.add_action(footprintMenu, '&Move', self.move_footprint)
+    self.add_action(footprintMenu, '&Clone', self.clone_footprint, 'Ctrl+Alt+C')
+    self.add_action(footprintMenu, '&Delete', self.remove_footprint, 'Ctrl+Alt+D')
+    self.add_action(footprintMenu, '&New', self.new_footprint, 'Ctrl+Alt+N')
+    self.add_action(footprintMenu, '&Move', self.move_footprint, 'Ctrl+Alt+M')
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
-    self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+X')
-    self.add_action(footprintMenu, '&Print', None)
-    self.add_action(footprintMenu, '&Reload', self.reload_footprint)
+    self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
+    self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
+    self.add_action(footprintMenu, '&Reload', self.reload_footprint, 'Ctrl+R')
 
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
     self.add_action(libraryMenu, '&Disconnect', self.disconnect_library)
-    self.add_action(libraryMenu, '&Import', self.import_footprints)
-    self.add_action(libraryMenu, '&Reload', self.reload_library)
+    self.add_action(libraryMenu, '&Import', self.import_footprints, 'Ctrl+Alt+I')
+    self.add_action(libraryMenu, '&Reload', self.reload_library, 'Ctrl+Alt+R')
 
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
@@ -237,6 +237,7 @@ class MainWin(QtGui.QMainWindow):
   def reload_footprint(self):
     with open(self.active_footprint_file(), 'r') as f:
       self.te1.setPlainText(f.read())
+    self.status("%s reloaded." % (self.active_footprint_file()))
 
   def new_footprint(self):
     dialog = NewFootprintDialog(self)
@@ -389,6 +390,7 @@ class MainWin(QtGui.QMainWindow):
     else:
       lib = self.active_library
     self.rescan_library(lib)
+    self.status("%s reloaded." % (lib))
 
   def disconnect_library(self):
     dialog = DisconnectLibraryDialog(self)
@@ -471,7 +473,7 @@ class MainWin(QtGui.QMainWindow):
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)
-      self.status("Compilation successful.")
+      #self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2, 0])
     # TODO: get rid of exception handling code duplication
