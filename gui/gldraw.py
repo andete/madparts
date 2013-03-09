@@ -12,7 +12,7 @@ import FTGL
 import numpy as np
 import math
 
-from jydutil import *
+from util.util import *
 from defaultsettings import color_schemes
 
 def make_shader(name):
