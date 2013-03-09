@@ -78,6 +78,8 @@ def eval_coffee_footprint(coffee):
   finally:
     js_make_js_ctx.leave()
 
+# TODO: the meta stuff doesn't really belong here
+
 def eval_coffee_meta(coffee):
   lines = coffee.replace('\r', '').split('\n')
   meta_lines = [l for l in lines if re.match('^#\w+',l)]

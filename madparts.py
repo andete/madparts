@@ -8,11 +8,13 @@ import math, time, traceback, re
 
 from PySide import QtGui, QtCore
 
-import jydcoffee, jydgldraw, jydlibrary, jydinter, jydcoffeesimple
-from jyddialogs import *
+from gui.dialogs import *
+import gui.gldraw
 
-from syntax.jydjssyntax import JSHighlighter
-from syntax.jydcoffeesyntax import CoffeeHighlighter
+import pycoffee, jydlibrary, jydinter, jydcoffeesimple
+
+from syntax.jssyntax import JSHighlighter
+from syntax.coffeesyntax import CoffeeHighlighter
 
 import export.eagle
 
@@ -173,7 +175,7 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    self.glw = jydgldraw.JYDGLWidget(self)
+    self.glw = gui.gldraw.JYDGLWidget(self)
     self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)
@@ -217,11 +219,11 @@ class MainWin(QtGui.QMainWindow):
       self.status(s) 
       return
     old_code = self.te1.toPlainText()
-    old_meta = jydcoffee.eval_coffee_meta(old_code)
+    old_meta = pycoffee.eval_coffee_meta(old_code)
     dialog = CloneFootprintDialog(self, old_meta, old_code)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
-    new_code = jydcoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
+    new_code = pycoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
     lib_dir = QtCore.QDir(self.lib_dir[new_lib])
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
@@ -243,7 +245,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = NewFootprintDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
-    new_code = jydcoffee.new_coffee(new_id, new_name)
+    new_code = pycoffee.new_coffee(new_id, new_name)
     lib_dir = QtCore.QDir(self.lib_dir[new_lib])
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
@@ -257,7 +259,7 @@ class MainWin(QtGui.QMainWindow):
 
   def move_footprint(self):
     old_code = self.te1.toPlainText()
-    old_meta = jydcoffee.eval_coffee_meta(old_code)
+    old_meta = pycoffee.eval_coffee_meta(old_code)
     dialog = MoveFootprintDialog(self, old_meta)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_name, new_lib) = dialog.get_data()
@@ -438,7 +440,7 @@ class MainWin(QtGui.QMainWindow):
         s = "warning: skipping footprint %s\nerror: %s" % (footprint_name, str(ex) + '\n' + tb)
         QtGui.QMessageBox.warning(self, "warning", s)
     for (footprint_name, coffee) in cl:
-      meta = jydcoffee.eval_coffee_meta(coffee)
+      meta = pycoffee.eval_coffee_meta(coffee)
       new_file_name = lib_dir.filePath("%s.coffee" % (meta['id']))
       with open(new_file_name, 'w+') as f:
         f.write(coffee)
@@ -464,7 +466,7 @@ class MainWin(QtGui.QMainWindow):
     code = self.te1.toPlainText()
     self.executed_footprint = []
     try:
-      inter = jydcoffee.eval_coffee_footprint(code)
+      inter = pycoffee.eval_coffee_footprint(code)
       if inter != None:
         inter = jydinter.add_names(inter)
       self.executed_footprint = inter
@@ -477,7 +479,7 @@ class MainWin(QtGui.QMainWindow):
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2, 0])
     # TODO: get rid of exception handling code duplication
-    except jydcoffee.JSError as ex:
+    except pycoffee.JSError as ex:
       self.executed_footprint = []
       s = str(ex)
       s = s.replace('JSError: Error: ', '')

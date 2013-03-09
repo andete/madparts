@@ -5,7 +5,7 @@ import traceback
 
 from PySide import QtGui, QtCore
 
-import jydcoffee
+import pycoffee
 from jydutil import *
 
 class Footprint():
@@ -15,7 +15,7 @@ class Footprint():
   def load(self, path):
     with open(path) as f:
       code = f.read()
-    meta = jydcoffee.eval_coffee_meta(code)
+    meta = pycoffee.eval_coffee_meta(code)
     if not 'name' in meta:
       raise Exception('Error loading footprint from %s' % (path))
     self.name = meta['name']
