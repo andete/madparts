@@ -19,6 +19,7 @@ color_schemes['default'] = {
   'restrict':  (0.0, 1.0, 0.0, 0.3),
   'stop':  (0.0, 1.0, 1.0, 0.3),
   'unknown':  (1.0, 0.0, 1.0, 0.7),
+  'hole': (1.0, 1.0, 1.0, 0.7),
   }
 
 def _inverse(color_scheme):

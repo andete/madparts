@@ -49,6 +49,9 @@ class GLDraw:
     self.octagon_move_loc = self.octagon_shader.uniformLocation("move")
     self.octagon_drill_loc = self.octagon_shader.uniformLocation("drill")
     self.octagon_drill_offset_loc = self.octagon_shader.uniformLocation("drill_offset")
+    self.hole_shader = make_shader("hole")
+    self.hole_move_loc = self.hole_shader.uniformLocation("move")
+    self.hole_radius_loc = self.hole_shader.uniformLocation("radius")
 
     self.square_data = np.array([[-0.5,0.5],[-0.5,-0.5],[0.5,-0.5],[0.5,0.5]], dtype=np.float32)
     self.square_data_vbo = vbo.VBO(self.square_data)
@@ -106,6 +109,17 @@ class GLDraw:
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release() 
 
+  def _hole(self, x, y, rx, ry):
+    self.set_color('hole')
+    self.hole_shader.bind()
+    self.hole_shader.setUniformValue(self.hole_move_loc, x, y)
+    self.square_data_vbo.bind()
+    glEnableClientState(GL_VERTEX_ARRAY)
+    glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
+    self.hole_shader.setUniformValue(self.hole_radius_loc, rx, ry)
+    glDrawArrays(GL_QUADS, 0, 4)
+    self.hole_shader.release() 
+
   def disc(self, shape):
     r = fget(shape, 'dx') / 2
     r = fget(shape, 'r', r)
@@ -122,6 +136,8 @@ class GLDraw:
     drill_dy = fget(shape,'drill_dy')
  
     self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
       self._txt(shape, rx*2, ry*2, x, y, True)
 
@@ -148,6 +164,8 @@ class GLDraw:
     drill_dy = fget(shape,'drill_dy')
  
     self._disc(x, y, rx, ry, drill, drill_dx, drill_dy, irx, iry)
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
       self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True)
 
@@ -174,6 +192,8 @@ class GLDraw:
     drill_dy = fget(shape,'drill_dy')
  
     self._octagon(x, y, dx, dy, drill, drill_dx, drill_dy)
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
       self._txt(shape, dx, dy, x, y, True)
 
