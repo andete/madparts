@@ -1,12 +1,15 @@
 all:
-	@python madparts.py
+	@./madparts
 
 size:
 	@echo 'python:'
-	@wc -l `find . -name '*.py'`
+	@wc -l madparts `find . -name '*.py'`
 	@echo 'coffee:'
 	@wc -l `find grind -name '*.coffee'`
 	@echo 'shaders:'
 	@wc -l `find . -name '*.vert'` `find . -name '*.frag'`
 
-.PHONY: all
+clean:
+	rm -rf build dist
+
+.PHONY: all clean size
