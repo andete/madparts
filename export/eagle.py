@@ -407,7 +407,7 @@ class Import:
       shape = 'round'
       if pad.has_key('shape'): shape = pad['shape']
       if shape == 'round':
-        res['shape'] = 'circle'
+        res['shape'] = 'disc'
         res['r'] = 0.0
         if dia/2 > drill: res['r'] = dia/2
       elif shape == 'square':

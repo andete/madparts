@@ -159,13 +159,7 @@ class GLDraw:
     iry = fget(shape, 'iry', ry)
     ry = ry + w/2
     iry = iry - w/2
-    drill = fget(shape,'drill')
-    drill_dx = fget(shape,'drill_dx')
-    drill_dy = fget(shape,'drill_dy')
- 
-    self._disc(x, y, rx, ry, drill, drill_dx, drill_dy, irx, iry)
-    if drill > 0.0:
-      self._hole(x,y, drill/2, drill/2)
+    self._disc(x, y, rx, ry, 0.0, 0.0, 0.0)
     if 'name' in shape:
       self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True)
 
