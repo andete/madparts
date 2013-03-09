@@ -139,7 +139,7 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      self._txt(shape, rx*2, ry*2, x, y, True)
+      self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True)
 
   def circle(self, shape):
     r = fget(shape, 'dx') / 2
@@ -159,9 +159,9 @@ class GLDraw:
     iry = fget(shape, 'iry', ry)
     ry = ry + w/2
     iry = iry - w/2
-    self._disc(x, y, rx, ry, 0.0, 0.0, 0.0)
+    self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry)
     if 'name' in shape:
-      self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True)
+      self._txt(shape, rx*2, ry*2, x, y, True)
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
     self.octagon_shader.bind()
