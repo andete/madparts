@@ -4,7 +4,7 @@
 # License: GPL
 
 import numpy as np
-import math, time, traceback, re
+import math, time, traceback, re, os.path
 
 from PySide import QtGui, QtCore
 
@@ -15,7 +15,6 @@ import coffee.pycoffee as pycoffee
 import coffee.generatesimple
 
 import inter.util
-
 
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter

@@ -6,7 +6,7 @@
 import string
 from functools import partial
 
-from jydutil import *
+from util.util import *
 
 def valid(varname, g):
   def make_valid(c):

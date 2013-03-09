@@ -7,6 +7,9 @@ import PyV8
 
 supported_formats = ['1.0']
 
+grind_dir = os.path.abspath(os.path.dirname(__file__)+'/../grind')
+
+
 from PyV8 import JSError
 
 class Global(PyV8.JSClass):
@@ -65,7 +68,7 @@ def eval_coffee_footprint(coffee):
     prepare_coffee_compiler()
   try:
     js_make_js_ctx.enter()
-    with open("grind/ground-%s.coffee" % (format)) as f: ground = f.read()
+    with open("%s/ground-%s.coffee" % (grind_dir, format)) as f: ground = f.read()
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:

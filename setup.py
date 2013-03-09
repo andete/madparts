@@ -26,6 +26,7 @@ setup(
         ],
   package_data= { 
         'grind': ['*.coffee'],
+        'gui': ['../GPL', '../README.md'], # dirty trick ;)
         },
   data_files = [
     ('share/madparts/contrib/freefont', glob.glob('contrib/freefont/*')),

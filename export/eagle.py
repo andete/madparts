@@ -7,7 +7,7 @@ from xml.sax.saxutils import escape
 
 from bs4 import BeautifulSoup, Tag
 
-from jydutil import *
+from util.util import *
 
 import inter.util
 
