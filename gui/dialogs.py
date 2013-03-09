@@ -5,7 +5,7 @@ import uuid
 
 from PySide import QtGui, QtCore
 
-from jyddefaultsettings import default_settings, color_schemes
+from defaultsettings import default_settings, color_schemes
 
 import export.eagle
 

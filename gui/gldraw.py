@@ -13,7 +13,7 @@ import numpy as np
 import math
 
 from jydutil import *
-from jyddefaultsettings import color_schemes
+from defaultsettings import color_schemes
 
 def make_shader(name):
   print "compiling %s shaders" % (name)
