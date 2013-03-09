@@ -8,6 +8,7 @@ import PyV8
 supported_formats = ['1.0']
 
 grind_dir = os.path.abspath(os.path.dirname(__file__)+'/../grind')
+madparts_dir = os.path.abspath(os.path.dirname(__file__)+'/..')
 
 
 from PyV8 import JSError
@@ -15,7 +16,7 @@ from PyV8 import JSError
 class Global(PyV8.JSClass):
 
     def __init__(self):
-      self.path = ""
+      self.path = madparts_dir + "/"
 
     def require(self, arg):
       content = ""

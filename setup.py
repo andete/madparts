@@ -21,15 +21,19 @@ setup(
   scripts = ['madparts'],
   packages = [
         'coffee', 
+        'coffee-script', 
         'export', 
         'grind',
         'gui',
         'inter', 
+        'shaders', 
         'syntax', 
-        'util'
+        'util',
         ],
   package_data= { 
+        'coffee-script': ['*.js', 'LICENSE', 'README'],
         'grind': ['*.coffee'],
+        'shaders': ['*.vert', '*.frag'],
         'gui': ['../GPL', '../README.md'], # dirty trick ;)
         },
   data_files = [

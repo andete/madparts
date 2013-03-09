@@ -12,4 +12,7 @@ size:
 clean:
 	rm -rf build dist
 
-.PHONY: all clean size
+linux:
+	python setup.py sdist
+
+.PHONY: all clean size linux

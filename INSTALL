@@ -1,0 +1,31 @@
+Linux
+=====
+
+Install the following packages via your distribution package manager:
+
+* python (tested with 2.7)
+* numpy (tested with 1.6.2)
+* pyside (tested with 1.1.1)
+* python-opengl (tested with 3.0.1) 
+* beautiful soup 4 (tested with 4.1.0)
+
+You will have to build and install the following packages from source:
+
+* pyv8 (http://code.google.com/p/pyv8/)
+* pyftgl (http://code.google.com/p/pyftgl/) (tested with 0.5c)
+
+After that, just unpack the madparts tar file and run the madscripts
+script contained in it.
+
+Hopefully in the future madparts and it's dependencies will be packaged
+to be part of your favorite linux distrubution.
+
+MacOS-X
+=======
+
+TODO
+
+Windows
+=======
+
+TODO
