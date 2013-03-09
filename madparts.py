@@ -9,14 +9,13 @@ import math, time, traceback, re
 from PySide import QtGui, QtCore
 
 from gui.dialogs import *
-import gui.gldraw
+import gui.gldraw, gui.library
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple
 
 import inter.util
 
-import jydlibrary
 
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
@@ -93,7 +92,7 @@ class MainWin(QtGui.QMainWindow):
     parentItem = self.model.invisibleRootItem()
     first = True
     for (name, directory) in self.lib_dir.items():
-      lib = jydlibrary.Library(name, directory)
+      lib = gui.library.Library(name, directory)
       parentItem.appendRow(lib)
       if first:
         first_foot = lib.first_footprint()
@@ -387,7 +386,7 @@ class MainWin(QtGui.QMainWindow):
     self.lib_exist[name] = True
     self.save_libraries()
     root = self.model.invisibleRootItem()
-    lib = jydlibrary.Library(name, directory)
+    lib = gui.library.Library(name, directory)
     root.appendRow(lib)
     self.tree.expandAll()
 
