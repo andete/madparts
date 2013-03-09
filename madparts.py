@@ -11,7 +11,10 @@ from PySide import QtGui, QtCore
 from gui.dialogs import *
 import gui.gldraw
 
-import pycoffee, jydlibrary, jydinter, jydcoffeesimple
+import coffee.pycoffee as pycoffee
+import coffee.generatesimple
+
+import jydlibrary, jydinter
 
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
@@ -433,7 +436,7 @@ class MainWin(QtGui.QMainWindow):
     cl = []
     for (footprint_name, inter) in l:
       try:
-       coffee = jydcoffeesimple.generate_coffee(inter)
+       coffee = coffee.generatesimple.generate_coffee(inter)
        cl.append((footprint_name, coffee))
       except Exception as ex:
         tb = traceback.format_exc()

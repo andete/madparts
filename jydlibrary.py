@@ -5,7 +5,7 @@ import traceback
 
 from PySide import QtGui, QtCore
 
-import pycoffee
+import coffee.pycoffee as pycoffee
 from jydutil import *
 
 class Footprint():
