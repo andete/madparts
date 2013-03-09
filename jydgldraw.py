@@ -280,6 +280,9 @@ class JYDGLWidget(QGLWidget):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glEnable(GL_LINE_SMOOTH)
+    #glEnable(GL_POLYGON_STIPPLE)
+    #pattern=np.fromfunction(lambda x,y: 0xAA, (32,32), dtype=uint1)
+    #glPolygonStipple(pattern)
     (r,g,b,a) = self.colorscheme['background']
     glClearColor(r, g, b, a)
     glClear(GL_COLOR_BUFFER_BIT)
