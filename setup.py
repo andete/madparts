@@ -5,7 +5,7 @@
 
 import glob
 
-from distutils.core import setup
+from setuptools import setup
 
 with open('README.md') as file:
     long_description = file.read()
@@ -41,4 +41,6 @@ setup(
     ('share/madparts/examples', glob.glob('examples/*.coffee')),
     ],
   platforms = ["Windows", "Linux", "Mac OS-X"],
+  app = ['madparts'],
+  setup_requires = ['py2app'],
   )
