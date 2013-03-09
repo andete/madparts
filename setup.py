@@ -11,9 +11,16 @@ with open('README.md') as file:
     long_description = file.read()
 
 if sys.platform == 'darwin':
+   OPTIONS = {
+       'argv_emulation': True,
+       'includes': ['sip', 'PyQt4', 'PyQt4.QtCore', 'PyQt4.QtGui', 'simplejson'],
+       'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
+       }
+     
+
   extra_options = dict(
       setup_requires=['py2app'],
-      app=['madparts'],
+      app=['madparts.py'],
       # Cross-platform applications generally expect sys.argv to
       # be used for opening files.
       options=dict(py2app=dict(argv_emulation=True)),
@@ -21,13 +28,13 @@ if sys.platform == 'darwin':
 elif sys.platform == 'win32':
   extra_options = dict(
       setup_requires=['py2exe'],
-      app=['madparts'],
+      app=['madparts.py'],
       )
 else:
    extra_options = dict(
        # Normally unix-like platforms will use "setup.py install"
        # and install the main script as such
-       scripts=['madparts'],
+       scripts=['madparts.py'],
        )
 
 setup(
