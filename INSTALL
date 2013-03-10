@@ -8,15 +8,20 @@ Install the following packages via your distribution package manager:
 * pyside (tested with 1.1.1)
 * python-opengl (tested with 3.0.1) 
 * beautiful soup 4 (tested with 4.1.0)
-* libboost-python1.49.0
+* python-imaging (tested with 1.1.7)
 
-The following two are not yet provided by distributions so they
-are provided as part of the madparts download for now:
+The following two are not yet provided by distributions.
+
+For wheezy x86_64 a download is provided that contains these
+libraries pre-compiled and is ready to run.
+
+Other linux variants will have to build these libraries from
+source:
 
 * pyv8 (http://code.google.com/p/pyv8/)
 * pyftgl (http://code.google.com/p/pyftgl/) (tested with 0.5c)
 
-Just unpack the madparts tar file and run the madscripts
+After that just unpack the madparts tar file and run the madscripts.py
 script contained in it.
 
 Hopefully in the future madparts and it's dependencies will be packaged
@@ -32,12 +37,11 @@ Make sure you have macports from macports.org.
 
 In a Terminal, execute:
 
-sudo port install boost
 sudo port install py27-pyside
 sudo port install py27-numpy
 sudo port install py27-opengl
 sudo port install py27-beautifulsoup4
-sudo port install ftgl
+sudo port install py27-pil
 
 madparts.app
 ------------
@@ -45,11 +49,61 @@ madparts.app
 Should contain:
 * madparts
 * pyv8
-* pyftgl
 
 TODO
  
 Windows
 =======
 
-TODO
+* python
+
+Get from http://www.python.org/download/ .
+Get the file "Python 2.7.3 Windows Installer".
+
+* setuptools
+
+Get from https://pypi.python.org/pypi/setuptools#downloads
+Take setuptools-0.6c11.win32-py2.7.exe 
+
+* pip
+
+next start a command prompt and execute:
+
+cd c:\Python27\Scripts
+easy_install pip
+keep the shell open
+
+* numpy
+
+pip install numpy
+
+* pyside
+
+pip install pyside
+
+* beautifulsoup4
+
+pip install beautifulsoup4
+
+* pyopengl
+
+from https://pypi.python.org/pypi/PyOpenGL/3.0.2
+
+take PyOpenGL-3.0.2.win32.exe
+
+* pyopengl-accelerate
+
+from https://pypi.python.org/pypi/PyOpenGL-accelerate/3.0.2
+
+take PyOpenGL-accelerate-3.0.2.win32-py2.7.exe
+
+* pyv8
+
+from http://code.google.com/p/pyv8/downloads/list
+
+take PyV8-1.0-preview-r443.win32-py2.7.exe
+
+* python imaging
+
+from http://www.pythonware.com/products/pil/
+take "Python Imaging Library 1.1.7 for Python 2.7"

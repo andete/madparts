@@ -10,7 +10,7 @@ size:
 	@wc -l `find . -name '*.vert'` `find . -name '*.frag'`
 
 clean:
-	rm -rf build dist
+	rm -rf build dist madparts.egg-info
 
 linux:
 	python setup.py sdist
