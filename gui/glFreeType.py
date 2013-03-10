@@ -9,7 +9,6 @@
 # From PIL 1.1.4:
 import ImageFont
 from OpenGL.GL import *
-from OpenGL.GLU import *
 
 def is_font_available (ft, facename):
     """ Returns true if FreeType can find the requested face name 
@@ -179,11 +178,7 @@ def pushScreenCoordinateMatrix():
     glLoadIdentity()
     dx = (right-left)/2
     dy = (top-bottom)/2
-    gluOrtho2D(
-            -dx,
-            +dx,
-            -dy,
-            +dy)
+    glOrtho( -dx, +dx, -dy, +dy, -1,+1)
     glPopAttrib()
     return
 
