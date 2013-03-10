@@ -37,6 +37,7 @@ Make sure you have macports from macports.org.
 
 In a Terminal, execute:
 
+sudo port install boost
 sudo port install py27-pyside
 sudo port install py27-numpy
 sudo port install py27-opengl
