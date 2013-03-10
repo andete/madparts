@@ -64,10 +64,9 @@ setup(
         'coffee-script': ['*.js', 'LICENSE', 'README'],
         'grind': ['*.coffee'],
         'shaders': ['*.vert', '*.frag'],
-        'gui': ['../GPL', '../README.md'], # dirty trick ;)
+        'gui': ['../GPL', '../README.md', 'freefont.COPYING', 'FreeMonoBold.ttf'], # dirty trick ;)
         },
   data_files = [
-    ('share/madparts/contrib/freefont', glob.glob('contrib/freefont/*')),
     ('share/madparts/examples', glob.glob('examples/*.coffee')),
     ],
   platforms = ["Windows", "Linux", "Mac OS-X"],
