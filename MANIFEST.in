@@ -1,6 +1,5 @@
 include PyV8.py
 include _PyV8.so
-include FTGL.so
 include GPL
 include INSTALL
 include README.md
@@ -11,5 +10,5 @@ include coffee-script/LICENSE
 include coffee-script/README
 include examples/*.coffee
 include grind/*.coffee
-include contrib/freefont/COPYING
-include contrib/freefont/FreeMono.ttf
+include gui/freefont.COPYING
+include gui/FreeMonoBold.ttf

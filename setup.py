@@ -50,25 +50,27 @@ setup(
   version = '1.0',
   url = 'http://madparts.org/',
   packages = [
-        'coffee', 
-        'coffee-script', 
-        'export', 
+        'coffee',
+        'coffee-script',
+        'export',
         'grind',
         'gui',
-        'inter', 
-        'shaders', 
-        'syntax', 
+        'inter',
+        'shaders',
+        'syntax',
         'util',
         ],
   package_data= { 
         'coffee-script': ['*.js', 'LICENSE', 'README'],
         'grind': ['*.coffee'],
+        'gui': [
+          'freefont.COPYING', 'FreeMonoBold.ttf',
+          '../GPL', '../README.md', # dirty trick ;)
+          '../PyV8.py', '../_PyV8.so',
+          ],
         'shaders': ['*.vert', '*.frag'],
-        'gui': ['../GPL', '../README.md'], # dirty trick ;)
-        'gui': ['../PyV8.py', '../_PyV8.so', '../FTGL.so'], 
         },
   data_files = [
-    ('share/madparts/contrib/freefont', glob.glob('contrib/freefont/*')),
     ('share/madparts/examples', glob.glob('examples/*.coffee')),
     ],
   platforms = ["Windows", "Linux", "Mac OS-X"],
