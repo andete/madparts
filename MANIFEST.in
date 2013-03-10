@@ -1,0 +1,15 @@
+include PyV8.py
+include _PyV8.so
+include FTGL.so
+include GPL
+include INSTALL
+include README.md
+include shaders/*.vert
+include shaders/*.frag
+include coffee-script/*.js
+include coffee-script/LICENSE
+include coffee-script/README
+include examples/*.coffee
+include grind/*.coffee
+include contrib/freefont/COPYING
+include contrib/freefont/FreeMono.ttf
