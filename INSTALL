@@ -8,13 +8,15 @@ Install the following packages via your distribution package manager:
 * pyside (tested with 1.1.1)
 * python-opengl (tested with 3.0.1) 
 * beautiful soup 4 (tested with 4.1.0)
+* libboost-python1.49.0
 
-You will have to build and install the following packages from source:
+The following two are not yet provided by distributions so they
+are provided as part of the madparts download for now:
 
 * pyv8 (http://code.google.com/p/pyv8/)
 * pyftgl (http://code.google.com/p/pyftgl/) (tested with 0.5c)
 
-After that, just unpack the madparts tar file and run the madscripts
+Just unpack the madparts tar file and run the madscripts
 script contained in it.
 
 Hopefully in the future madparts and it's dependencies will be packaged
@@ -23,27 +25,30 @@ to be part of your favorite linux distrubution.
 MacOS-X
 =======
 
-* python
+Macports
+--------
+
+Make sure you have macports from macports.org.
+
+In a Terminal, execute:
+
+sudo port install boost
+sudo port install py27-pyside
+sudo port install py27-numpy
+sudo port install py27-opengl
+sudo port install py27-beautifulsoup4
+sudo port install ftgl
+
+madparts.app
+------------
+
+Should contain:
+* madparts
+* pyv8
+* pyftgl
+
+TODO
  
-The latest MACOS-X comes with python 2.7 pre-installed. That being said,
-that python version is not supported by most 3rd party libraries, they
-recommend installing vanilla python from the python website.
-
-Get it at: http://python.org/download/
-Get the file: "Python 2.7.3 Mac OS X 64-bit/32-bit x86-64/i386 Installer"
-
-* pyside
-
-Get pyside from http://qt-project.org/wiki/PySide_Binaries_MacOSX
-Get the 1.1.0 version for python 2.7.
-
-* numpy
-
-Get it at http://sourceforge.net/projects/numpy/files/NumPy/1.7.0/
-Get the numpy-1.7.0-py2.7-python.org-macosx10.6.dmg
-
-* 
-
 Windows
 =======
 
