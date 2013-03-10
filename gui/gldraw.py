@@ -11,6 +11,7 @@ import FTGL
 
 import numpy as np
 import math
+import os.path
 
 from util.util import *
 from defaultsettings import color_schemes
@@ -18,8 +19,9 @@ from defaultsettings import color_schemes
 def make_shader(name):
   print "compiling %s shaders" % (name)
   p = QGLShaderProgram()
-  p.addShaderFromSourceFile(QGLShader.Vertex, "shaders/%s.vert" % (name))
-  p.addShaderFromSourceFile(QGLShader.Fragment, "shaders/%s.frag" % (name))
+  shaders_dir = os.path.abspath(os.path.dirname(__file__)+'/../shaders')
+  p.addShaderFromSourceFile(QGLShader.Vertex, "%s/%s.vert" % (shaders_dir, name))
+  p.addShaderFromSourceFile(QGLShader.Fragment, "%s/%s.frag" % (shaders_dir, name))
   p.link()
   print p.log()
   return p
@@ -277,7 +279,8 @@ class JYDGLWidget(QGLWidget):
     start_zoomfactor = int(parent.setting('gl/zoomfactor'))
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
-    font_file = str(parent.setting('gl/fontfile'))
+    font_dir = os.path.abspath(os.path.dirname(__file__)+'/../contrib/freefont')
+    font_file = "%s/%s" % (font_dir, "FreeMono.ttf")
     self.font = FTGL.PixmapFont(font_file)
     self.shapes = []
     self.make_dot_field()

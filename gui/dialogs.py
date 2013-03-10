@@ -379,16 +379,6 @@ class PreferencesDialog(QtGui.QDialog):
     self.glzoomf = QtGui.QLineEdit(str(parent.setting('gl/zoomfactor')))
     self.glzoomf.setValidator(QtGui.QIntValidator(1,250))
     form_layout.addRow("zoom factor", self.glzoomf) 
-    font_hbox = QtGui.QHBoxLayout()
-    self.font_filename = QtGui.QLineEdit(str(parent.setting('gl/fontfile')))
-    self.font_filename.setReadOnly(True)
-    font_button = QtGui.QPushButton("Browse")
-    font_button.clicked.connect(self.get_font)
-    font_hbox.addWidget(self.font_filename)
-    font_hbox.addWidget(font_button)
-    font_widget = QtGui.QWidget()
-    font_widget.setLayout(font_hbox)
-    form_layout.addRow("font", font_widget) 
     self.key_idle = QtGui.QLineEdit(str(parent.setting('gui/keyidle')))
     self.key_idle.setValidator(QtGui.QDoubleValidator(0.0,5.0,2))
     form_layout.addRow("key idle", self.key_idle) 
@@ -409,7 +399,6 @@ class PreferencesDialog(QtGui.QDialog):
     self.gldx.setText(str(default_settings['gl/dx']))
     self.gldy.setText(str(default_settings['gl/dy']))
     self.glzoomf.setText(str(default_settings['gl/zoomfactor']))
-    self.font_filename.setText(str(default_settings['gl/fontfile']))
     self.key_idle.setText(str(default_settings['gui/keyidle']))
     default_color_scheme = str(default_settings['gui/colorscheme'])
     for i in range(0, self.color_scheme.count()):
@@ -422,15 +411,7 @@ class PreferencesDialog(QtGui.QDialog):
     settings.setValue('gl/dx', self.gldx.text())
     settings.setValue('gl/dy', self.gldy.text())
     settings.setValue('gl/zoomfactor', self.glzoomf.text())
-    settings.setValue('gl/fontfile', self.font_filename.text())
     settings.setValue('gui/keyidle', self.key_idle.text())
     settings.setValue('gl/colorscheme', self.color_scheme.currentText())
     self.parent.status("Settings updated.")
     self.accept()
-
-  def get_font(self):
-    result = QtGui.QFileDialog.getOpenFileName(self,
-      "Select Font", filter="Truetype Font (*.ttf)")
-    font_filename = result[0]
-    if (font_filename == ''): return
-    self.settings_font_filename.setText(font_filename)

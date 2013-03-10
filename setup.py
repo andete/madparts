@@ -31,13 +31,13 @@ elif sys.platform == 'win32':
       app=['madparts.py'],
       )
 elif sys.platform.startswith('linux'):
-  extra_options = dict(
-      # Normally unix-like platforms will use "setup.py install"
-      # and install the main script as such
-      scripts=['madparts.py'],
-      )
-  if not arch in ['x86_64']:
-      raise Exception("unsupported arch %s" % (arch))
+   extra_options = dict(
+       # Normally unix-like platforms will use "setup.py install"
+       # and install the main script as such
+       scripts=['madparts.py'],
+       )
+   if not arch in ['x86_64']:
+     raise Exception("unsupported arch %s" % (arch))
 else:
   raise Exception("unsupported platform %s" % (sys.platform))
 

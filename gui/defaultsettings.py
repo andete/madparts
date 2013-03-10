@@ -33,7 +33,6 @@ color_schemes['inverse'] = _inverse(color_schemes['default'])
 default_settings = {
   'gl/dx': 200,
   'gl/dy': 200,
-  'gl/fontfile': "/usr/share/fonts/truetype/freefont/FreeMono.ttf",
   'gl/zoomfactor': 50,
   'gl/colorscheme': 'default',
   'gui/keyidle': 0.5,
