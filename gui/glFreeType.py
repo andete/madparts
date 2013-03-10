@@ -173,11 +173,17 @@ def make_dlist (ft, ch, list_base, tex_base_list):
 # /// coordinates identical to window coordinates.
 def pushScreenCoordinateMatrix():
     glPushAttrib(GL_TRANSFORM_BIT)
-    viewport = glGetIntegerv(GL_VIEWPORT)
+    [left,bottom,right,top] = glGetIntegerv(GL_VIEWPORT)
     glMatrixMode(GL_PROJECTION)
     glPushMatrix()
     glLoadIdentity()
-    gluOrtho2D(viewport[0],viewport[2],viewport[1],viewport[3])
+    dx = (right-left)/2
+    dy = (top-bottom)/2
+    gluOrtho2D(
+            -dx,
+            +dx,
+            -dy,
+            +dy)
     glPopAttrib()
     return
 
@@ -201,7 +207,7 @@ class font_data:
 
         # Try to obtain the FreeType font
         try:
-            ft = ImageFont.truetype (facename, pixel_height)
+            self.ft = ImageFont.truetype (facename, pixel_height)
         except:
             raise ValueError, "Unable to locate true type font '%s'" % (facename)
 
@@ -216,13 +222,13 @@ class font_data:
 
         # This is where we actually create each of the fonts display lists.
         for i in xrange (128):
-            make_dlist (ft, i, self.m_list_base, self.textures);
+            make_dlist (self.ft, i, self.m_list_base, self.textures);
 
         self.m_allocated = True
 
         return
 
-    def glPrint (self, x, y, string):
+    def glPrint (self, x, y, string, scale):
         """
         # ///Much like Nehe's glPrint function, but modified to work
         # ///with freetype fonts.
@@ -273,8 +279,9 @@ class font_data:
             line = lines [i]
             glPushMatrix ()
             glLoadIdentity ()
-            glTranslatef (x,y-h*i,0);
-            glMultMatrixf (modelview_matrix);
+            glTranslatef (x,y-h*i,0)
+            glScalef (scale, scale, 0)
+            glMultMatrixf (modelview_matrix)
 
             # //  The commented out raster position stuff can be useful if you need to
             # //  know the length of the text that you are creating.
