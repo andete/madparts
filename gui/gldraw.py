@@ -305,7 +305,6 @@ class JYDGLWidget(QGLWidget):
     #glPolygonStipple(pattern)
     (r,g,b,a) = self.colorscheme['background']
     glClearColor(r, g, b, a)
-    glClear(GL_COLOR_BUFFER_BIT)
     self.make_dot_field_vbo()
     self.gldraw = GLDraw(self.font, self.zoomfactor, self.colorscheme)
 
@@ -314,7 +313,6 @@ class JYDGLWidget(QGLWidget):
     if new_colorscheme != self.colorscheme:
       (r,g,b,a) = new_colorscheme['background']
       glClearColor(r, g, b, a)
-      glClear(GL_COLOR_BUFFER_BIT)
     self.colorscheme = new_colorscheme
     self.gldraw.color = self.colorscheme
     if self.zoom_changed:
