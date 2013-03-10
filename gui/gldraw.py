@@ -7,7 +7,7 @@ from PySide.QtOpenGL import *
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as vbo
 
-import FTGL
+#import FTGL
 
 import numpy as np
 import math
@@ -15,6 +15,8 @@ import os.path
 
 from util.util import *
 from defaultsettings import color_schemes
+
+import glFreeType 
 
 def make_shader(name):
   print "compiling %s shaders" % (name)
@@ -78,18 +80,16 @@ class GLDraw:
     l = len(s)
     dxp = dx * self.zoom # dx in pixels
     dyp = dy * self.zoom # dy in pixels
-    dxp = dxp / 16. / l # dx in 16 pixel char units
-    dyp = dyp / 24. # dy in 24 pixel units
-    d = min(dxp, dyp, 100.0)
-    f = int(24.*d*1.25)
-    self.font.FaceSize(f)
-    (slx, sly, slz, srx, sry, srz) = self.font.BBox(s)
-    sdx = srx + (8/l) - slx # points
-    sdy = sry - sly # points
-    sdx = sdx / self.zoom # converted in GL locations
-    sdy = sdy / self.zoom # converted in GL locations
-    glRasterPos(x - sdx/2, y - sdy/2)
-    self.font.Render(s)
+    (fdx, fdy) = self.font.ft.getsize(s)
+    scale = min(dxp / fdx, dyp / fdy)
+    sdx = -scale*fdx/2
+    sdy = -scale*fdy/2
+    glEnable(GL_TEXTURE_2D) # Enables texture mapping
+    glPushMatrix()
+    glLoadIdentity()
+    self.font.glPrint(x*self.zoom+sdx, y*self.zoom+sdy, s, scale)
+    glPopMatrix ()
+    glDisable(GL_TEXTURE_2D)
 
   def label(self, shape):
     x = fget(shape,'x')
@@ -279,9 +279,8 @@ class JYDGLWidget(QGLWidget):
     start_zoomfactor = int(parent.setting('gl/zoomfactor'))
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
-    font_dir = os.path.abspath(os.path.dirname(__file__)+'/../contrib/freefont')
-    font_file = "%s/%s" % (font_dir, "FreeMono.ttf")
-    self.font = FTGL.PixmapFont(font_file)
+    font_dir = os.path.abspath(os.path.dirname(__file__))
+    self.font_file = "%s/%s" % (font_dir, "FreeMonoBold.ttf")
     self.shapes = []
     self.make_dot_field()
 
@@ -298,7 +297,9 @@ class JYDGLWidget(QGLWidget):
   def initializeGL(self):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    #glEnable(GL_TEXTURE_2D) # Enables texture mapping
     glEnable(GL_LINE_SMOOTH)
+    self.font = glFreeType.font_data(self.font_file, 64)
     #glEnable(GL_POLYGON_STIPPLE)
     #pattern=np.fromfunction(lambda x,y: 0xAA, (32,32), dtype=uint1)
     #glPolygonStipple(pattern)
