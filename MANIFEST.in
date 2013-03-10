@@ -1,0 +1,14 @@
+include PyV8.py
+include _PyV8.so
+include GPL
+include INSTALL
+include README.md
+include shaders/*.vert
+include shaders/*.frag
+include coffee-script/*.js
+include coffee-script/LICENSE
+include coffee-script/README
+include examples/*.coffee
+include grind/*.coffee
+include gui/freefont.COPYING
+include gui/FreeMonoBold.ttf
