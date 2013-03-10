@@ -280,7 +280,7 @@ class JYDGLWidget(QGLWidget):
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
     font_dir = os.path.abspath(os.path.dirname(__file__)+'/../contrib/freefont')
-    self.font_file = "%s/%s" % (font_dir, "FreeMono.ttf")
+    self.font_file = "%s/%s" % (font_dir, "FreeMonoBold.ttf")
     self.shapes = []
     self.make_dot_field()
 
