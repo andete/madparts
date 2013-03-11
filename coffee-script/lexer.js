@@ -5,9 +5,9 @@
 
   var exports = Object();
 
-  _ref = require('./rewriter'), Rewriter = _ref.Rewriter, INVERSES = _ref.INVERSES;
+  _ref = require('rewriter'), Rewriter = _ref.Rewriter, INVERSES = _ref.INVERSES;
 
-  _ref1 = require('./helpers'), count = _ref1.count, starts = _ref1.starts, compact = _ref1.compact, last = _ref1.last;
+  _ref1 = require('helpers'), count = _ref1.count, starts = _ref1.starts, compact = _ref1.compact, last = _ref1.last;
 
   exports.Lexer = Lexer = (function() {
 
