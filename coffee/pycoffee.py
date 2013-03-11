@@ -15,7 +15,7 @@ class Global(PyV8.JSClass):
       pass
 
     def require(self, arg):
-      file_content = pkgutil.get_data('coffee-script', "%s.js" % (arg))
+      file_content = pkgutil.get_data('coffeescript', "%s.js" % (arg))
       return PyV8.JSContext.current.eval(file_content)
 
 js_make_js_from_coffee = None
