@@ -9,11 +9,11 @@
 
   //path = require('path');
 
-  _ref = require('./lexer'), Lexer = _ref.Lexer, RESERVED = _ref.RESERVED;
+  _ref = require('lexer'), Lexer = _ref.Lexer, RESERVED = _ref.RESERVED;
 
   //writeln("Lexer: " + Lexer);
 
-  parser = require('./parser').parser;
+  parser = require('parser').parser;
 
   // vm = require('vm');
 
@@ -39,7 +39,7 @@
 
   exports.RESERVED = RESERVED;
 
-  exports.helpers = require('./helpers');
+  exports.helpers = require('helpers');
 
   exports.compile = compile = function(code, options) {
     var header, js, merge;
@@ -170,6 +170,6 @@
     }
   };
 
-  parser.yy = require('./nodes');
+  parser.yy = require('nodes');
   return exports;
 }).call(this);
