@@ -2,20 +2,18 @@
 # License: GPL
 
 import os.path, re, string, pkgutil
+import pkg_resources
+import coffeescript, grind
 
 import PyV8
+from PyV8 import JSError
 
 supported_formats = ['1.0']
 
-from PyV8 import JSError
-
 class Global(PyV8.JSClass):
 
-    def __init__(self):
-      pass
-
     def require(self, arg):
-      file_content = pkgutil.get_data('coffeescript', "%s.js" % (arg))
+      file_content = pkg_resources.resource_string(coffeescript.__name__, "%s.js" % (arg))
       return PyV8.JSContext.current.eval(file_content)
 
 js_make_js_from_coffee = None
@@ -56,7 +54,7 @@ def eval_coffee_footprint(coffee):
     prepare_coffee_compiler()
   try:
     js_make_js_ctx.enter()
-    ground = pkgutil.get_data('grind', "ground-%s.coffee" % (format))
+    ground = pkg_resources.resource_string(grind.__name__, "ground-%s.coffee" % (format))
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:
