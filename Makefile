@@ -1,3 +1,5 @@
+PYTHON:=/opt/local/bin/python2.7
+
 all:
 	@./madparts.py
 
@@ -13,6 +15,9 @@ clean:
 	rm -rf build dist madparts.egg-info
 
 linux:
-	python setup.py sdist
+	$(PYTHON) setup.py sdist
+
+darwin:
+	$(PYTHON) setup.py py2app
 
 .PHONY: all clean size linux

@@ -1,7 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import os.path, re, string, pkgutil
+import os.path, re, string, pkgutil, traceback
 
 import PyV8
 
@@ -15,8 +15,11 @@ class Global(PyV8.JSClass):
       pass
 
     def require(self, arg):
-      file_content = pkgutil.get_data('coffee-script', "%s.js" % (arg))
-      return PyV8.JSContext.current.eval(file_content)
+      try:
+        file_content = pkgutil.get_data('coffee-script', "%s.js" % (arg))
+        return PyV8.JSContext.current.eval(file_content)
+      except:
+        return traceback.format_exc()
 
 js_make_js_from_coffee = None
 js_make_js_ctx = None
