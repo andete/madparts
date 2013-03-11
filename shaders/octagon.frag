@@ -9,6 +9,7 @@ varying float drill2; // drill diameter
 varying vec2 drill_offset2;
 
 void main() {
+  gl_FragColor = vec4(0,0,0,0);
   float drill3 = drill2/2;
   
   // r: mininum size of straight side
