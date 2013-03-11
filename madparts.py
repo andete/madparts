@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/local/bin/python2.7
 #
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
