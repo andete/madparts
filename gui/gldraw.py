@@ -11,7 +11,7 @@ import OpenGL.arrays.vbo as vbo
 
 import numpy as np
 import math
-import os.path
+import os.path, pkgutil
 
 from util.util import *
 from defaultsettings import color_schemes
@@ -21,9 +21,10 @@ import glFreeType
 def make_shader(name):
   print "compiling %s shaders" % (name)
   p = QGLShaderProgram()
-  shaders_dir = os.path.abspath(os.path.dirname(__file__)+'/../shaders')
-  p.addShaderFromSourceFile(QGLShader.Vertex, "%s/%s.vert" % (shaders_dir, name))
-  p.addShaderFromSourceFile(QGLShader.Fragment, "%s/%s.frag" % (shaders_dir, name))
+  vertex = pkgutil.get_data('shaders', "%s.vert" % (name))
+  p.addShaderFromSourceCode(QGLShader.Vertex, vertex)
+  fragment = pkgutil.get_data('shaders', "%s.frag" % (name))
+  p.addShaderFromSourceCode(QGLShader.Fragment, fragment)
   p.link()
   print p.log()
   return p
