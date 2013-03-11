@@ -2,7 +2,7 @@
 (function() {
   var Scope, extend, last, _ref;
 
-  _ref = require('./helpers'), extend = _ref.extend, last = _ref.last;
+  _ref = require('helpers'), extend = _ref.extend, last = _ref.last;
 
   exports = Object();
 
