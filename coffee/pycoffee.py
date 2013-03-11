@@ -1,7 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import os.path, re, string, pkgutil
+import os.path, re, string
 import pkg_resources
 import coffeescript, grind
 
