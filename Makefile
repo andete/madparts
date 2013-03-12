@@ -20,4 +20,8 @@ linux:
 darwin:
 	$(PYTHON) setup.py py2app
 
+apprun::
+	./dist/madparts.app/Contents/MacOS/madparts
+
+
 .PHONY: all clean size linux
