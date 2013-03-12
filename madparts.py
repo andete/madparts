@@ -4,7 +4,7 @@
 # License: GPL
 
 import numpy as np
-import math, time, traceback, re, os.path
+import math, time, traceback, re, os, os.path
 
 from PySide import QtGui, QtCore
 
@@ -576,3 +576,4 @@ if __name__ == '__main__':
     widget = MainWin()
     widget.show()
     app.exec_()
+    os.unlink(widget.glw.font_file)

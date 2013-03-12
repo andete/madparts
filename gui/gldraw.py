@@ -11,7 +11,7 @@ import OpenGL.arrays.vbo as vbo
 
 import numpy as np
 import math
-import os.path, pkg_resources
+import os.path, pkg_resources, tempfile
 
 from util.util import *
 from defaultsettings import color_schemes
@@ -281,9 +281,14 @@ class JYDGLWidget(QGLWidget):
     start_zoomfactor = int(parent.setting('gl/zoomfactor'))
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
-    #font_dir = os.path.abspath(os.path.dirname(__file__))
-    #self.font_file = "%s/%s" % (font_dir, "FreeMonoBold.ttf")
-    self.font_file = pkg_resources.resource_filename(__name__, "FreeMonoBold.ttf")
+    # resource_filename does not work in the .zip file py2app makes :(
+    # self.font_file = pkg_resources.resource_filename(__name__, "FreeMonoBold.ttf")
+    # we work around that by means of a tempfile
+    font_data = pkg_resources.resource_string(__name__, 'FreeMonoBold.ttf')
+    t = tempfile.NamedTemporaryFile(suffix='.ttf',delete=False)
+    t.write(font_data)
+    t.close()
+    self.font_file = t.name
     self.shapes = []
     self.make_dot_field()
 
