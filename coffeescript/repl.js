@@ -7,7 +7,7 @@
 
   stdout = process.stdout;
 
-  CoffeeScript = require('./coffee-script');
+  CoffeeScript = require('coffee-script');
 
   readline = require('readline');
 

@@ -11,19 +11,21 @@ import OpenGL.arrays.vbo as vbo
 
 import numpy as np
 import math
-import os.path
+import os.path, pkg_resources, tempfile
 
 from util.util import *
 from defaultsettings import color_schemes
 
-import glFreeType 
+import glFreeType
+import shaders
 
 def make_shader(name):
   print "compiling %s shaders" % (name)
   p = QGLShaderProgram()
-  shaders_dir = os.path.abspath(os.path.dirname(__file__)+'/../shaders')
-  p.addShaderFromSourceFile(QGLShader.Vertex, "%s/%s.vert" % (shaders_dir, name))
-  p.addShaderFromSourceFile(QGLShader.Fragment, "%s/%s.frag" % (shaders_dir, name))
+  vertex = pkg_resources.resource_string(shaders.__name__, "%s.vert" % (name))
+  p.addShaderFromSourceCode(QGLShader.Vertex, vertex)
+  fragment = pkg_resources.resource_string(shaders.__name__, "%s.frag" % (name))
+  p.addShaderFromSourceCode(QGLShader.Fragment, fragment)
   p.link()
   print p.log()
   return p
@@ -279,8 +281,14 @@ class JYDGLWidget(QGLWidget):
     start_zoomfactor = int(parent.setting('gl/zoomfactor'))
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
-    font_dir = os.path.abspath(os.path.dirname(__file__))
-    self.font_file = "%s/%s" % (font_dir, "FreeMonoBold.ttf")
+    # resource_filename does not work in the .zip file py2app makes :(
+    # self.font_file = pkg_resources.resource_filename(__name__, "FreeMonoBold.ttf")
+    # we work around that by means of a tempfile
+    font_data = pkg_resources.resource_string(__name__, 'FreeMonoBold.ttf')
+    t = tempfile.NamedTemporaryFile(suffix='.ttf',delete=False)
+    t.write(font_data)
+    t.close()
+    self.font_file = t.name
     self.shapes = []
     self.make_dot_field()
 

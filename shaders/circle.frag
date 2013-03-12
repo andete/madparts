@@ -10,6 +10,7 @@ varying float drill2; // drill: radius
 varying vec2 drill_offset2;
 
 void main() {
+  gl_FragColor = vec4(0,0,0,0);
   float drill3 = drill2/2;
   float x = pos2.x / radius2.x;
   float y = pos2.y / radius2.y;

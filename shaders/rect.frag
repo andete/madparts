@@ -10,6 +10,7 @@ varying float drill2; // drill diameter
 varying vec2 drill_offset2;
 
 void main() {
+  gl_FragColor = vec4(0,0,0,0);
   float drill3 = drill2/2;
   float rx = (size2.x / 2) * round2;
   float ry = (size2.y / 2) * round2;

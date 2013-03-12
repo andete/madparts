@@ -51,7 +51,7 @@ setup(
   url = 'http://madparts.org/',
   packages = [
         'coffee',
-        'coffee-script',
+        'coffeescript',
         'export',
         'grind',
         'gui',

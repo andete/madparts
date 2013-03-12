@@ -4,7 +4,7 @@
 # License: GPL
 
 import numpy as np
-import math, time, traceback, re, os.path
+import math, time, traceback, re, os, os.path
 
 from PySide import QtGui, QtCore
 
@@ -155,9 +155,6 @@ class MainWin(QtGui.QMainWindow):
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.te1.textChanged.connect(self.editor_text_changed)
     self.te2 = QtGui.QTextEdit()
-    pal = self.te2.palette()
-    pal.setColor(QtGui.QPalette.Base, QtGui.QColor(255,100,100))
-    self.te2.setPalette(pal)
     self.te2.setReadOnly(True)
     self.highlighter2 = JSHighlighter(self.te2.document())
     lsplitter.addWidget(self.te1)
@@ -579,3 +576,4 @@ if __name__ == '__main__':
     widget = MainWin()
     widget.show()
     app.exec_()
+    os.unlink(widget.glw.font_file)

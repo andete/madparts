@@ -3,7 +3,7 @@ all:
 
 size:
 	@echo 'python:'
-	@wc -l madparts `find . -name '*.py'`
+	@wc -l `find . -name '*.py'`
 	@echo 'coffee:'
 	@wc -l `find grind -name '*.coffee'`
 	@echo 'shaders:'

@@ -2,34 +2,19 @@
 # License: GPL
 
 import os.path, re, string
+import pkg_resources
+import coffeescript, grind
 
 import PyV8
+from PyV8 import JSError
 
 supported_formats = ['1.0']
 
-grind_dir = os.path.abspath(os.path.dirname(__file__)+'/../grind')
-madparts_dir = os.path.abspath(os.path.dirname(__file__)+'/..')
-
-
-from PyV8 import JSError
-
 class Global(PyV8.JSClass):
 
-    def __init__(self):
-      self.path = madparts_dir + "/"
-
     def require(self, arg):
-      content = ""
-      with open(self.path+arg+".js") as file:
-        file_content = file.read()
-      result = None
-      try:
-        store_path = self.path
-        self.path = self.path + os.path.dirname(arg) + "/"
-        result = PyV8.JSContext.current.eval(file_content)
-      finally:
-        self.path = store_path
-      return result
+      file_content = pkg_resources.resource_string(coffeescript.__name__, "%s.js" % (arg))
+      return PyV8.JSContext.current.eval(file_content)
 
 js_make_js_from_coffee = None
 js_make_js_ctx = None
@@ -43,7 +28,7 @@ def prepare_coffee_compiler():
       try:
         js_make_js_from_coffee = js_make_js_ctx.eval("""
 (function (coffee_code) {
-  CoffeeScript = require('coffee-script/coffee-script');
+  CoffeeScript = require('coffee-script');
   js_code = CoffeeScript.compile(coffee_code, {bare:true});
   return js_code;
 })
@@ -69,7 +54,7 @@ def eval_coffee_footprint(coffee):
     prepare_coffee_compiler()
   try:
     js_make_js_ctx.enter()
-    with open("%s/ground-%s.coffee" % (grind_dir, format)) as f: ground = f.read()
+    ground = pkg_resources.resource_string(grind.__name__, "ground-%s.coffee" % (format))
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:

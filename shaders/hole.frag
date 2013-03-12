@@ -7,6 +7,7 @@ varying vec2 pos2;    // location
 varying vec2 radius2; // outer radius
 
 void main() {
+  gl_FragColor = vec4(0,0,0,0);
   float x = pos2.x / radius2.x;
   float y = pos2.y / radius2.y;
   float dist = x * x + y * y;
