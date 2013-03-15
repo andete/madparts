@@ -170,14 +170,9 @@ class Export:
       package.append(label)
     
     def disc(shape, layer):
-      r = fget(shape, 'dx') / 2
-      r = fget(shape, 'r', r)
+      r = fget(shape, 'r')
       rx = fget(shape, 'rx', r)
-      dy = fget(shape, 'dy') / 2
-      if dy > 0:
-        ry = fget(shape, 'ry', dy)
-      else:
-        ry = fget(shape, 'ry', r)
+      ry = fget(shape, 'ry', r)
       x = fget(shape,'x')
       y = fget(shape,'y')
       # a disc is just a circle with a
@@ -191,14 +186,9 @@ class Export:
       package.append(disc)
   
     def circle(shape, layer):
-      r = fget(shape, 'dx') / 2
-      r = fget(shape, 'r', r)
+      r = fget(shape, 'r')
       rx = fget(shape, 'rx', r)
-      dy = fget(shape, 'dy') / 2
-      if dy > 0:
-        ry = fget(shape, 'ry', dy)
-      else:
-        ry = fget(shape, 'ry', r)
+      ry = fget(shape, 'ry', r)
       x = fget(shape,'x')
       y = fget(shape,'y')
       w = fget(shape,'w')

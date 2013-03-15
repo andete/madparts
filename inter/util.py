@@ -45,3 +45,37 @@ def prepare_for_display(inter):
         x['dy'] = abs(x['y1'] - x['y2'])
     return x
   return map(convert, sinter)
+
+def bounding_box(inter):
+  def circle(x):
+    pass
+  def disc(x):
+    pass
+  def label(x):
+    pass
+  def line(x):
+    pass
+  def octagon(x):
+    pass
+  def rect(x):
+    pass
+  x1 = 0
+  y1 = 0
+  x2 = 0
+  y2 = 0
+  dispatch = {
+    'circle': circle,
+    'disc': disc,
+    'label': label,
+    'line': line,
+    'octagon': octagon,
+    'rect': rect,
+  }
+  for x in inter:
+    if 'shape' in x:
+       (xx1, xy1, xx2, xy2) = dispatch[x['shape']](x)
+       x1 = min(x1, xx1)
+       y1 = min(y1, xy1)
+       x2 = min(x2, xx2)
+       y2 = min(y2, xy2)
+  return (x1,y1,x2,y2)

@@ -7,8 +7,6 @@ from PySide.QtOpenGL import *
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as vbo
 
-#import FTGL
-
 import numpy as np
 import math
 import os.path, pkg_resources, tempfile
@@ -125,14 +123,9 @@ class GLDraw:
     self.hole_shader.release() 
 
   def disc(self, shape):
-    r = fget(shape, 'dx') / 2
-    r = fget(shape, 'r', r)
+    r = fget(shape, 'r')
     rx = fget(shape, 'rx', r)
-    dy = fget(shape, 'dy') / 2
-    if dy > 0:
-      ry = fget(shape, 'ry', dy)
-    else:
-      ry = fget(shape, 'ry', r)
+    ry = fget(shape, 'ry', r)
     x = fget(shape,'x')
     y = fget(shape,'y')
     drill = fget(shape,'drill')
@@ -146,14 +139,9 @@ class GLDraw:
       self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True)
 
   def circle(self, shape):
-    r = fget(shape, 'dx') / 2
-    r = fget(shape, 'r', r)
+    r = fget(shape, 'r')
     rx = fget(shape, 'rx', r)
-    dy = fget(shape, 'dy') / 2
-    if dy > 0:
-      ry = fget(shape, 'ry', dy)
-    else:
-      ry = fget(shape, 'ry', r)
+    ry = fget(shape, 'ry', r)
     x = fget(shape,'x')
     y = fget(shape,'y')
     w = fget(shape,'w')
