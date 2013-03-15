@@ -13,6 +13,7 @@ import os.path, pkg_resources, tempfile
 
 from util.util import *
 from defaultsettings import color_schemes
+import inter.util
 
 import glFreeType
 import shaders
@@ -30,10 +31,9 @@ def make_shader(name):
 
 class GLDraw:
 
-  def __init__(self, font, zoom, colorscheme):
-
+  def __init__(self, glw, font, colorscheme):
+    self.glw = glw
     self.font = font
-    self.set_zoom(zoom)
     self.color = colorscheme
 
     self.circle_shader = make_shader("circle")
@@ -64,8 +64,8 @@ class GLDraw:
     (r,g,b,a) = self.color[t]
     glColor4f(r,g,b,a)
 
-  def set_zoom(self, zoom):
-    self.zoom = float(zoom)
+  def zoom(self):
+    return float(self.glw.zoomfactor)
 
   def _txt(self, shape, dx, dy, x, y, on_pad=False):
     if 'name' in shape:
@@ -78,8 +78,8 @@ class GLDraw:
     else:
       self.set_color('silk')
     l = len(s)
-    dxp = dx * self.zoom # dx in pixels
-    dyp = dy * self.zoom # dy in pixels
+    dxp = dx * self.zoom() # dx in pixels
+    dyp = dy * self.zoom() # dy in pixels
     (fdx, fdy) = self.font.ft.getsize(s)
     scale = min(dxp / fdx, dyp / fdy)
     sdx = -scale*fdx/2
@@ -87,7 +87,7 @@ class GLDraw:
     glEnable(GL_TEXTURE_2D) # Enables texture mapping
     glPushMatrix()
     glLoadIdentity()
-    self.font.glPrint(x*self.zoom+sdx, y*self.zoom+sdy, s, scale)
+    self.font.glPrint(x*self.zoom()+sdx, y*self.zoom()+sdy, s, scale)
     glPopMatrix ()
     glDisable(GL_TEXTURE_2D)
 
@@ -269,6 +269,7 @@ class JYDGLWidget(QGLWidget):
     start_zoomfactor = int(parent.setting('gl/zoomfactor'))
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
+    self.auto_zoom = bool(parent.setting('gl/autozoom'))
     # resource_filename does not work in the .zip file py2app makes :(
     # self.font_file = pkg_resources.resource_filename(__name__, "FreeMonoBold.ttf")
     # we work around that by means of a tempfile
@@ -279,6 +280,7 @@ class JYDGLWidget(QGLWidget):
     self.font_file = t.name
     self.shapes = []
     self.make_dot_field()
+    self.called_by_me = False
 
   def make_dot_field(self):
     gldx = int(self.parent.setting('gl/dx'))
@@ -302,7 +304,7 @@ class JYDGLWidget(QGLWidget):
     (r,g,b,a) = self.colorscheme['background']
     glClearColor(r, g, b, a)
     self.make_dot_field_vbo()
-    self.gldraw = GLDraw(self.font, self.zoomfactor, self.colorscheme)
+    self.gldraw = GLDraw(self, self.font, self.colorscheme)
 
   def paintGL(self):
     new_colorscheme = color_schemes[str(self.parent.setting('gl/colorscheme'))]
@@ -311,8 +313,13 @@ class JYDGLWidget(QGLWidget):
       glClearColor(r, g, b, a)
     self.colorscheme = new_colorscheme
     self.gldraw.color = self.colorscheme
+
     if self.zoom_changed:
-      self.gldraw.set_zoom(self.zoomfactor)
+      self.zoom_changed = False
+      self.called_by_me = True
+      self.resizeGL(self.width(), self.height())
+      self.called_by_me = False
+
     glClear(GL_COLOR_BUFFER_BIT)
     (r, g, b, a) = self.colorscheme['grid']
     glColor4f(r, g, b, a)
@@ -336,11 +343,10 @@ class JYDGLWidget(QGLWidget):
     glEnd()
         
     if self.shapes != None: self.gldraw.draw(self.shapes)
-    if self.zoom_changed:
-      self.zoom_changed = False
-      self.resizeGL(self.width(), self.height())
 
   def resizeGL(self, w, h):
+    if (not self.called_by_me) and self.auto_zoom:
+      self.update_zoomfactor()
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     # every 'zoomfactor' pixels is one mm
@@ -350,6 +356,17 @@ class JYDGLWidget(QGLWidget):
     if mm_visible_y < 1: mm_visible_y = 1.0
     glOrtho(-mm_visible_x/2, mm_visible_x/2, -mm_visible_y/2, mm_visible_y/2, -1, 1)
     glViewport(0, 0, w, h)
+    if not self.called_by_me:
+      self.updateGL()
+
+  def update_zoomfactor(self):
+    (dx, dy) = inter.util.size(self.shapes)
+    w = self.width()
+    h = self.height()
+    zoomx = float(w) / dx
+    zoomy = float(h) / dy
+    self.zoomfactor = int(min(zoomx, zoomy))
+    self.parent.zoom_selector.setText(str(self.zoomfactor))
 
   def set_shapes(self, s):
     self.shapes = s
