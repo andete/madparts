@@ -26,10 +26,10 @@ def get_meta(inter):
 
 def prepare_for_display(inter):
   h = {
-    'silk': 2,
-    'docu': 1,
-    'smd': 3,
-    'pad': 4,
+    'silk': 4,
+    'docu': 3,
+    'smd': 2,
+    'pad': 1,
   }
   def _sort(x1, x2):
     t1 = h.get(x1['type'], 0)
