@@ -54,3 +54,10 @@ take "Pillow-2.0.0.win32-py2.7.exe"
 Run the program in the development tree with:
 
 C:\python27\python.exe madparts.py
+
+
+* get py2exe
+
+from http://sourceforge.net/projects/py2exe/files/
+
+get py2exe-0.6.9_win32-py2.7.exe

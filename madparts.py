@@ -590,4 +590,6 @@ if __name__ == '__main__':
     widget = MainWin()
     widget.show()
     app.exec_()
-    os.unlink(widget.glw.font_file)
+    # on windows we can't delete the file; TODO investigate how to work around that
+    if sys.platform != 'win32':
+      os.unlink(widget.glw.font_file)

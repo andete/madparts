@@ -12,6 +12,8 @@ with open('README.md') as file:
 
 arch = platform.uname()[4]
 
+extra_data_files = []
+
 if sys.platform == 'darwin':
   OPTIONS = {
       'argv_emulation': True,
@@ -26,9 +28,10 @@ if sys.platform == 'darwin':
       options=dict(py2app=OPTIONS),
       )
 elif sys.platform == 'win32':
+  extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
       setup_requires=['py2exe'],
-      app=['madparts.py'],
+      console=['madparts.py'],
       )
 elif sys.platform.startswith('linux'):
    extra_options = dict(
@@ -71,7 +74,7 @@ setup(
         },
   data_files = [
     ('share/madparts/examples', glob.glob('examples/*.coffee')),
-    ],
+    ] + extra_data_files,
   platforms = ["Windows", "Linux", "Mac OS-X"],
   **extra_options
   )
