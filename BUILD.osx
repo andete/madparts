@@ -13,7 +13,7 @@ You need to build pyv8 from source. (TODO document)
 
 copy PyV8.py and _PyV8.so to your source tree.
 
-Execute 'make osx'
+Execute 'make darwin'
 
 An madparts.app directory will be made in dist/
 

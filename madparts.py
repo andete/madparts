@@ -4,7 +4,7 @@
 # License: GPL
 
 import numpy as np
-import math, time, traceback, re, os, os.path
+import math, time, traceback, re, os, os.path, sys
 
 from PySide import QtGui, QtCore
 
@@ -28,7 +28,10 @@ class MainWin(QtGui.QMainWindow):
 
     self.settings = QtCore.QSettings()
     if not 'library' in self.settings.childGroups():
-      example_lib = QtCore.QDir('examples').absolutePath()
+      if sys.platform == 'darwin':
+        example_lib = QtCore.QDir('share/madparts/examples').absolutePath()
+      else:
+        example_lib = QtCore.QDir('examples').absolutePath()
       self.lib_dir = {'Examples':example_lib}
       self.lib_exist = {'Examples':True}
       self.save_libraries()
