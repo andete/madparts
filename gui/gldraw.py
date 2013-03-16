@@ -225,26 +225,19 @@ class GLDraw:
     y1 = fget(shape, 'y1')
     x2 = fget(shape, 'x2')
     y2 = fget(shape, 'y2')
-    if (x1 > x2):
-      (x1, x2) = (x2, x1)
-      (y1, y2) = (y2, y1)
     w = fget(shape, 'w')
     r = w/2
-    dx = abs(x1-x2)
-    dy = abs(y1-y2)
+
+    dx = x2-x1
+    dy = y2-y1
     l = math.sqrt(dx*dx + dy*dy)
-    s = dy / l
-    c = dx / l
-    ddy = r * c
-    ddx = r * s
+    px = dy * r / l # trigoniometrics
+    py = dx * r / l # trigoniometrics
     glBegin(GL_QUADS)
-    if (y1 > y2):
-      ddx = -ddx
-      ddy = -ddy
-    glVertex3f(x1-ddx, y1+ddy, 0)
-    glVertex3f(x1+ddx, y1-ddy, 0)
-    glVertex3f(x2+ddx, y2-ddy, 0)
-    glVertex3f(x2-ddx, y2+ddy, 0)
+    glVertex3f(x1-px, y1+py, 0)
+    glVertex3f(x1+px, y1-py, 0)
+    glVertex3f(x2+px, y2-py, 0)
+    glVertex3f(x2-px, y2+py, 0)
     glEnd()
     self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
     self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)
