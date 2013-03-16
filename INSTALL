@@ -16,4 +16,8 @@ For other variants of OSX please look in the BUILD.osx file.
 Windows
 =======
 
-Download the windows 32-bit zip file and install the executable.
+Install the prerequisites as described in BUILD.win32
+
+Download the windows 32-bit zip file.
+
+Execute madparts.py in it.

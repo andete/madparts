@@ -56,8 +56,10 @@ Run the program in the development tree with:
 C:\python27\python.exe madparts.py
 
 
-* get py2exe
+### TODO: py2exe seems to have issues with pkg_resources...
+# * get py2exe
+#
+# from http://sourceforge.net/projects/py2exe/files/
+#
+# get py2exe-0.6.9_win32-py2.7.exe
 
-from http://sourceforge.net/projects/py2exe/files/
-
-get py2exe-0.6.9_win32-py2.7.exe

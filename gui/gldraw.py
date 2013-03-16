@@ -1,11 +1,6 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-try:
-    from OpenGL.platform import win32
-except AttributeError:
-    pass
-
 from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
