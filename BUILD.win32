@@ -1,1 +1,56 @@
-TODO
+* python
+
+Get from http://www.python.org/download/ .
+Get the file "Python 2.7.3 Windows Installer".
+
+* setuptools
+
+Get from https://pypi.python.org/pypi/setuptools#downloads
+Take setuptools-0.6c11.win32-py2.7.exe 
+
+* pip
+
+next start a command prompt and execute:
+
+cd c:\Python27\Scripts
+easy_install pip
+keep the shell open
+
+* numpy
+
+pip install numpy
+
+* pyside
+
+pip install pyside
+
+* beautifulsoup4
+
+pip install beautifulsoup4
+
+* pyopengl
+
+from https://pypi.python.org/pypi/PyOpenGL/3.0.2
+
+take PyOpenGL-3.0.2.win32.exe
+
+* pyopengl-accelerate
+
+from https://pypi.python.org/pypi/PyOpenGL-accelerate/3.0.2
+
+take PyOpenGL-accelerate-3.0.2.win32-py2.7.exe
+
+* pyv8
+
+from http://code.google.com/p/pyv8/downloads/list
+
+take PyV8-1.0-preview-r443.win32-py2.7.exe
+
+* python imaging
+
+from http://www.lfd.uci.edu/~gohlke/pythonlibs/
+take "Pillow-2.0.0.win32-py2.7.exe"
+
+Run the program in the development tree with:
+
+C:\python27\python.exe madparts.py

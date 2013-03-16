@@ -3,14 +3,14 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import glob, sys, os
+import glob, sys, platform
 
 from setuptools import setup
 
 with open('README.md') as file:
     long_description = file.read()
 
-arch = os.uname()[4]
+arch = platform.uname()[4]
 
 if sys.platform == 'darwin':
   OPTIONS = {
