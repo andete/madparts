@@ -107,6 +107,7 @@ lines = (wi, a) ->
        line
     )
 
+# TODO: quad with a unit, simular to single and dual below
 quad = (pad, num, step, dist) ->
   adj = 0
   if pad.adj?
@@ -139,3 +140,41 @@ class Label
 silk_square = (half_line_size, line_width) ->
     ls = half_line_size
     lines line_width, [[-ls,ls], [ls,ls], [ls,-ls], [-ls,-ls], [-ls,ls]]
+
+adjust_y = (o, dy) ->
+  if o.shape == 'line'
+    o.y1 += dy
+    o.y2 += dy
+  else
+    if not o.y?
+      o.y = 0
+    o.y += dy
+  o
+
+adjust_x = (o, dx) ->
+  if o.shape == 'line'
+    o.x1 += dx
+    o.x2 += dx
+  else
+    if not o.x?
+      o.x = 0
+    o.x += dx
+  o
+
+single = (unit, n, d) ->
+    y = (n-1) * d /2
+    adapt = (o, dy) ->
+      o2 = clone o
+      adjust_y o2, (-dy)
+    units = [0...n].map((x) ->
+        unit.map((o) ->
+          adapt(o, - y + x * d)))
+    combine units
+
+# TODO: allow alternating numbering for dual
+dual = (unit, n, d, e) ->
+  s1 = single unit, n, d
+  s2 = single unit, n, d
+  s1 = s1.map ((o) -> adjust_x o, -e/2)
+  s2 = s2.map ((o) -> adjust_x o, e/2)
+  combine [s1, s2.reverse()]
