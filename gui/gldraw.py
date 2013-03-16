@@ -278,14 +278,11 @@ class JYDGLWidget(QGLWidget):
     # resource_filename does not work in the .zip file py2app makes :(
     # self.font_file = pkg_resources.resource_filename(__name__, "FreeMonoBold.ttf")
     # we work around that by means of a tempfile
-    if sys.platform != 'win32':
-      font_data = pkg_resources.resource_string(__name__, 'FreeMonoBold.ttf')
-      t = tempfile.NamedTemporaryFile(suffix='.ttf',delete=False)
-      t.write(font_data)
-      t.close()
-      self.font_file = t.name
-    else:
-      self.font_file = 'COURB.TTF' # we just assume windows has Courier New Bold
+    font_data = pkg_resources.resource_string(__name__, 'FreeMonoBold.ttf')
+    t = tempfile.NamedTemporaryFile(suffix='.ttf',delete=False)
+    t.write(font_data)
+    t.close()
+    self.font_file = t.name
     self.shapes = []
     self.make_dot_field()
     self.called_by_me = False
