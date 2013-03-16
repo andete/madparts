@@ -1,58 +1,18 @@
 Linux
 =====
 
-Install the following packages via your distribution package manager:
-
-* python (tested with 2.7)
-* numpy (tested with 1.6.2)
-* pyside (tested with 1.1.1)
-* python-opengl (tested with 3.0.1) 
-* beautiful soup 4 (tested with 4.1.0)
-* python-imaging (tested with 1.1.7)
-
-The following two are not yet provided by distributions.
-
-For wheezy x86_64 a download is provided that contains these
+For Debian wheezy x86_64 a download is provided that contains these
 libraries pre-compiled and is ready to run.
 
-Other linux variants will have to build these libraries from
-source:
-
-* pyv8 (http://code.google.com/p/pyv8/)
-* pyftgl (http://code.google.com/p/pyftgl/) (tested with 0.5c)
-
-After that just unpack the madparts tar file and run the madscripts.py
-script contained in it.
-
-Hopefully in the future madparts and it's dependencies will be packaged
-to be part of your favorite linux distrubution.
+For other variants please look in the BUILD.Linux file.
 
 MacOS-X
 =======
 
-Macports
---------
+For OSX Montain Lion an app is provided. Download it and run it.
 
-Make sure you have macports from macports.org.
+For other variants of OSX please look in the BUILD.osx file.
 
-In a Terminal, execute:
-
-sudo port install boost
-sudo port install py27-pyside
-sudo port install py27-numpy
-sudo port install py27-opengl
-sudo port install py27-beautifulsoup4
-sudo port install py27-pil
-
-madparts.app
-------------
-
-Should contain:
-* madparts
-* pyv8
-
-TODO
- 
 Windows
 =======
 

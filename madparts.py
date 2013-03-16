@@ -182,10 +182,15 @@ class MainWin(QtGui.QMainWindow):
     self.zoom_selector.returnPressed.connect(self.zoom)
     rhbox.addWidget(QtGui.QLabel("Zoom: "))
     rhbox.addWidget(self.zoom_selector)
+    self.auto_zoom = QtGui.QCheckBox("Auto")
+    self.auto_zoom.setChecked(bool(self.setting('gl/autozoom')))
+    self.auto_zoom.stateChanged.connect(self.zoom)
+    self.auto_zoom.stateChanged.connect(self.auto_zoom_changed)
+    rhbox.addWidget(self.auto_zoom)
     rvbox.addLayout(rhbox)
     rvbox.addWidget(self.glw)
 
-    right = QtGui.QWidget()
+    right = QtGui.QWidget(self)
     right.setLayout(rvbox)
     return right
 
@@ -345,7 +350,13 @@ class MainWin(QtGui.QMainWindow):
   def zoom(self):
     self.glw.zoomfactor = int(self.zoom_selector.text())
     self.glw.zoom_changed = True
+    self.glw.auto_zoom = self.auto_zoom.isChecked()
+    if self.glw.auto_zoom:
+      self.glw.update_zoomfactor()
     self.glw.updateGL()
+
+  def auto_zoom_changed(self):
+    self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
 
   def remove_footprint(self):
     directory = self.lib_dir[self.active_library]
