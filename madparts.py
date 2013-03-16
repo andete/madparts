@@ -12,7 +12,7 @@ from gui.dialogs import *
 import gui.gldraw, gui.library
 
 import coffee.pycoffee as pycoffee
-import coffee.generatesimple
+import coffee.generatesimple as generatesimple
 
 import inter.util
 
@@ -447,7 +447,7 @@ class MainWin(QtGui.QMainWindow):
     cl = []
     for (footprint_name, interim) in l:
       try:
-       coffee = coffee.generatesimple.generate_coffee(interim)
+       coffee = generatesimple.generate_coffee(interim)
        cl.append((footprint_name, coffee))
       except Exception as ex:
         tb = traceback.format_exc()
@@ -478,6 +478,7 @@ class MainWin(QtGui.QMainWindow):
   def compile(self):
 
     code = self.te1.toPlainText()
+    compilation_failed_last_time = self.executed_footprint == []
     self.executed_footprint = []
     try:
       interim = pycoffee.eval_coffee_footprint(code)
@@ -489,7 +490,8 @@ class MainWin(QtGui.QMainWindow):
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)
-      #self.status("Compilation successful.")
+      if compilation_failed_last_time:
+        self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2, 0])
     # TODO: get rid of exception handling code duplication
