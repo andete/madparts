@@ -1,6 +1,11 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+try:
+    from OpenGL.platform import win32
+except AttributeError:
+    pass
+
 from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
@@ -8,7 +13,7 @@ from OpenGL.GL import *
 import OpenGL.arrays.vbo as vbo
 
 import numpy as np
-import math
+import math, sys
 import os.path, pkg_resources, tempfile
 
 from util.util import *
@@ -273,11 +278,14 @@ class JYDGLWidget(QGLWidget):
     # resource_filename does not work in the .zip file py2app makes :(
     # self.font_file = pkg_resources.resource_filename(__name__, "FreeMonoBold.ttf")
     # we work around that by means of a tempfile
-    font_data = pkg_resources.resource_string(__name__, 'FreeMonoBold.ttf')
-    t = tempfile.NamedTemporaryFile(suffix='.ttf',delete=False)
-    t.write(font_data)
-    t.close()
-    self.font_file = t.name
+    if sys.platform != 'win32':
+      font_data = pkg_resources.resource_string(__name__, 'FreeMonoBold.ttf')
+      t = tempfile.NamedTemporaryFile(suffix='.ttf',delete=False)
+      t.write(font_data)
+      t.close()
+      self.font_file = t.name
+    else:
+      self.font_file = 'COURB.TTF' # we just assume windows has Courier New Bold
     self.shapes = []
     self.make_dot_field()
     self.called_by_me = False
