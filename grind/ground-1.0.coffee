@@ -76,13 +76,17 @@ class Line
      @type = 'silk'
      @shape = 'line'
 
-rot = (o) ->
-   b = clone(o)
-   b.dx = o.dy
-   b.dy = o.dx
-   b
-
-rotl = (l) -> l.map rot
+rotate90 = (o) ->
+  b = clone(o)
+  if b.shape == 'line'
+    b.x1 = -o.y1
+    b.y1 = o.x1
+    b.x2 = -o.y2
+    b.y2 = o.x2
+  else
+    b.x = -o.y
+    b.y = o.x
+  b
 
 # a... treats a as a argument list
 combine = (a) -> [].concat a...
