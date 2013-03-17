@@ -1,6 +1,8 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+### SECTION 1: general coffeescript utilities ###
+
 # clone, from http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning
 clone = (obj) ->
   if not obj? or typeof obj isnt 'object'
@@ -47,15 +49,25 @@ modl = (l, kv...) ->
     o[k] = v for [k,v] in kv
     o)
 
+### SECTION 2: type constructors ###
+
 class Smd
   constructor: ->
     @type = 'smd'
     @shape = 'rect'
+    @x = 0
+    @y = 0
+    @dx = 0
+    @dy = 0
     
 class Rect
   constructor: ->
     @type = 'silk'
     @shape = 'rect'
+    @x = 0
+    @y = 0
+    @dx = 0
+    @dy = 0
 
 class Pad
   constructor: ->
@@ -65,16 +77,48 @@ class Disc
   constructor: (@r) ->
     @type = 'silk'
     @shape = 'disc'
+    @x = 0
+    @y = 0
 
 class Circle
   constructor: (@w) ->
     @type = 'silk'
     @shape = 'circle'
+    @r = 0
+    @x = 0
+    @y = 0
 
 class Line
    constructor: (@w) ->
      @type = 'silk'
      @shape = 'line'
+     @x1 = 0
+     @y1 = 0
+     @x2 = 0
+     @y2 = 0
+
+class Name
+  constructor: (@y) ->
+    @type = 'silk'
+    @shape = 'label'
+    @value = 'NAME'
+    @x = 0
+
+class Value
+  constructor: (@y) ->
+    @type = 'silk'
+    @shape = 'label'
+    @value = 'VALUE'
+    @x = 0
+
+class Label
+  constructor: (@value) ->
+    @type = 'silk'
+    @shape = 'label'
+    @x = 0
+    @y = 0
+
+### SECTION 3: handy utility functions ###
 
 rotate90 = (o) ->
   b = clone(o)
