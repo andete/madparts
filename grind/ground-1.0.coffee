@@ -164,23 +164,6 @@ quad = (pad, num, step, dist) ->
   l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d+adj], ['rot', 270]
   combine [l1, l2, l3, l4]
 
-class Name
-  constructor: (@y) ->
-    @type = 'silk'
-    @shape = 'label'
-    @value = 'NAME'
-
-class Value
-  constructor: (@y) ->
-    @type = 'silk'
-    @shape = 'label'
-    @value = 'VALUE'
-
-class Label
-  constructor: (@value) ->
-    @type = 'silk'
-    @shape = 'label'
-
 silk_square = (half_line_size, line_width) ->
     ls = half_line_size
     lines line_width, [[-ls,ls], [ls,ls], [ls,-ls], [-ls,-ls], [-ls,ls]]
