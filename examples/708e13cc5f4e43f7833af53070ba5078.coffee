@@ -13,10 +13,7 @@ footprint = () ->
   name = new Name (n*d/2+0.5)
   value = new Value (-n*d/2-0.5)
   
-  pad = new Pad
-  pad.r = pad_r
-  pad.shape = 'disc'
-  pad.drill = drill
+  pad = new RoundPad pad_r, drill
 
   silk1 = new Line w
   silk1.x1 = d/2

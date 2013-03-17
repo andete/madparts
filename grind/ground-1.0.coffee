@@ -76,6 +76,40 @@ class Pad
   constructor: ->
     @type = 'pad'
 
+class RoundPad extends Pad
+  constructor: (@r, @drill) ->
+    super
+    @shape = 'disc'
+
+class SquarePad extends Pad
+  constructor: (dia, @drill) ->
+    super
+    @shape = 'rect'
+    @dx = dia
+    @dy = dia
+
+class LongPad extends Pad
+  constructor: (dia, @drill) ->
+    super
+    @shape = 'rect'
+    @ro = 100
+    @dx = 2*dia
+    @dy = dia
+
+class OctagonPad extends Pad
+  constructor: (@r, @drill) ->
+    super
+    @shape = 'octagon'
+
+class OffsetPad extends Pad
+  constructor: (dia, @drill) ->
+    super
+    @shape = 'rect'
+    @ro = 100
+    @dx = 2*dia
+    @dy = dia
+    @drill_dx = -dia/2
+
 class Disc
   constructor: (@r) ->
     @type = 'silk'
@@ -190,8 +224,8 @@ single = (unit, num, distance) ->
 dual = (unit, num, distance, between) ->
   s1 = single unit, num, distance
   s2 = single unit, num, distance
-  s1 = s1.map ((item) -> adjust_x item, -between/2)
-  s2 = s2.map ((item) -> adjust_x (rotate180 item), between/2)
+  s1 = s1.map ((item) -> adjust_x (rotate180 item), -between/2)
+  s2 = s2.map ((item) -> adjust_x item, between/2)
   combine [s1, s2.reverse()]
 
 # create a dual vertical range of 'num' units 'distance' apart in the range
@@ -202,8 +236,8 @@ alt_dual = (unit, num, distance, between) ->
   s1 = single unit, num, distance
   s1 = s1.map ((item) ->
     i2 = clone item
-    i1 = adjust_x item, -between/2
-    i2 = adjust_x (rotate180 i2), between/2
+    i1 = adjust_x (rotate180 item), -between/2
+    i2 = adjust_x i2, between/2
     [i1,i2])
   combine s1
 

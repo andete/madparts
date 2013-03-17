@@ -15,10 +15,7 @@ footprint = () ->
   value = new Value (-n*d/2-0.5)
   
   # the basic pad
-  pad = new Pad
-  pad.r = pad_r
-  pad.shape = 'disc'
-  pad.drill = drill
+  pad = new OctagonPad pad_r, drill
 
   # create a nice octagon around the pad
   # # horizontal parts
@@ -29,7 +26,8 @@ footprint = () ->
   silk1.y2 = d/4
   silk2 = rotate90 clone silk1
   silk3 = rotate90 clone silk2
-  silk4 = rotate90 clone silk3
+  silk4 = rotate90 clone silk3 
+
   # # diagonal parts
   silk5 = new Line w
   silk5.y1 = d/4
