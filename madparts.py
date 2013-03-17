@@ -84,6 +84,10 @@ class MainWin(QtGui.QMainWindow):
     self.export_library_filetype = ""
     self.is_fresh_from_file = True
     self.selected_library = None
+    self.gl_dx = 0
+    self.gl_dy = 0
+    self.gl_w = 0
+    self.gl_h = 0
 
   ### GUI HELPERS
 
@@ -354,8 +358,8 @@ class MainWin(QtGui.QMainWindow):
     self.glw.zoomfactor = int(self.zoom_selector.text())
     self.glw.zoom_changed = True
     self.glw.auto_zoom = self.auto_zoom.isChecked()
-    if self.glw.auto_zoom:
-      self.glw.update_zoomfactor()
+    #if self.glw.auto_zoom:
+    #  self.glw.update_zoomfactor()
     self.glw.updateGL()
 
   def auto_zoom_changed(self):
@@ -475,6 +479,18 @@ class MainWin(QtGui.QMainWindow):
   def status(self, s):
     self.statusBar().showMessage(s)
 
+  def update_zoom(self, dx, dy, w, h):
+    self.gl_dx = dx
+    self.gl_dy = dy
+    self.gl_w = w
+    self.gl_h = h
+    zoomx = float(w) / dx
+    zoomy = float(h) / dy
+    zoom = int(min(zoomx, zoomy))
+    self.zoom_selector.setText(str(zoom))
+    self.glw.zoomfactor = zoom
+    self.glw.zoom_changed = True
+
   def compile(self):
 
     code = self.te1.toPlainText()
@@ -486,6 +502,11 @@ class MainWin(QtGui.QMainWindow):
         interim = inter.util.add_names(interim)
       self.executed_footprint = interim
       self.te2.setPlainText(str(interim))
+      (dx, dy) = inter.util.size(interim)
+      w = self.glw.width()
+      h = self.glw.height()
+      if dx != self.gl_dx or dy != self.gl_dy or w != self.gl_w or h != self.gl_h:
+        self.update_zoom(dx, dy, w, h)
       self.glw.set_shapes(inter.util.prepare_for_display(interim))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:

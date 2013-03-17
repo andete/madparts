@@ -338,8 +338,6 @@ class JYDGLWidget(QGLWidget):
     if self.shapes != None: self.gldraw.draw(self.shapes)
 
   def resizeGL(self, w, h):
-    if (not self.called_by_me) and self.auto_zoom:
-      self.update_zoomfactor()
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     # every 'zoomfactor' pixels is one mm
@@ -350,16 +348,7 @@ class JYDGLWidget(QGLWidget):
     glOrtho(-mm_visible_x/2, mm_visible_x/2, -mm_visible_y/2, mm_visible_y/2, -1, 1)
     glViewport(0, 0, w, h)
     if not self.called_by_me:
-      self.updateGL()
-
-  def update_zoomfactor(self):
-    (dx, dy) = inter.util.size(self.shapes)
-    w = self.width()
-    h = self.height()
-    zoomx = float(w) / dx
-    zoomy = float(h) / dy
-    self.zoomfactor = int(min(zoomx, zoomy))
-    self.parent.zoom_selector.setText(str(self.zoomfactor))
+      self.parent.compile()
 
   def set_shapes(self, s):
     self.shapes = s
@@ -375,8 +364,6 @@ class JYDGLWidget(QGLWidget):
           self.updateGL()
       else:
         if self.zoomfactor < 245:
-          self.zoom_changed = True
-          self.updateGL()
           self.zoomfactor = self.zoomfactor + 5
           self.parent.zoom_selector.setText(str(self.zoomfactor))
           self.zoom_changed = True
