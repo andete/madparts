@@ -27,18 +27,18 @@ footprint = () ->
   silk1.y1 = -d/4
   silk1.x2 = d/2
   silk1.y2 = d/4
-  silk2 = rotate90 silk1
-  silk3 = rotate90 silk2
-  silk4 = rotate90 silk3
+  silk2 = rotate90 clone silk1
+  silk3 = rotate90 clone silk2
+  silk4 = rotate90 clone silk3
   # # diagonal parts
   silk5 = new Line w
   silk5.y1 = d/4
   silk5.x1 = d/2
   silk5.y2 = d/2
   silk5.x2 = d/4
-  silk6 = rotate90 silk5
-  silk7 = rotate90 silk6
-  silk8 = rotate90 silk7
+  silk6 = rotate90 clone silk5
+  silk7 = rotate90 clone silk6
+  silk8 = rotate90 clone silk7
 
   unit = [pad, silk1, silk2, silk3, silk4, silk5, silk6, silk7, silk8]
 

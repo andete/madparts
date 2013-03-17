@@ -123,19 +123,31 @@ class Label
 
 ### SECTION 4: handy utility functions ###
 
-# create a clone that is rotated 90 degrees anti-clockwise around (0,0)
-rotate90 = (o) ->
-  # TODO if it is a pad or smd use rot property instead ?
-  b = clone(o)
-  if b.shape == 'line'
-    b.x1 = -o.y1
-    b.y1 = o.x1
-    b.x2 = -o.y2
-    b.y2 = o.x2
+# adjust item to be rotated 90 degrees anti-clockwise around (0,0)
+rotate90 = (item) ->
+  if item.type == 'smd' or item.type == 'pad'
+    if not item.rot?
+      item.rot = 0
+    item.rot -= 90
+    if item.rot < 0
+      item.rot += 360
+  else if item.shape == 'line'
+    ox1 = item.x1
+    oy1 = item.y1
+    ox2 = item.x2
+    oy2 = item.y2
+    item.x1 = -oy1
+    item.y1 = ox1
+    item.x2 = -oy2
+    item.y2 = ox2
   else
-    b.x = -o.y
-    b.y = o.x
-  b
+    ox = item.x
+    oy = item.y
+    item.x = -oy
+    item.y = ox
+  item
+
+rotate180 = (item) -> rotate90 rotate90 item
 
 # adjust a shape in the y direction
 adjust_y = (o, dy) ->
@@ -179,8 +191,7 @@ dual = (unit, num, distance, between) ->
   s1 = single unit, num, distance
   s2 = single unit, num, distance
   s1 = s1.map ((item) -> adjust_x item, -between/2)
-  s2 = s2.map ((item) -> adjust_x item, between/2)
-  #s2 entries should be rotated 180 degrees ?
+  s2 = s2.map ((item) -> adjust_x (rotate180 item), between/2)
   combine [s1, s2.reverse()]
 
 
@@ -197,11 +208,11 @@ quad = (pad, num, step, dist) ->
   l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d+adj], ['rot', 270]
   combine [l1, l2, l3, l4]
 
-# this is just temporarely
-lines = (w, coordinates) ->
+# create a sequence of lines from a list of coordinates
+lines = (width, coordinates) ->
     from = coordinates[0]
     coordinates[1..].map ((to) ->
-       line = new Line w
+       line = new Line width
        line.x1 = from[0]
        line.y1 = from[1]
        line.x2 = to[0]
@@ -213,21 +224,3 @@ lines = (w, coordinates) ->
 silk_square = (half_line_size, line_width) ->
     ls = half_line_size
     lines line_width, [[-ls,ls], [ls,ls], [ls,-ls], [-ls,-ls], [-ls,ls]]
-
-single = (unit, n, d) ->
-    y = (n-1) * d /2
-    adapt = (o, dy) ->
-      o2 = clone o
-      adjust_y o2, (-dy)
-    units = [0...n].map((x) ->
-        unit.map((o) ->
-          adapt(o, - y + x * d)))
-    combine units
-
-# TODO: allow alternating numbering for dual
-dual = (unit, n, d, e) ->
-  s1 = single unit, n, d
-  s2 = single unit, n, d
-  s1 = s1.map ((o) -> adjust_x o, -e/2)
-  s2 = s2.map ((o) -> adjust_x o, e/2)
-  combine [s1, s2.reverse()]
