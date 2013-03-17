@@ -42,6 +42,6 @@ footprint = () ->
 
   unit = [pad, silk1, silk2, silk3, silk4, silk5, silk6, silk7, silk8]
 
-  units = dual unit, n, d, d
+  units = alt_dual unit, n, d, d
 
   combine [name,value, units]

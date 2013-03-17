@@ -194,6 +194,19 @@ dual = (unit, num, distance, between) ->
   s2 = s2.map ((item) -> adjust_x (rotate180 item), between/2)
   combine [s1, s2.reverse()]
 
+# create a dual vertical range of 'num' units 'distance' apart in the range
+# and 'between' apart between the two ranges
+# with alternating numbering like typically used for pin headers
+# instead of the typical pin numbering found for chips
+alt_dual = (unit, num, distance, between) ->
+  s1 = single unit, num, distance
+  s1 = s1.map ((item) ->
+    i2 = clone item
+    i1 = adjust_x item, -between/2
+    i2 = adjust_x (rotate180 i2), between/2
+    [i1,i2])
+  combine s1
+
 
 # TODO: quad with a unit, simular to single and dual below
 quad = (pad, num, step, dist) ->
