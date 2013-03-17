@@ -173,12 +173,13 @@ single = (unit, num, distance) ->
     )
     combine units
 
-# create a dual vertical range of 'num' units
-dual = (unit, n, d, e) ->
-  s1 = single unit, n, d
-  s2 = single unit, n, d
-  s1 = s1.map ((o) -> adjust_x o, -e/2)
-  s2 = s2.map ((o) -> adjust_x o, e/2)
+# create a dual vertical range of 'num' units 'distance' apart in the range
+# and 'between' apart between the two ranges
+dual = (unit, num, distance, between) ->
+  s1 = single unit, num, distance
+  s2 = single unit, num, distance
+  s1 = s1.map ((item) -> adjust_x item, -between/2)
+  s2 = s2.map ((item) -> adjust_x item, between/2)
   #s2 entries should be rotated 180 degrees ?
   combine [s1, s2.reverse()]
 
@@ -195,6 +196,19 @@ quad = (pad, num, step, dist) ->
   l3  = modl (range pad, 'y', (steps n,  step)),  ['x', d+adj], ['rot', 180]
   l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d+adj], ['rot', 270]
   combine [l1, l2, l3, l4]
+
+# this is just temporarely
+lines = (w, coordinates) ->
+    from = coordinates[0]
+    coordinates[1..].map ((to) ->
+       line = new Line w
+       line.x1 = from[0]
+       line.y1 = from[1]
+       line.x2 = to[0]
+       line.y2 = to[1]
+       from = to
+       line
+    )
 
 silk_square = (half_line_size, line_width) ->
     ls = half_line_size
