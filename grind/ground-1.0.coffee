@@ -48,6 +48,9 @@ modl = (l, kv...) ->
   l.map ((o) ->
     o[k] = v for [k,v] in kv
     o)
+    
+# a... treats a as a argument list
+combine = (a) -> [].concat a...
 
 ### SECTION 2: type constructors ###
 
@@ -118,9 +121,11 @@ class Label
     @x = 0
     @y = 0
 
-### SECTION 3: handy utility functions ###
+### SECTION 4: handy utility functions ###
 
+# create a clone that is rotated 90 degrees anti-clockwise around (0,0)
 rotate90 = (o) ->
+  # TODO if it is a pad or smd use rot property instead ?
   b = clone(o)
   if b.shape == 'line'
     b.x1 = -o.y1
@@ -132,24 +137,51 @@ rotate90 = (o) ->
     b.y = o.x
   b
 
-# a... treats a as a argument list
-combine = (a) -> [].concat a...
+# adjust a shape in the y direction
+adjust_y = (o, dy) ->
+  if o.shape == 'line'
+    o.y1 += dy
+    o.y2 += dy
+  else
+    if not o.y?
+      o.y = 0
+    o.y += dy
+  o
 
-# this is just temporarely
-lines = (wi, a) ->
-    b = a[0]
-    a[1..].map ((c) ->
-       line =
-         type: 'silk'
-         shape: 'line'
-         x1: b[0]
-         y1: b[1]
-         x2: c[0]
-         y2: c[1]
-         w: wi
-       b = c
-       line
+# adjust a shape in the x direction
+adjust_x = (o, dx) ->
+  if o.shape == 'line'
+    o.x1 += dx
+    o.x2 += dx
+  else
+    if not o.x?
+      o.x = 0
+    o.x += dx
+  o
+
+### SECTION 5: creating ranges of items ###
+
+# create a single vertical range of 'num' units 'distance' apart
+single = (unit, num, distance) ->
+    y = (num-1) * distance /2
+    units = [0...num].map((i) ->
+      dy =  - y + i * distance
+      unit.map ((item) ->
+        item2 = clone item
+        adjust_y item2, (-dy)
+      )
     )
+    combine units
+
+# create a dual vertical range of 'num' units
+dual = (unit, n, d, e) ->
+  s1 = single unit, n, d
+  s2 = single unit, n, d
+  s1 = s1.map ((o) -> adjust_x o, -e/2)
+  s2 = s2.map ((o) -> adjust_x o, e/2)
+  #s2 entries should be rotated 180 degrees ?
+  combine [s1, s2.reverse()]
+
 
 # TODO: quad with a unit, simular to single and dual below
 quad = (pad, num, step, dist) ->
@@ -167,26 +199,6 @@ quad = (pad, num, step, dist) ->
 silk_square = (half_line_size, line_width) ->
     ls = half_line_size
     lines line_width, [[-ls,ls], [ls,ls], [ls,-ls], [-ls,-ls], [-ls,ls]]
-
-adjust_y = (o, dy) ->
-  if o.shape == 'line'
-    o.y1 += dy
-    o.y2 += dy
-  else
-    if not o.y?
-      o.y = 0
-    o.y += dy
-  o
-
-adjust_x = (o, dx) ->
-  if o.shape == 'line'
-    o.x1 += dx
-    o.x2 += dx
-  else
-    if not o.x?
-      o.x = 0
-    o.x += dx
-  o
 
 single = (unit, n, d) ->
     y = (n-1) * d /2
