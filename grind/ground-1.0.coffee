@@ -243,16 +243,13 @@ alt_dual = (unit, num, distance, between) ->
 
 
 # TODO: quad with a unit, simular to single and dual below
-quad = (pad, num, step, dist) ->
-  adj = 0
-  if pad.adj?
-    adj = pad.adj
+quad = (pad, num, distance, between) ->
   n = num / 4
-  d = dist / 2
-  l1  = modl (range pad, 'y', (steps n,  -step)), ['x', -d-adj]
-  l2  = modl (range pad, 'x', (steps n,  step)),  ['y', -d-adj], ['rot', 90]
-  l3  = modl (range pad, 'y', (steps n,  step)),  ['x', d+adj], ['rot', 180]
-  l4  = modl (range pad, 'x', (steps n,  -step)), ['y', d+adj], ['rot', 270]
+  b = between / 2
+  l1  = modl (range pad, 'y', (steps n,  -distance)), ['x', -b]
+  l2  = modl (range pad, 'x', (steps n,  distance)),  ['y', -b], ['rot', 90]
+  l3  = modl (range pad, 'y', (steps n,  distance)),  ['x', b], ['rot', 180]
+  l4  = modl (range pad, 'x', (steps n,  -distance)), ['y', b], ['rot', 270]
   combine [l1, l2, l3, l4]
 
 # create a sequence of lines from a list of coordinates
