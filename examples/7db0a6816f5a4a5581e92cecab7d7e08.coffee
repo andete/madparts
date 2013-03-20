@@ -1,5 +1,5 @@
 #format 1.0
-#name JEDEC_MS-012-AA
+#name JEDEC_MS-012-AA_manual
 #id 7db0a6816f5a4a5581e92cecab7d7e08
 footprint = () ->
 

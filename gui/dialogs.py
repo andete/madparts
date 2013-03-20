@@ -163,7 +163,7 @@ class MoveFootprintDialog(QtGui.QDialog):
     gbox_from = QtGui.QGroupBox("from")
     from_fl = QtGui.QFormLayout()
     from_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
-    from_fl.addRow("library:", QtGui.QLabel(library))
+    from_fl.addRow("library:", QtGui.QLabel(parent.active_library))
     gbox_from.setLayout(from_fl)
     vbox.addWidget(gbox_from) 
     gbox_to = QtGui.QGroupBox("to")
