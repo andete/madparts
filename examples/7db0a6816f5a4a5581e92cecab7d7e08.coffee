@@ -2,8 +2,12 @@
 #name JEDEC_MS-012-AA
 #id 7db0a6816f5a4a5581e92cecab7d7e08
 footprint = () ->
-  name4 = new Name 3.5814
-  name4.x = -0.2794
+
+  name = new Name 3.5814
+  name.x = -0.2794
+  value = new Value -3.5052
+  value.x = -0.381
+
   silk1 = new Line 0.127
   silk1.x1 = -1.95
   silk1.y1 = 2.54
@@ -43,54 +47,11 @@ footprint = () ->
   silk9.y1 = 1.905
   silk9.x2 = -0.635
   silk9.y2 = 1.905
-  smd1 = new Smd
-  smd1.name = '1'
-  smd1.x = -2.75
-  smd1.y = 1.905
-  smd1.dx = 1.27
-  smd1.dy = 0.45
-  smd2 = new Smd
-  smd2.name = '2'
-  smd2.x = -2.75
-  smd2.y = 0.635
-  smd2.dx = 1.27
-  smd2.dy = 0.45
-  smd3 = new Smd
-  smd3.name = '3'
-  smd3.x = -2.75
-  smd3.y = -0.635
-  smd3.dx = 1.27
-  smd3.dy = 0.45
-  smd4 = new Smd
-  smd4.name = '4'
-  smd4.x = -2.75
-  smd4.y = -1.905
-  smd4.dx = 1.27
-  smd4.dy = 0.45
-  smd5 = new Smd
-  smd5.name = '5'
-  smd5.x = 2.75
-  smd5.y = -1.905
-  smd5.dx = 1.27
-  smd5.dy = 0.45
-  smd6 = new Smd
-  smd6.name = '6'
-  smd6.x = 2.75
-  smd6.y = -0.635
-  smd6.dx = 1.27
-  smd6.dy = 0.45
-  smd7 = new Smd
-  smd7.name = '7'
-  smd7.x = 2.75
-  smd7.y = 0.635
-  smd7.dx = 1.27
-  smd7.dy = 0.45
-  smd8 = new Smd
-  smd8.name = '8'
-  smd8.x = 2.75
-  smd8.y = 1.905
-  smd8.dx = 1.27
-  smd8.dy = 0.45
-  value5 = new Value -3.5052
-  value5.x = -0.381
-  [name4,silk1,silk10,silk2,silk3,silk6,silk7,silk8,silk9,smd1,smd2,smd3,smd4,smd5,smd6,smd7,smd8,value5]
+
+  smd = new Smd
+  smd.dx = 2.2
+  smd.dy = 0.6
+
+  pads = dual smd, 4, 1.27, 5.2
+
+  combine [name,silk1,silk10,silk2,silk3,silk6,silk7,silk8,silk9,value, pads]
