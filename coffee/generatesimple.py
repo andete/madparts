@@ -191,7 +191,14 @@ simple_dispatch = {
 }
 
 def generate_coffee(interim):
-  g = generate_ints()
+  generators = {
+   'smd': generate_ints(),
+   'pad': generate_ints(),
+   'silk': generate_ints(),
+   'docu': generate_ints(),
+   'restrict': generate_ints(),
+   'stop': generate_ints(),
+  }
   l = []
   meta = None
   for x in interim:
@@ -200,6 +207,7 @@ def generate_coffee(interim):
     else:
       shape = x['shape']
       key = "%s_%s" % (t, shape)
+      g = generators[t]
       result = simple_dispatch.get(key, simple_unknown)(g, x)
       l.append(result)
   l = sorted(l, lambda (n1,s1),(n2,s2): cmp(n1,n2))
