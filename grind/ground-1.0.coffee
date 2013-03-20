@@ -157,15 +157,19 @@ class Label
 
 ### SECTION 4: handy utility functions ###
 
+rotate90pad = (item) ->
+  if not item.rot?
+    item.rot = 0
+  item.rot -= 90
+  if item.rot < 0
+    item.rot += 360
+  item
+
 # adjust item to be rotated 90 degrees anti-clockwise around (0,0)
 rotate90 = (item) ->
   if item.type == 'smd' or item.type == 'pad'
-    if not item.rot?
-      item.rot = 0
-    item.rot -= 90
-    if item.rot < 0
-      item.rot += 360
-  else if item.shape == 'line'
+    rotate90pad item
+  if item.shape == 'line'
     ox1 = item.x1
     oy1 = item.y1
     ox2 = item.x2
@@ -175,13 +179,31 @@ rotate90 = (item) ->
     item.x2 = -oy2
     item.y2 = ox2
   else
+    if not item.x?
+      item.x = 0
+    if not item.y?
+      item.y = 0
     ox = item.x
     oy = item.y
     item.x = -oy
     item.y = ox
   item
 
-rotate180 = (item) -> rotate90 rotate90 item
+rotate180 = (item) -> rotate90 (rotate90 item)
+rotate180pad = (item) -> rotate90pad (rotate90pad item)
+
+mirror_y = (item) ->
+  if item.type == 'smd' or item.type == 'pad'
+    rotate180pad item
+  if item.shape == 'line'
+    item.x1 = -item.x1
+    item.x2 = -item.x2
+  else
+    if not item.x?
+      item.x = 0
+    item.x = -item.x
+  item
+ 
 
 # adjust a shape in the y direction
 adjust_y = (o, dy) ->
@@ -223,10 +245,9 @@ single = (unit, num, distance) ->
 # and 'between' apart between the two ranges
 dual = (unit, num, distance, between) ->
   s1 = single unit, num, distance
-  s2 = single unit, num, distance
-  s1 = s1.map ((item) -> adjust_x (rotate180 item), -between/2)
-  s2 = s2.map ((item) -> adjust_x item, between/2)
-  combine [s1, s2.reverse()]
+  s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
+  s2 = s1.map ((item) -> rotate180 (clone item))
+  combine [s1, s2]
 
 # create a dual vertical range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
@@ -235,22 +256,22 @@ dual = (unit, num, distance, between) ->
 alt_dual = (unit, num, distance, between) ->
   s1 = single unit, num, distance
   s1 = s1.map ((item) ->
-    i2 = clone item
-    i1 = adjust_x (rotate180 item), -between/2
-    i2 = adjust_x i2, between/2
+    i1 = adjust_x (rotate180pad item), -between/2
+    i2 = mirror_y (clone i1)
     [i1,i2])
   combine s1
 
-
-# TODO: quad with a unit, simular to single and dual below
-quad = (pad, num, distance, between) ->
+# create a quad of 'num' units 'distance' apart in the range
+# and 'between' apart between the opposide sides
+quad = (unit, num, distance, between) ->
   n = num / 4
   b = between / 2
-  l1  = modl (range pad, 'y', (steps n,  -distance)), ['x', -b]
-  l2  = modl (range pad, 'x', (steps n,  distance)),  ['y', -b], ['rot', 90]
-  l3  = modl (range pad, 'y', (steps n,  distance)),  ['x', b], ['rot', 180]
-  l4  = modl (range pad, 'x', (steps n,  -distance)), ['y', b], ['rot', 270]
-  combine [l1, l2, l3, l4]
+  s1 = single unit, n, distance
+  s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
+  s2 = s1.map ((item) -> rotate90 (clone item))
+  s3 = s2.map ((item) -> rotate90 (clone item))
+  s4 = s3.map ((item) -> rotate90 (clone item))
+  combine [s1,s2,s3,s4]
 
 # create a sequence of lines from a list of coordinates
 lines = (width, coordinates) ->

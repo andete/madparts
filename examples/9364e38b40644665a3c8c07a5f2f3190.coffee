@@ -22,7 +22,7 @@ footprint = () ->
   pad.dy = 0.36
   pad.ro = 50
 
-  pads = quad pad, num_pads, e, size
+  pads = quad [pad], num_pads, e, size
 
   silk = silk_square half_line_size, line_width
 

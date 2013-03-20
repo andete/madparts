@@ -24,7 +24,7 @@ footprint = () ->
   pad.ro = 50
   #pad.adj = pad_len_adj/2
 
-  pads = quad pad, num_pads, e, size + pad_len_adj/2
+  pads = quad [pad], num_pads, e, size + pad_len_adj/2
 
   silk = silk_square half_line_size, line_width
 

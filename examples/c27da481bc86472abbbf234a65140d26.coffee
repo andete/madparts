@@ -27,7 +27,6 @@ footprint = () ->
   silk2 = rotate90 clone silk1
   silk3 = rotate90 clone silk2
   silk4 = rotate90 clone silk3 
-
   # # diagonal parts
   silk5 = new Line w
   silk5.y1 = d/4
