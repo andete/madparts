@@ -29,7 +29,7 @@ footprint = () ->
   pads[0].ro = 100
 
   dot = new Disc (line_width)
-  dot.x = -half
-  dot.y = half - 1
+  dot.x = -half 
+  dot.y = half - 0.7
 
   combine [name, value, pads, silk, dot]

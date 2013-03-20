@@ -396,11 +396,13 @@ class Import:
       if pad.has_key('rot'):
         res['rot'] = int(pad['rot'][1:])
       shape = 'round'
-      if pad.has_key('shape'): shape = pad['shape']
+      if pad.has_key('shape'):
+        shape = pad['shape']
       if shape == 'round':
         res['shape'] = 'disc'
         res['r'] = 0.0
-        if dia/2 > drill: res['r'] = dia/2
+        #if dia/2 > drill:
+        res['r'] = dia/2
       elif shape == 'square':
         res['shape'] = 'rect'
         res['dx'] = dia

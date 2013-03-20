@@ -72,27 +72,24 @@ def _simple_t_rect(t, g, x):
   a = a + ("%s.type = '%s'\n" % (varname, t))
   return (varname, a)
 
-def _simple_pad_circle_octagon(g, prefix, x):
+def _simple_pad_disc_octagon(g, constructor, prefix, x):
   varname = valid("%s%s" % (prefix, x['name']), g)
   a = """\
-%s = new Pad
+%s = new %s %s, %s
 %s.name = '%s'
 %s.shape = '%s'
 %s.x = %s
 %s.y = %s
-%s.r = %s
-%s.drill = %s
-""" % (varname, varname, x['name'],
-       varname, x['shape'], varname, x['x'],
-       varname, x['y'], varname, x['r'], varname, x['drill'])
+""" % (varname, constructor, x['r'], x['drill'], varname, x['name'],
+       varname, x['shape'], varname, x['x'], varname, x['y'])
   a = _add_if(x, a, varname, 'drill_dx')
   return (varname, a)
 
-def simple_pad_circle(g, x):
-  return _simple_pad_circle_octagon(g, 'cpad', x)
+def simple_pad_disc(g, x):
+  return _simple_pad_disc_octagon(g, 'RoundPad', 'cpad', x)
 
 def simple_pad_octagon(g, x):
-  return _simple_pad_circle_octagon(g, 'opad', x)
+  return _simple_pad_disc_octagon(g, 'OctagonPad', 'opad', x)
 
 def _simple_circle(prefix, g, x):
   varname = "%s%s" % (prefix, g.next())
@@ -177,7 +174,7 @@ def simple_unknown(g, x):
 simple_dispatch = {
  'smd_rect': simple_smd_rect,
  'pad_rect': simple_pad_rect,
- 'pad_circle': simple_pad_circle,
+ 'pad_disc': simple_pad_disc,
  'pad_octagon': simple_pad_octagon,
  'silk_circle': simple_silk_circle,
  'silk_line': simple_silk_line,
