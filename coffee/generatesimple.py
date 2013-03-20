@@ -51,17 +51,49 @@ def _simple_rect(prefix, constructor, x, g):
   a = _add_if(x, a, varname, 'y')
   a = _add_if(x, a, varname, 'dx')
   a = _add_if(x, a, varname, 'dy')
-  a = _add_if(x, a, varname, 'x1')
-  a = _add_if(x, a, varname, 'y1')
-  a = _add_if(x, a, varname, 'x2')
-  a = _add_if(x, a, varname, 'y2')
   return (varname, a)
 
 def simple_smd_rect(g, x):
   return _simple_rect('smd', 'Smd', x, g)
 
 def simple_pad_rect(g, x):
+  name = str(g.next())
+  varname = valid("rpad%s" % (name), g)
+  dx = x['dx']
+  dy = x['dy']
+  drill = x['drill']
+  ro = 0
+  if 'ro' in x:
+    ro = x['ro']
+  if dx == dy:
+    a = """\
+%s = new SquarePad %s, %s
+""" % (varname, dx, drill)
+    a = _add_if(x, a, varname, 'ro')
+  elif dx == 2*dy and ro == 100:
+    if 'drill_dx' in x and x['drill_dx'] == -dy/2:
+      a = """\
+%s = new OffsetPad %s, %s
+""" % (varname, dx, drill)
+    else:
+      a = """\
+%s = new LongPad %s, %s
+""" % (varname, dx, drill)
+  else:
+    a = """\
+%s = new Pad
+"""
+    a = _add_if(x, a, varname, 'ro')
+  a = _add_if(x, a, varname, 'name', True)
+  a = _add_if(x, a, varname, 'rot')
+  a = _add_if(x, a, varname, 'x')
+  a = _add_if(x, a, varname, 'y')
+  return (varname, a)
+    
   (varname, a) = _simple_rect('rpad', 'Pad', x, g)
+  dx = x['dx']
+  dy = x['dy']
+  a = _add_if(x, a, varname, 'dy')
   a = a + "%s.shape = 'rect'\n" % (varname)
   a = a + "%s.drill = %s\n" % (varname, x['drill'])
   a = _add_if(x, a, varname, 'drill_dx')
@@ -77,11 +109,10 @@ def _simple_pad_disc_octagon(g, constructor, prefix, x):
   a = """\
 %s = new %s %s, %s
 %s.name = '%s'
-%s.shape = '%s'
 %s.x = %s
 %s.y = %s
 """ % (varname, constructor, x['r'], x['drill'], varname, x['name'],
-       varname, x['shape'], varname, x['x'], varname, x['y'])
+       varname, x['x'], varname, x['y'])
   a = _add_if(x, a, varname, 'drill_dx')
   return (varname, a)
 

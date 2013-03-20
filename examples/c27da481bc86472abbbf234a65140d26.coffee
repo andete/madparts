@@ -9,10 +9,10 @@ footprint = () ->
   drill = 1
   w = 0.15
   pad_r = (d-0.34)/2
-  n = 3
+  n = 6
 
-  name = new Name (n*d/2+0.5)
-  value = new Value (-n*d/2-0.5)
+  name = new Name (n*d/4+0.5)
+  value = new Value (-n*d/4-0.5)
   
   # the basic pad
   pad = new OctagonPad pad_r, drill

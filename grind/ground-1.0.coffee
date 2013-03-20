@@ -251,6 +251,7 @@ single = (unit, num, distance) ->
 # create a dual vertical range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
 dual = (unit, num, distance, between) ->
+  num = Math.floor(num / 2)
   unit = make_sure_is_array unit
   s1 = single unit, num, distance
   s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
@@ -262,6 +263,7 @@ dual = (unit, num, distance, between) ->
 # with alternating numbering like typically used for pin headers
 # instead of the typical pin numbering found for chips
 alt_dual = (unit, num, distance, between) ->
+  num = Math.floor(num / 2)
   unit = make_sure_is_array unit
   s1 = single unit, num, distance
   s1 = s1.map ((item) ->
@@ -274,7 +276,7 @@ alt_dual = (unit, num, distance, between) ->
 # and 'between' apart between the opposide sides
 quad = (unit, num, distance, between) ->
   unit = make_sure_is_array unit
-  n = num / 4
+  n = Math.floor(num / 4)
   b = between / 2
   s1 = single unit, n, distance
   s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
