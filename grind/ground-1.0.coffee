@@ -52,6 +52,12 @@ modl = (l, kv...) ->
 # a... treats a as a argument list
 combine = (a) -> [].concat a...
 
+make_sure_is_array = (unit) ->
+  if not (unit instanceof Array)
+    [unit]
+  else
+    unit
+
 ### SECTION 2: type constructors ###
 
 class Smd
@@ -231,14 +237,11 @@ adjust_x = (o, dx) ->
 
 # create a single vertical range of 'num' units 'distance' apart
 single = (unit, num, distance) ->
-  if not (unit instanceof Array)
-    unit2 = [unit]
-  else
-    unit2 = unit
+  unit = make_sure_is_array unit
   y = (num-1) * distance /2
   units = [0...num].map((i) ->
     dy =  - y + i * distance
-    unit2.map ((item) ->
+    unit.map ((item) ->
       item2 = clone item
       adjust_y item2, (-dy)
     )
@@ -248,11 +251,8 @@ single = (unit, num, distance) ->
 # create a dual vertical range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
 dual = (unit, num, distance, between) ->
-  if not (unit instanceof Array)
-    unit2 = [unit]
-  else
-    unit2 = unit
-  s1 = single unit2, num, distance
+  unit = make_sure_is_array unit
+  s1 = single unit, num, distance
   s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
   s2 = s1.map ((item) -> rotate180 (clone item))
   combine [s1, s2]
@@ -262,11 +262,8 @@ dual = (unit, num, distance, between) ->
 # with alternating numbering like typically used for pin headers
 # instead of the typical pin numbering found for chips
 alt_dual = (unit, num, distance, between) ->
-  if not (unit instanceof Array)
-    unit2 = [unit]
-  else
-    unit2 = unit
-  s1 = single unit2, num, distance
+  unit = make_sure_is_array unit
+  s1 = single unit, num, distance
   s1 = s1.map ((item) ->
     i1 = adjust_x (rotate180pad item), -between/2
     i2 = mirror_y (clone i1)
@@ -276,13 +273,10 @@ alt_dual = (unit, num, distance, between) ->
 # create a quad of 'num' units 'distance' apart in the range
 # and 'between' apart between the opposide sides
 quad = (unit, num, distance, between) ->
-  if not (unit instanceof Array)
-    unit2 = [unit]
-  else
-    unit2 = unit
+  unit = make_sure_is_array unit
   n = num / 4
   b = between / 2
-  s1 = single unit2, n, distance
+  s1 = single unit, n, distance
   s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
   s2 = s1.map ((item) -> rotate90 (clone item))
   s3 = s2.map ((item) -> rotate90 (clone item))
