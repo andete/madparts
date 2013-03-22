@@ -78,7 +78,7 @@ def simple_pad_rect(g, x):
     else:
       a = """\
 %s = new LongPad %s, %s
-""" % (varname, dx, drill)
+""" % (varname, dy, drill)
   else:
     a = """\
 %s = new Pad

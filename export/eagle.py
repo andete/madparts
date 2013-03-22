@@ -142,10 +142,14 @@ class Export:
 
     def rect(shape, layer):
       rect = self.soup.new_tag('rectangle')
-      rect['x1'] = fget(shape, 'x1')
-      rect['y1'] = fget(shape, 'y1')
-      rect['x2'] = fget(shape, 'x2')
-      rect['y2'] = fget(shape, 'y2')
+      x = fget(shape, 'x')
+      y = fget(shape, 'y')
+      dx = fget(shape, 'dx')
+      dy = fget(shape, 'dy')
+      rect['x1'] = x - dx/2
+      rect['x2'] = x + dx/2
+      rect['y1'] = y - dy/2
+      rect['y2'] = y + dy/2
       rect['rot'] = "R%d" % (fget(shape, 'rot'))
       rect['layer'] = layer
       package.append(rect)
@@ -347,10 +351,14 @@ class Import:
       res = {}
       res['type'] = layer_number_to_type(int(rect['layer']))
       res['shape'] = 'rect'
-      res['x1'] = float(rect['x1'])
-      res['y1'] = float(rect['y1'])
-      res['x2'] = float(rect['x2'])
-      res['y2'] = float(rect['y2'])
+      x1 = float(rect['x1'])
+      y1 = float(rect['y1'])
+      x2 = float(rect['x2'])
+      y2 = float(rect['y2'])
+      res['x'] = (x1+x2)/2
+      res['y'] = (y1+y2)/2
+      res['dx'] = abs(x1-x2)
+      res['dy'] = abs(y1-y2)
       if rect.has_key('rot'):
         res['rot'] = int(rect['rot'][1:])
       return res

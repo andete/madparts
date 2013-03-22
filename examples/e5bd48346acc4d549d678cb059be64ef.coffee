@@ -12,7 +12,7 @@ footprint = () ->
   line_width = 0.25
   num_pads = 32
   e = 0.8
-  pad_len_adj = 0.5
+  pad_len_adj = 0.7
 
   name = new Name (half + 1.5 + pad_len_adj)
   value = new Value (-half - 1.5 - pad_len_adj)
