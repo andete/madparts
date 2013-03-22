@@ -150,3 +150,43 @@ def size(inter):
     return (1,1)
   (x1,y1,x2,y2) = bounding_box(inter)
   return (abs(x2-x1), abs(y2-y1))
+
+def sort_by_type(inter):
+  h = {
+    'silk': 1,
+    'docu': 2,
+    'smd': 3,
+    'pad': 4,
+    'restrict': 5,
+    'stop': 6,
+  }
+  def _sort(x1, x2):
+    t1 = h.get(x1['type'], 0)
+    t2 = h.get(x2['type'], 0)
+    return cmp(t1, t2)
+  return sorted(inter, _sort)
+
+def _check_single(inter):
+  return False
+
+def _check_dual(inter):
+  return False
+
+def _check_quad(inter):
+  return False
+
+def check_pad_order(inter):
+  pads = filter(lambda x: x['type'] == 'pad', inter)
+  if _check_single(pads):
+    print "Found pad single!"
+  if _check_dual(pads):
+    print "Found pad dual!"
+  if _check_quad(pads):
+    print "Found pad quad!"
+  smds = filter(lambda x: x['type'] == 'smd', inter)
+  if _check_single(smds):
+    print "Found smd single!"
+  if _check_dual(smds):
+    print "Found smd dual!"
+  if _check_quad(smds):
+    print "Found smd quad!"
