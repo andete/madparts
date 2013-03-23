@@ -401,8 +401,8 @@ class Import:
       res = {}
       res['type'] = 'pad'
       res['name'] = clean_name(pad['name'])
-      res['x'] = pad['x']
-      res['y'] = pad['y']
+      res['x'] = float(pad['x'])
+      res['y'] = float(pad['y'])
       drill = float(pad['drill'])
       res['drill'] = drill
       if pad.has_key('diameter'):
