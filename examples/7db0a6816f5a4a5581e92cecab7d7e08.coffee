@@ -52,6 +52,6 @@ footprint = () ->
   smd.dx = 2.2
   smd.dy = 0.6
 
-  pads = dual smd, 4, 1.27, 5.2
+  pads = dual smd, 8, 1.27, 5.2
 
   combine [name,silk1,silk10,silk2,silk3,silk6,silk7,silk8,silk9,value, pads]

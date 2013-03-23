@@ -4,6 +4,8 @@
 #desc Numitron IV-9 pinout
 
 footprint = () ->
+  name = new Name 6.5
+  value = new Value -6.5
   cpad1 = new RoundPad 0.75, 1.0
   cpad1.name = '1'
   cpad1.shape = 'disc'
@@ -49,14 +51,10 @@ footprint = () ->
   cpad9.shape = 'disc'
   cpad9.x = -3.175
   cpad9.y = -1.885
-  label5 = new Label 'B-9'
-  label5.x = 0.905
+  label5 = new Label 'IV-9'
+  label5.x = 0
   label5.y = 0.135
   label5.dy = 1.27
-  label6 = new Label 'N'
-  label6.x = -0.615
-  label6.y = 0.135
-  label6.dy = 1.27
   silk1 = new Line 0.127
   silk1.x1 = -2.0
   silk1.y1 = -5.0
@@ -75,4 +73,4 @@ footprint = () ->
   silk4.x = 0.0
   silk4.y = 0.0
   silk4.r = 2.8135
-  [cpad1,cpad2,cpad3,cpad4,cpad5,cpad6,cpad7,cpad8,cpad9,label5,label6,silk1,silk2,silk3,silk4]
+  [name, value, cpad1,cpad2,cpad3,cpad4,cpad5,cpad6,cpad7,cpad8,cpad9,label5,silk1,silk2,silk3,silk4]
