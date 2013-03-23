@@ -501,6 +501,7 @@ class MainWin(QtGui.QMainWindow):
     try:
       interim = pycoffee.eval_coffee_footprint(code)
       if interim != None:
+        interim = inter.util.cleanup_js(interim)
         interim = inter.util.add_names(interim)
       self.executed_footprint = interim
       self.te2.setPlainText(str(interim))

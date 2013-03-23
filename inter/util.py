@@ -3,6 +3,13 @@
 #
 # functions that operate on the intermediate format
 
+def cleanup_js(inter):
+  def _remove_constructor(item):
+    if 'constructor' in item:
+      del item['constructor']
+    return item
+  return filter(_remove_constructor, inter)
+
 def add_names(inter):
   def generate_ints():
     for i in xrange(1, 10000):

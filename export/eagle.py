@@ -84,48 +84,56 @@ class Export:
     interim = self.add_ats_to_names(interim)
     meta = inter.util.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
+    # make name eagle compatible
+    name = re.sub(' ','_',name)
     # check if there is an existing package
     # and if so, replace it
     packages = self.soup.eagle.drawing.packages('package')
     package = None
     for some_package in packages:
       if some_package['name'] == name:
-        package = package
+        package = some_package
+        package.clear()
         break
-    if package != None:
-      package.clear()
-    else:
+    if package == None:
       package = self.soup.new_tag('package')
       self.soup.eagle.drawing.packages.append(package)
       package['name'] = name
 
-    def pad(shape, layer):
+    def pad(shape):
       pad = self.soup.new_tag('pad')
       pad['name'] = shape['name']
-      pad['layer'] = type_to_layer_number('pad')
+      # don't set layer in a pad, it is implicit
       pad['x'] = fget(shape, 'x')
       pad['y'] = fget(shape, 'y')
-      pad['drill'] = fget(shape, 'drill')
+      drill = fget(shape, 'drill')
+      pad['drill'] = drill
       pad['rot'] = "R%d" % (fget(shape, 'rot'))
-      shape = 'circle'
-      if 'shape' in pad: shape = pad['shape']
-      if shape == 'circle':
+      r = fget(shape, 'r')
+      shape2 = 'circle'
+      if 'shape' in pad: shape2 = pad['shape']
+      if shape2 == 'circle':
         pad['shape'] = 'round'
-        pad['diameter'] = pad['r']/2
-      elif shape == 'octagon':
+        if r != drill*1.5:
+          pad['diameter'] = r*2
+      elif shape2 == 'octagon':
         pad['shape'] = 'octagon'
-        pad['diameter'] = pad['r']/2
-      elif shape == 'rect':
+        if r != drill*1.5:
+          pad['diameter'] = r*2
+      elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         if ro == 0: 
           res['shape'] = 'square'
-          res['diameter'] = pad['dx']
+          if shape['dx'] != drill*1.5:
+            res['diameter'] = shape['dx']
         elif 'drill_dx' in shape:
           pad['shape'] = 'offset'
-          pad['diameter'] = pad['dy']
+          if shape['dy'] != drill*1.5:
+            pad['diameter'] = shape['dy']
         else:
           pad['shape'] = 'long'
-          pad['diameter'] = pad['dy']
+          if shape['dy'] != drill*1.5:
+            pad['diameter'] = shape['dy']
       package.append(pad)
 
     def smd(shape):
@@ -226,7 +234,7 @@ class Export:
       if s == 'line': line(shape, layer)
       elif s == 'circle': circle(shape, layer)
       elif s == 'disc': disc(shape, layer)
-      elif s == 'label': circle(shape, layer)
+      elif s == 'label': label(shape, layer)
       elif s == 'rect': rect(shape, layer)
 
     def unknown(shape):
@@ -266,7 +274,7 @@ class Export:
         multi_names[k] = 1
     def adapt(x):
       if x['type'] == 'smd' or x['type'] == 'pad':
-        name = x['name']
+        name = re.sub(' ','_', x['name'])
         if name in multi_names:
           x['name'] = "%s@%d" % (name, multi_names[name])
           multi_names[name] = multi_names[name] + 1
