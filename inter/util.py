@@ -166,27 +166,82 @@ def sort_by_type(inter):
     return cmp(t1, t2)
   return sorted(inter, _sort)
 
-def _check_single(inter):
+def _count_num_values(pads, param):
+  res = {}
+  for pad in pads:
+    v = pad[param]
+    if not v in res:
+      res[v] = 1
+    else:
+      res[v] = res[v] + 1
+  i = len(res.keys())
+  return (i, res)
+
+def _equidistant(pads, direction):
+  def _check((a, pd), pad):
+    pd2 = pad[direction]
+    if pd2-pd != expected:
+      (False, pd2)
+    else:
+      (a, pd2)
+  return reduce(_check, pads[2:], (True, pads[1][direction]))
+
+def _all_equal(pads, direction):
+  first = pads[0][direction]
+  return reduce(lambda a, p: a and p[direction] == first, pads, True)
+
+def _sort_by_field(pads, field, reverse=False):
+  return sorted(pads, lambda a,b: cmp(a[field], b[field]), reverse)
+
+def _check_single(orig_pads):
+  # sort pads by decreasing y
+  pads = _sort_by_field(orig_pads, 'y', reverse=True)
+  # check if the distance is uniform
+  if not _equidistant(pads, 'y'):
+    return orig_pads
+  # check if all x coordinates are equal
+  x0 = pads[0]['x']
+  equal_x = reduce(lambda a, p: a and p['x'] == x0, pads, True)
+  if not equal_x:
+    return orig_pads
+  # TODO
+  # create one pad and a pseudo-entry
+  return orig_pads
+
+def _check_dual(pads):
   return False
 
-def _check_dual(inter):
+def _check_quad(pads):
   return False
 
-def _check_quad(inter):
-  return False
+def _find_pad_patterns(pads):
+  n = len(pads)
+  (x_diff, _z) = _count_num_values(pads, 'x')
+  print 'x diff ', x_diff
+  (y_diff, _z) = _count_num_values(pads, 'y')
+  print 'y diff ', y_diff
+  if x_diff == 1 and y_diff == n:
+    return _check_single(pads)
+  if x_diff == n and x_diff == 1:
+    print "horizontal row"
+  if x_diff == 2 and y_diff == n/2:
+    print "vertical dual"
+  if x_diff == n/2 and y_diff == 2:
+    print "horizontal dual"
+  if x_diff == (n/4)+2 and y_diff == (n/4)+2:
+    print "quad"
+  return pads
 
-def check_pad_order(inter):
+def find_pad_patterns(inter):
   pads = filter(lambda x: x['type'] == 'pad', inter)
-  if _check_single(pads):
-    print "Found pad single!"
-  if _check_dual(pads):
-    print "Found pad dual!"
-  if _check_quad(pads):
-    print "Found pad quad!"
+  no_pads = filter(lambda x: x['type'] != 'pad', inter)
+  if len(pads) > 0:
+    pads = _find_pad_patterns(pads)
+    inter = pads + no_pads
+
   smds = filter(lambda x: x['type'] == 'smd', inter)
-  if _check_single(smds):
-    print "Found smd single!"
-  if _check_dual(smds):
-    print "Found smd dual!"
-  if _check_quad(smds):
-    print "Found smd quad!"
+  no_smds = filter(lambda x: x['type'] != 'smd', inter)
+  if len(smds) > 0:
+    smds = _find_pad_patterns(smds)
+    inter = smds + no_smds
+  return inter
