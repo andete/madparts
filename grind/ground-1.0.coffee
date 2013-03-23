@@ -248,6 +248,20 @@ single = (unit, num, distance) ->
   )
   combine units
 
+# create a single vertical range of 'num' units 'distance' apart
+# horizontal variant
+alt_single = (unit, num, distance) ->
+  unit = make_sure_is_array unit
+  x = (num-1) * distance /2
+  units = [0...num].map((i) ->
+    dx =  - x + i * distance
+    unit.map ((item) ->
+      item2 = clone item
+      adjust_x item2, dx
+    )
+  )
+  combine units
+
 # create a dual vertical range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
 dual = (unit, num, distance, between) ->
