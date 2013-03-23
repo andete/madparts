@@ -232,6 +232,7 @@ def generate_coffee(interim):
    'docu': generate_ints(),
    'restrict': generate_ints(),
    'stop': generate_ints(),
+   'unknown': generate_ints(),
   }
   l = []
   meta = None
