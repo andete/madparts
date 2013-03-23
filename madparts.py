@@ -448,7 +448,7 @@ class MainWin(QtGui.QMainWindow):
     for footprint_name in footprint_names:
       interim = importer.import_footprint(footprint_name) 
       interim = inter.util.sort_by_type(interim)
-      inter.util.find_pad_patterns(interim)
+      interim = inter.util.find_pad_patterns(interim)
       l.append((footprint_name, interim))
     cl = []
     for (footprint_name, interim) in l:

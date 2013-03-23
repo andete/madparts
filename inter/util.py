@@ -189,58 +189,75 @@ def _count_num_values(pads, param):
   return (i, res)
 
 def _equidistant(pads, direction):
-  def _check((a, pd), pad):
-    pd2 = pad[direction]
-    if pd2-pd != expected:
-      (False, pd2)
-    else:
-      (a, pd2)
-  return reduce(_check, pads[2:], (True, pads[1][direction]))
+  expected = abs(pads[1][direction] - pads[0][direction])
+  prev = pads[1][direction]
+  print prev
+  for item in pads[2:]:
+    cur = item[direction]
+    print cur
+    if abs(cur - prev) != expected:
+      return False
+    prev = cur
+  return True
 
 def _all_equal(pads, direction):
   first = pads[0][direction]
   return reduce(lambda a, p: a and p[direction] == first, pads, True)
 
 def _sort_by_field(pads, field, reverse=False):
-  return sorted(pads, lambda a,b: cmp(a[field], b[field]), reverse)
+  def _sort_by(a, b):
+    return cmp(a[field], b[field])
+  return sorted(pads, cmp=_sort_by, reverse=reverse)
 
-def _check_single(orig_pads):
-  # sort pads by decreasing y
-  pads = _sort_by_field(orig_pads, 'y', reverse=True)
+def _check_single(orig_pads, direction):
+  if direction == 'horizontal':
+    equal_direction = 'y'
+    diff_direction = 'x'
+    reverse = False
+  else:
+    equal_direction = 'x'
+    diff_direction = 'y'
+    reverse = True
+  print "check_single", direction
+  # sort pads by decreasing in other direction
+  pads = _sort_by_field(orig_pads, diff_direction, reverse)
+  print pads
   # check if the distance is uniform
-  if not _equidistant(pads, 'y'):
+  if not _equidistant(pads, diff_direction):
+    print "not equidistant", diff_direction
     return orig_pads
   # check if all x coordinates are equal
-  if not _all_equal(pads, 'x'):
+  if not _all_equal(pads, equal_direction):
+    print "not all equal", equal_direction
     return orig_pads
   # create a pad based on the second pad
   # the first one might be special...
   pad = copy.deepcopy(pads[1])
-  if 'y' in pad: del pad['y']
+  if diff_direction in pad: del pad[diff_direction]
   if 'name' in pad: del pad['name']
   # create a special pseudo entry
   special = {}
   special['type'] = 'special'
+  special['shape'] = 'special'
   special['subtype'] = 'single'
   special['num'] = len(pads)
-  special['e'] = pad[0]['y'] - pad[1]['y']
+  special['e'] = abs(pads[0][diff_direction] - pads[1][diff_direction])
   l = [pad, special]
   # check if there are mods needed
-  for (x, i) in zip(pads, range(len(pads))):
+  for (item, i) in zip(pads, range(len(pads))):
     mod = {}
-    for k in x.keys():
+    for (k,v) in item.items():
+      if k == diff_direction: continue
+      if k == 'name' and str(i+1) == v: continue
       if k not in pad:
-        mod['k'] = x['k']
+        mod[k] = v
     if mod != {}:
       mod['type'] = 'special'
+      mod['shape'] = 'special'
       mod['subtype'] = 'mod'
       mod['index'] = i
       l.append(mod)
   return l
-
-def _check_rot_single(orig_pads):
-  # TODO
-  return orig_pads
 
 def _check_dual(pads):
   return False
@@ -250,14 +267,15 @@ def _check_quad(pads):
 
 def _find_pad_patterns(pads):
   n = len(pads)
+  print n
   (x_diff, _z) = _count_num_values(pads, 'x')
   print 'x diff ', x_diff
   (y_diff, _z) = _count_num_values(pads, 'y')
   print 'y diff ', y_diff
   if x_diff == 1 and y_diff == n:
-    return _check_single(pads)
-  if x_diff == n and x_diff == 1:
-    return _check_rot_single(pads)
+    return _check_single(pads, 'vertical')
+  if x_diff == n and y_diff == 1:
+    return _check_single(pads, 'horizontal')
   if x_diff == 2 and y_diff == n/2:
     print "vertical dual"
   if x_diff == n/2 and y_diff == 2:
