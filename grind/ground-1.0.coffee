@@ -198,6 +198,9 @@ rotate90 = (item) ->
 rotate180 = (item) -> rotate90 (rotate90 item)
 rotate180pad = (item) -> rotate90pad (rotate90pad item)
 
+rotate270 = (item) -> rotate90 (rotate180 item)
+rotate270pad = (item) -> rotate90pad (rotate180pad item)
+
 mirror_y = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
@@ -208,6 +211,18 @@ mirror_y = (item) ->
     if not item.x?
       item.x = 0
     item.x = -item.x
+  item
+
+mirror_x = (item) ->
+  if item.type == 'smd' or item.type == 'pad'
+    rotate180pad item
+  if item.shape == 'line'
+    item.y1 = -item.y1
+    item.y2 = -item.y2
+  else
+    if not item.y?
+      item.y = 0
+    item.y = -item.y
   item
  
 
@@ -283,6 +298,30 @@ alt_dual = (unit, num, distance, between) ->
   s1 = s1.map ((item) ->
     i1 = adjust_x (rotate180pad item), -between/2
     i2 = mirror_y (clone i1)
+    [i1,i2])
+  combine s1
+
+# create a dual horizontal range of 'num' units 'distance' apart in the range
+# and 'between' apart between the two ranges
+rot_dual = (unit, num, distance, between) ->
+  num = Math.floor(num / 2)
+  unit = make_sure_is_array unit
+  s1 = alt_single unit, num, distance
+  s1 = s1.map ((item) -> adjust_y (rotate90pad item), -between/2)
+  s2 = s1.map ((item) -> rotate180 (clone item))
+  combine [s1, s2]
+
+# create a dual horizontal range of 'num' units 'distance' apart in the range
+# and 'between' apart between the two ranges
+# with alternating numbering like typically used for pin headers
+# instead of the typical pin numbering found for chips
+alt_rot_dual = (unit, num, distance, between) ->
+  num = Math.floor(num / 2)
+  unit = make_sure_is_array unit
+  s1 = alt_single unit, num, distance
+  s1 = s1.map ((item) ->
+    i1 = adjust_y (rotate90pad item), -between/2
+    i2 = mirror_x (clone i1)
     [i1,i2])
   combine s1
 

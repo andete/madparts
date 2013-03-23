@@ -499,7 +499,6 @@ class MainWin(QtGui.QMainWindow):
     self.glw.zoom_changed = True
 
   def compile(self):
-
     code = self.te1.toPlainText()
     compilation_failed_last_time = self.executed_footprint == []
     self.executed_footprint = []

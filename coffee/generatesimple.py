@@ -163,11 +163,14 @@ def _simple_t_line(t, g, x):
   return (varname, a)
 
 def _simple_name_value(prefix, constructor, g, x):
+  y = 0
+  if x.has_key('y'):
+    y = x['y']
   varname = "%s%s" % (prefix, g.next())
   a = """\
 %s = new %s %s
-%s.x = %s
-""" % (varname, constructor, x['y'], varname, x['x'])
+""" % (varname, constructor, y)
+  a = _add_if(x, a, varname, 'x')
   return (varname, a)
 
 def _simple_silk_label(g, x):
