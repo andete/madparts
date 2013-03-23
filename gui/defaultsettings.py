@@ -36,5 +36,5 @@ default_settings = {
   'gl/zoomfactor': 50,
   'gl/colorscheme': 'default',
   'gui/keyidle': 1.5,
-  'gl/autozoom': False,
+  'gl/autozoom': True,
 }

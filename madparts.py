@@ -510,8 +510,9 @@ class MainWin(QtGui.QMainWindow):
         interim = inter.util.add_names(interim)
       self.executed_footprint = interim
       self.te2.setPlainText(str(interim))
-      (dx, dy, x1, y1, x2, y2) = inter.util.size(interim)
-      self.update_zoom(dx, dy, x1, y1, x2, y2)
+      if self.auto_zoom.isChecked():
+        (dx, dy, x1, y1, x2, y2) = inter.util.size(interim)
+        self.update_zoom(dx, dy, x1, y1, x2, y2)
       self.glw.set_shapes(inter.util.prepare_for_display(interim))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
