@@ -481,7 +481,12 @@ class MainWin(QtGui.QMainWindow):
   def status(self, s):
     self.statusBar().showMessage(s)
 
-  def update_zoom(self, dx, dy, w, h):
+  def update_zoom(self, dx, dy, x1, y1, x2, y2):
+    # TODO: keep x1, y1, x2, y2 in account
+    w = self.glw.width()
+    h = self.glw.height()
+    if dx == self.gl_dx and dy == self.gl_dy and w == self.gl_w and h == self.gl_h:
+      return
     self.gl_dx = dx
     self.gl_dy = dy
     self.gl_w = w
@@ -505,11 +510,8 @@ class MainWin(QtGui.QMainWindow):
         interim = inter.util.add_names(interim)
       self.executed_footprint = interim
       self.te2.setPlainText(str(interim))
-      (dx, dy) = inter.util.size(interim)
-      w = self.glw.width()
-      h = self.glw.height()
-      if dx != self.gl_dx or dy != self.gl_dy or w != self.gl_w or h != self.gl_h:
-        self.update_zoom(dx, dy, w, h)
+      (dx, dy, x1, y1, x2, y2) = inter.util.size(interim)
+      self.update_zoom(dx, dy, x1, y1, x2, y2)
       self.glw.set_shapes(inter.util.prepare_for_display(interim))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:

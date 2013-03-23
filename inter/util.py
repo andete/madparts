@@ -156,7 +156,9 @@ def size(inter):
   if inter == None or inter == []:
     return (1,1)
   (x1,y1,x2,y2) = bounding_box(inter)
-  return (abs(x2-x1), abs(y2-y1))
+  dx = 2*max(abs(x2),abs(x1)) 
+  dy = 2*max(abs(y2),abs(y1))
+  return (dx, dy, x1, y1, x2, y2)
 
 def sort_by_type(inter):
   h = {
