@@ -3,6 +3,8 @@
 #
 # functions that operate on the intermediate format
 
+import copy
+
 def cleanup_js(inter):
   def _remove_constructor(item):
     if 'constructor' in item:
@@ -209,12 +211,35 @@ def _check_single(orig_pads):
   if not _equidistant(pads, 'y'):
     return orig_pads
   # check if all x coordinates are equal
-  x0 = pads[0]['x']
-  equal_x = reduce(lambda a, p: a and p['x'] == x0, pads, True)
-  if not equal_x:
+  if not _all_equal(pads, 'x'):
     return orig_pads
+  # create a pad based on the second pad
+  # the first one might be special...
+  pad = copy.deepcopy(pads[1])
+  if 'y' in pad: del pad['y']
+  if 'name' in pad: del pad['name']
+  # create a special pseudo entry
+  special = {}
+  special['type'] = 'special'
+  special['subtype'] = 'single'
+  special['num'] = len(pads)
+  special['e'] = pad[0]['y'] - pad[1]['y']
+  l = [pad, special]
+  # check if there are mods needed
+  for (x, i) in zip(pads, range(len(pads))):
+    mod = {}
+    for k in x.keys():
+      if k not in pad:
+        mod['k'] = x['k']
+    if mod != {}:
+      mod['type'] = 'special'
+      mod['subtype'] = 'mod'
+      mod['index'] = i
+      l.append(mod)
+  return l
+
+def _check_rot_single(orig_pads):
   # TODO
-  # create one pad and a pseudo-entry
   return orig_pads
 
 def _check_dual(pads):
@@ -232,7 +257,7 @@ def _find_pad_patterns(pads):
   if x_diff == 1 and y_diff == n:
     return _check_single(pads)
   if x_diff == n and x_diff == 1:
-    print "horizontal row"
+    return _check_rot_single(pads)
   if x_diff == 2 and y_diff == n/2:
     print "vertical dual"
   if x_diff == n/2 and y_diff == 2:
