@@ -132,6 +132,9 @@ def bounding_box(inter):
     y2 = y + dy/2
     return (x1, y1, x2, y2)
 
+  def unknown(shape):
+    return (0,0,0,0)
+
   x1 = 0
   y1 = 0
   x2 = 0
@@ -147,7 +150,7 @@ def bounding_box(inter):
   if inter == None or inter == []: return (-1,-1,1,1)
   for x in inter:
     if 'shape' in x:
-       (xx1, xy1, xx2, xy2) = dispatch[x['shape']](x)
+       (xx1, xy1, xx2, xy2) = dispatch.get(x['shape'], unknown)(x)
        x1 = min(x1, xx1)
        y1 = min(y1, xy1)
        x2 = max(x2, xx2)
