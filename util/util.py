@@ -18,3 +18,9 @@ def eget(m, k, e):
 def generate_ints():
   for i in xrange(1, 10000):
     yield i
+
+def f_eq(a, b):
+  return abs(a-b) < 1E-8
+
+def f_neq(a, b):
+  return not f_eq(a, b)

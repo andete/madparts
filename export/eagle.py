@@ -305,7 +305,7 @@ class Import:
           return True
         return False
 
-    [package] = self.soup.find_all(package_has_name)
+    package = self.soup.find_all(package_has_name)[0]
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name

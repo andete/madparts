@@ -263,8 +263,7 @@ single = (unit, num, distance) ->
   )
   combine units
 
-# create a single vertical range of 'num' units 'distance' apart
-# horizontal variant
+# create a horizontal range of 'num' units 'distance' apart
 alt_single = (unit, num, distance) ->
   unit = make_sure_is_array unit
   x = (num-1) * distance /2

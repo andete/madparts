@@ -5,6 +5,12 @@
 
 import copy
 
+def f_eq(a, b):
+  return abs(a-b) < 1E-8
+
+def f_neq(a, b):
+  return not f_eq(a, b)
+
 def cleanup_js(inter):
   def _remove_constructor(item):
     if 'constructor' in item:
@@ -194,18 +200,16 @@ def _count_num_values(pads, param):
 def _equidistant(pads, direction):
   expected = abs(pads[1][direction] - pads[0][direction])
   prev = pads[1][direction]
-  print prev
   for item in pads[2:]:
     cur = item[direction]
-    print cur
-    if abs(cur - prev) != expected:
+    if f_neq(abs(cur - prev), expected):
       return False
     prev = cur
   return True
 
 def _all_equal(pads, direction):
   first = pads[0][direction]
-  return reduce(lambda a, p: a and p[direction] == first, pads, True)
+  return reduce(lambda a, p: a and f_eq(p[direction], first), pads, True)
 
 def _sort_by_field(pads, field, reverse=False):
   def _sort_by(a, b):
@@ -221,34 +225,35 @@ def _check_single(orig_pads, direction):
     equal_direction = 'x'
     diff_direction = 'y'
     reverse = True
-  print "check_single", direction
   # sort pads by decreasing in other direction
   pads = _sort_by_field(orig_pads, diff_direction, reverse)
-  print pads
   # check if the distance is uniform
   if not _equidistant(pads, diff_direction):
-    print "not equidistant", diff_direction
+    #print "not equidistant", diff_direction
     return orig_pads
   # check if all x coordinates are equal
   if not _all_equal(pads, equal_direction):
-    print "not all equal", equal_direction
+    #print "not all equal", equal_direction
     return orig_pads
   # create a pad based on the second pad
   # the first one might be special...
   pad = copy.deepcopy(pads[1])
+  pad_type = pad['type']
   if diff_direction in pad: del pad[diff_direction]
   if 'name' in pad: del pad['name']
   # create a special pseudo entry
   special = {}
   special['type'] = 'special'
-  special['shape'] = 'special'
-  special['subtype'] = 'single'
+  special['shape'] = 'single'
+  special['direction'] = diff_direction
+  special['ref'] = pad_type
   special['num'] = len(pads)
   special['e'] = abs(pads[0][diff_direction] - pads[1][diff_direction])
   l = [pad, special]
   # check if there are mods needed
   for (item, i) in zip(pads, range(len(pads))):
     mod = {}
+    print "investigating", i, item
     for (k,v) in item.items():
       if k == diff_direction: continue
       if k == 'name' and str(i+1) == v: continue
@@ -256,9 +261,11 @@ def _check_single(orig_pads, direction):
         mod[k] = v
     if mod != {}:
       mod['type'] = 'special'
-      mod['shape'] = 'special'
-      mod['subtype'] = 'mod'
+      if 'shape' in mod:
+        mod['real_shape'] = mod['shape']
+      mod['shape'] = 'mod'
       mod['index'] = i
+      print "adding mod", mod
       l.append(mod)
   return l
 
