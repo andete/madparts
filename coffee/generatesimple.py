@@ -3,7 +3,7 @@
 
 # TODO: rework approach
 
-import string
+import string, copy
 from functools import partial
 
 from util.util import *

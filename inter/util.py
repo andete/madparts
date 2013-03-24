@@ -253,11 +253,14 @@ def _check_single(orig_pads, direction):
   # check if there are mods needed
   for (item, i) in zip(pads, range(len(pads))):
     mod = {}
-    print "investigating", i, item
+    #print "investigating", i, item
     for (k,v) in item.items():
       if k == diff_direction: continue
       if k == 'name' and str(i+1) == v: continue
+      #print 'testing', k, v
       if k not in pad:
+        mod[k] = v
+      elif pad[k] != v:
         mod[k] = v
     if mod != {}:
       mod['type'] = 'special'
@@ -265,7 +268,7 @@ def _check_single(orig_pads, direction):
         mod['real_shape'] = mod['shape']
       mod['shape'] = 'mod'
       mod['index'] = i
-      print "adding mod", mod
+      #print "adding mod", mod
       l.append(mod)
   return l
 

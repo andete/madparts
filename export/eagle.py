@@ -110,29 +110,31 @@ class Export:
       pad['drill'] = drill
       pad['rot'] = "R%d" % (fget(shape, 'rot'))
       r = fget(shape, 'r')
-      shape2 = 'circle'
-      if 'shape' in pad: shape2 = pad['shape']
-      if shape2 == 'circle':
+      shape2 = 'disc' # disc is the default
+      if 'shape' in shape:
+        shape2 = shape['shape']
+      if shape2 == 'disc':
         pad['shape'] = 'round'
-        if r != drill*1.5:
+        print r, drill, drill*1.5
+        if f_neq(r, drill*1.5):
           pad['diameter'] = r*2
       elif shape2 == 'octagon':
         pad['shape'] = 'octagon'
-        if r != drill*1.5:
+        if f_neq(r, drill*1.5):
           pad['diameter'] = r*2
       elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         if ro == 0: 
           res['shape'] = 'square'
-          if shape['dx'] != drill*1.5:
+          if f_neq(shape['dx'], drill*1.5):
             res['diameter'] = shape['dx']
         elif 'drill_dx' in shape:
           pad['shape'] = 'offset'
-          if shape['dy'] != drill*1.5:
+          if f_neq(shape['dy'], drill*1.5):
             pad['diameter'] = shape['dy']
         else:
           pad['shape'] = 'long'
-          if shape['dy'] != drill*1.5:
+          if f_neq(shape['dy'], drill*1.5):
             pad['diameter'] = shape['dy']
       package.append(pad)
 
