@@ -220,17 +220,31 @@ def simple_special_single(g, x, vl, ll):
     f = 'alt_single'
   else:
     f = 'single'
-  smd_or_pad = x['ref']
   # varname selection here is not perfect; should depend on actual naming
-  if smd_or_pad == 'smd':
-    var = 'smd1'
-  else:
-    var = 'pad1'
+  var = "%s1" % (x['ref'])
   num = x['num']
   e = x['e']
   a = """\
 l = %s [%s], %s, %s
 """ % (f, var, num, e)
+  vl.remove(var)
+  vl.append('l')
+  ll.append(a)
+
+def simple_special_dual(g, x, vl, ll):
+  direction_is_x = x['direction'] == 'x'
+  alt = x['alt'] == 'True'
+  f = 'dual'
+  if direction_is_x: f = 'rot_dual'
+  if alt: f = 'alt_%s' % (f)
+  # varname selection here is not perfect; should depend on actual naming
+  var = "%s1" % (x['ref'])
+  num = x['num']
+  e = x['e']
+  between = x['between']
+  a = """\
+l = %s [%s], %s, %s, %s
+""" % (f, var, num, e, between)
   vl.remove(var)
   vl.append('l')
   ll.append(a)
@@ -280,6 +294,7 @@ simple_dispatch = {
  'stop_line': partial(_simple_t_line, 'stop'),
  'stop_rect': partial(_simple_t_rect, 'stop'),
  'special_single': simple_special_single,
+ 'special_dual': simple_special_dual,
  'special_mod': simple_special_mod,
 }
 

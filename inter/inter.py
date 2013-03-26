@@ -212,9 +212,10 @@ def _sort_by_field(pads, field, reverse=False):
     return cmp(a[field], b[field])
   return sorted(pads, cmp=_sort_by, reverse=reverse)
 
-def _clone_pad(pad_in, diff_direction):
+def _clone_pad(pad_in, remove):
   pad = copy.deepcopy(pad_in)
-  if diff_direction in pad: del pad[diff_direction]
+  for x in remove:
+    if x in pad: del pad[x]
   if 'name' in pad: del pad['name']
   return pad
 
@@ -262,7 +263,7 @@ def _check_single(orig_pads, horizontal):
     return orig_pads
   # create a pad based on the second pad
   # the first one might be special...
-  pad = _clone_pad(pads[1], diff_direction)
+  pad = _clone_pad(pads[1], [diff_direction])
   pad_type = pad['type']
   # create a special pseudo entry
   special = {}
@@ -343,9 +344,10 @@ def _check_dual(orig_pads, horizontal):
   # if it is not pure alt we assume normal and if needed
   # set other names via mods
   is_alt = _check_dual_alt(r1, r2)
+  between = abs(r1[0][split_direction] - r2[0][split_direction])
   # create a pad based on the second pad
   # the first one might be special...
-  pad = _clone_pad(r1[1], diff_direction)
+  pad = _clone_pad(r1[1], ['x','y'])
   pad_type = pad['type']
   # create a special pseudo entry
   special = {}
@@ -355,14 +357,22 @@ def _check_dual(orig_pads, horizontal):
   special['direction'] = diff_direction
   special['ref'] = pad_type
   special['num'] = len(orig_pads)
+  special['between'] = between
   special['e'] = abs(r1[0][diff_direction] - r1[1][diff_direction])
-  l = [pad, special]
   if not is_alt:
     r2.reverse()
     sort_pads = r1 + r2
   else:
     sort_pads = list.join(map(lambda (a,b): [a,b], zip(r1, r2)))
   mods = _make_mods(['x','y'], pad, sort_pads)
+  rot = 0
+  if 'rot' in pad: rot = pad['rot']
+  rot = rot - 90
+  if rot < 0 : rot = rot + 360
+  pad['rot'] = rot
+  if rot == 0:
+    del pad['rot']
+  l = [pad, special]
   return l + mods
 
 def _check_quad(pads):
