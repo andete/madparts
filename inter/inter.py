@@ -212,7 +212,7 @@ def _sort_by_field(pads, field, reverse=False):
     return cmp(a[field], b[field])
   return sorted(pads, cmp=_sort_by, reverse=reverse)
 
-def _clone_pad(pad_in):
+def _clone_pad(pad_in, diff_direction):
   pad = copy.deepcopy(pad_in)
   if diff_direction in pad: del pad[diff_direction]
   if 'name' in pad: del pad['name']
@@ -262,7 +262,7 @@ def _check_single(orig_pads, horizontal):
     return orig_pads
   # create a pad based on the second pad
   # the first one might be special...
-  pad = _clone_pad(pads[1])
+  pad = _clone_pad(pads[1], diff_direction)
   pad_type = pad['type']
   # create a special pseudo entry
   special = {}
@@ -345,7 +345,7 @@ def _check_dual(orig_pads, horizontal):
   is_alt = _check_dual_alt(r1, r2)
   # create a pad based on the second pad
   # the first one might be special...
-  pad = _clone_pad(pads[1])
+  pad = _clone_pad(pads[1], diff_direction)
   pad_type = pad['type']
   # create a special pseudo entry
   special = {}
