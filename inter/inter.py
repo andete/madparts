@@ -5,11 +5,7 @@
 
 import copy
 
-def f_eq(a, b):
-  return abs(a-b) < 1E-8
-
-def f_neq(a, b):
-  return not f_eq(a, b)
+from util.util import *
 
 def cleanup_js(inter):
   def _remove_constructor(item):

@@ -13,7 +13,7 @@ import os.path, pkg_resources, tempfile
 
 from util.util import *
 from defaultsettings import color_schemes
-import inter.util
+from inter import inter
 
 import glFreeType
 import shaders

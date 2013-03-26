@@ -14,7 +14,7 @@ import gui.gldraw, gui.library
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
 
-import inter.util
+from inter import inter
 
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
@@ -447,8 +447,8 @@ class MainWin(QtGui.QMainWindow):
     l = []
     for footprint_name in footprint_names:
       interim = importer.import_footprint(footprint_name) 
-      interim = inter.util.sort_by_type(interim)
-      interim = inter.util.find_pad_patterns(interim)
+      interim = inter.sort_by_type(interim)
+      interim = inter.find_pad_patterns(interim)
       l.append((footprint_name, interim))
     cl = []
     for (footprint_name, interim) in l:
@@ -505,14 +505,14 @@ class MainWin(QtGui.QMainWindow):
     try:
       interim = pycoffee.eval_coffee_footprint(code)
       if interim != None:
-        interim = inter.util.cleanup_js(interim)
-        interim = inter.util.add_names(interim)
+        interim = inter.cleanup_js(interim)
+        interim = inter.add_names(interim)
       self.executed_footprint = interim
       self.te2.setPlainText(str(interim))
       if self.auto_zoom.isChecked():
-        (dx, dy, x1, y1, x2, y2) = inter.util.size(interim)
+        (dx, dy, x1, y1, x2, y2) = inter.size(interim)
         self.update_zoom(dx, dy, x1, y1, x2, y2)
-      self.glw.set_shapes(inter.util.prepare_for_display(interim))
+      self.glw.set_shapes(inter.prepare_for_display(interim))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)

@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup, Tag
 
 from util.util import *
 
-import inter.util
+from inter import inter
 
 # TODO: get from eagle XML isof hardcoded; 
 # however in practice this is quite low prio as everybody probably
@@ -82,7 +82,7 @@ class Export:
     # make a deep copy so we can make mods without harm
     interim = copy.deepcopy(interim)
     interim = self.add_ats_to_names(interim)
-    meta = inter.util.get_meta(interim)
+    meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
     # make name eagle compatible
     name = re.sub(' ','_',name)
