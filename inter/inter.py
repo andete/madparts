@@ -218,13 +218,13 @@ def _clone_pad(pad_in, diff_direction):
   if 'name' in pad: del pad['name']
   return pad
 
-def _make_mods(diff_direction, pad, pads):
+def _make_mods(skip, pad, pads):
   l = []
   for (item, i) in zip(pads, range(len(pads))):
     mod = {}
     #print "investigating", i, item
     for (k,v) in item.items():
-      if k == diff_direction: continue
+      if k in skip: continue
       if k == 'name' and str(i+1) == v: continue
       #print 'testing', k, v
       if k not in pad:
@@ -274,7 +274,7 @@ def _check_single(orig_pads, horizontal):
   special['e'] = abs(pads[0][diff_direction] - pads[1][diff_direction])
   l = [pad, special]
   # check if there are mods needed
-  mods = _make_mods(diff_direction, pad, pads)
+  mods = _make_mods([diff_direction], pad, pads)
   return l + mods
 
 def _split_dual(pads, direction):
@@ -345,23 +345,24 @@ def _check_dual(orig_pads, horizontal):
   is_alt = _check_dual_alt(r1, r2)
   # create a pad based on the second pad
   # the first one might be special...
-  pad = _clone_pad(pads[1], diff_direction)
+  pad = _clone_pad(r1[1], diff_direction)
   pad_type = pad['type']
   # create a special pseudo entry
   special = {}
   special['type'] = 'special'
-  special['shape'] = 'single'
+  special['shape'] = 'dual'
   special['alt'] = is_alt
   special['direction'] = diff_direction
   special['ref'] = pad_type
-  special['num'] = len(pads)
+  special['num'] = len(orig_pads)
   special['e'] = abs(r1[0][diff_direction] - r1[1][diff_direction])
   l = [pad, special]
-  if not alt_order:
-    sort_pads = r1 + r2.reverse()
+  if not is_alt:
+    r2.reverse()
+    sort_pads = r1 + r2
   else:
     sort_pads = list.join(map(lambda (a,b): [a,b], zip(r1, r2)))
-  mods = _make_mods(diff_direction, pad, sort_pads)
+  mods = _make_mods(['x','y'], pad, sort_pads)
   return l + mods
 
 def _check_quad(pads):
@@ -386,7 +387,7 @@ def _find_pad_patterns(pads):
   if x_diff == 2 and y_diff == n/2:
     return _check_dual(pads, horizontal=False)
   if x_diff == n/2 and y_diff == 2:
-    return _check_dual(pads, horizontal=False)
+    return _check_dual(pads, horizontal=True)
 
   # possibly a quad
   if x_diff == (n/4)+2 and y_diff == (n/4)+2:
