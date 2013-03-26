@@ -212,8 +212,8 @@ def _sort_by_field(pads, field, reverse=False):
     return cmp(a[field], b[field])
   return sorted(pads, cmp=_sort_by, reverse=reverse)
 
-def _check_single(orig_pads, direction):
-  if direction == 'horizontal':
+def _check_single(orig_pads, horizontal):
+  if horizontal:
     equal_direction = 'y'
     diff_direction = 'x'
     reverse = False
@@ -268,11 +268,16 @@ def _check_single(orig_pads, direction):
       l.append(mod)
   return l
 
-def _check_dual(pads):
-  return False
+def _check_dual(pads, horizontal):
+  if horizontal:
+    print 'dual horizontal?'
+  else:
+    print 'dual vertical?'
+  return pads
 
 def _check_quad(pads):
-  return False
+  print 'quad?'
+  return pads
 
 def _find_pad_patterns(pads):
   n = len(pads)
@@ -281,14 +286,20 @@ def _find_pad_patterns(pads):
   print 'x diff ', x_diff
   (y_diff, _z) = _count_num_values(pads, 'y')
   print 'y diff ', y_diff
+
+  # possibly single row
   if x_diff == 1 and y_diff == n:
-    return _check_single(pads, 'vertical')
+    return _check_single(pads, horizontal=False)
   if x_diff == n and y_diff == 1:
-    return _check_single(pads, 'horizontal')
+    return _check_single(pads, horizontal=True)
+
+  # possibly dual row
   if x_diff == 2 and y_diff == n/2:
-    print "vertical dual"
+    return _check_dual(pads, horizontal=False)
   if x_diff == n/2 and y_diff == 2:
-    print "horizontal dual"
+    return _check_dual(pads, horizontal=False)
+
+  # possibly a quad
   if x_diff == (n/4)+2 and y_diff == (n/4)+2:
     print "quad"
   return pads
