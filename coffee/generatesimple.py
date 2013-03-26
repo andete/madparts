@@ -161,6 +161,18 @@ def simple_silk_line(g, x, vl, ll):
   vl.append(varname)
   ll.append(a)
 
+def simple_silk_rect(g, x, vl, ll):
+  varname = "silk%s" % (g.next())
+  a = """\
+%s = new Rect
+""" % (varname)
+  a = _add_if(x, a, varname, 'x')
+  a = _add_if(x, a, varname, 'y')
+  a = _add_if(x, a, varname, 'dx')
+  a = _add_if(x, a, varname, 'dy')
+  vl.append(varname)
+  ll.append(a)
+
 def _simple_t_line(t, g, x):
   (varname, a) = _simple_line(t, g, x)
   a = a + ("%s.type = '%s'\n" % (varname, t))
@@ -257,6 +269,7 @@ simple_dispatch = {
  'silk_circle': simple_silk_circle,
  'silk_line': simple_silk_line,
  'silk_label': simple_silk_label,
+ 'silk_rect': simple_silk_rect,
  'docu_circle': partial(_simple_t_circle, 'docu'),
  'docu_line': partial(_simple_t_line, 'docu'),
  'docu_rect': partial(_simple_t_rect, 'docu'),
