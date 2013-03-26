@@ -218,6 +218,29 @@ def _clone_pad(pad_in):
   if 'name' in pad: del pad['name']
   return pad
 
+def _make_mods(diff_direction, pad, pads):
+  l = []
+  for (item, i) in zip(pads, range(len(pads))):
+    mod = {}
+    #print "investigating", i, item
+    for (k,v) in item.items():
+      if k == diff_direction: continue
+      if k == 'name' and str(i+1) == v: continue
+      #print 'testing', k, v
+      if k not in pad:
+        mod[k] = v
+      elif pad[k] != v:
+        mod[k] = v
+    if mod != {}:
+      mod['type'] = 'special'
+      if 'shape' in mod:
+        mod['real_shape'] = mod['shape']
+      mod['shape'] = 'mod'
+      mod['index'] = i
+      #print "adding mod", mod
+      l.append(mod)
+  return l
+
 def _check_single(orig_pads, horizontal):
   if horizontal:
     equal_direction = 'y'
@@ -251,26 +274,8 @@ def _check_single(orig_pads, horizontal):
   special['e'] = abs(pads[0][diff_direction] - pads[1][diff_direction])
   l = [pad, special]
   # check if there are mods needed
-  for (item, i) in zip(pads, range(len(pads))):
-    mod = {}
-    #print "investigating", i, item
-    for (k,v) in item.items():
-      if k == diff_direction: continue
-      if k == 'name' and str(i+1) == v: continue
-      #print 'testing', k, v
-      if k not in pad:
-        mod[k] = v
-      elif pad[k] != v:
-        mod[k] = v
-    if mod != {}:
-      mod['type'] = 'special'
-      if 'shape' in mod:
-        mod['real_shape'] = mod['shape']
-      mod['shape'] = 'mod'
-      mod['index'] = i
-      #print "adding mod", mod
-      l.append(mod)
-  return l
+  mods = _make_mods(diff_direction, pad, pads)
+  return l + mods
 
 def _split_dual(pads, direction):
   r1 = []
@@ -342,8 +347,22 @@ def _check_dual(orig_pads, horizontal):
   # the first one might be special...
   pad = _clone_pad(pads[1])
   pad_type = pad['type']
-  # BUSY
-  return pads
+  # create a special pseudo entry
+  special = {}
+  special['type'] = 'special'
+  special['shape'] = 'single'
+  special['alt'] = is_alt
+  special['direction'] = diff_direction
+  special['ref'] = pad_type
+  special['num'] = len(pads)
+  special['e'] = abs(r1[0][diff_direction] - r1[1][diff_direction])
+  l = [pad, special]
+  if not alt_order:
+    sort_pads = r1 + r2.reverse()
+  else:
+    sort_pads = list.join(map(lambda (a,b): [a,b], zip(r1, r2)))
+  mods = _make_mods(diff_direction, pad, sort_pads)
+  return l + mods
 
 def _check_quad(pads):
   print 'quad?'
