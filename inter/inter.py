@@ -360,14 +360,15 @@ def _check_dual(orig_pads, horizontal):
   special['between'] = between
   special['e'] = abs(r1[0][diff_direction] - r1[1][diff_direction])
   if not is_alt:
-    r2.reverse()
+    r1.reverse()
     sort_pads = r1 + r2
   else:
     sort_pads = list.join(map(lambda (a,b): [a,b], zip(r1, r2)))
   mods = _make_mods(['x','y'], pad, sort_pads)
   rot = 0
   if 'rot' in pad: rot = pad['rot']
-  rot = rot - 90
+  if diff_direction == 'x': 
+    rot = rot - 90 # will be rotated again while drawing
   if rot < 0 : rot = rot + 360
   pad['rot'] = rot
   if rot == 0:
