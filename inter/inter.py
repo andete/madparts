@@ -360,7 +360,10 @@ def _check_dual(orig_pads, horizontal):
   special['between'] = between
   special['e'] = abs(r1[0][diff_direction] - r1[1][diff_direction])
   if not is_alt:
-    r1.reverse()
+    if diff_direction == 'y':
+      sort_pads = r1 + r2
+    else:
+      r2.reverse()
     sort_pads = r1 + r2
   else:
     sort_pads = list.join(map(lambda (a,b): [a,b], zip(r1, r2)))
