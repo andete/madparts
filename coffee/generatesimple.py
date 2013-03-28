@@ -173,7 +173,7 @@ def simple_silk_rect(g, x, vl, ll):
   vl.append(varname)
   ll.append(a)
 
-def _simple_t_line(t, g, x):
+def _simple_t_line(t, g, x, vl, ll):
   (varname, a) = _simple_line(t, g, x)
   a = a + ("%s.type = '%s'\n" % (varname, t))
   vl.append(varname)
