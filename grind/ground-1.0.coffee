@@ -305,7 +305,7 @@ alt_dual = (unit, num, distance, between) ->
 rot_dual = (unit, num, distance, between) ->
   num = Math.floor(num / 2)
   unit = make_sure_is_array unit
-  s1 = alt_single unit, num, distance
+  s1 = rot_single unit, num, distance
   s1 = s1.map ((item) -> adjust_y (rotate90pad item), -between/2)
   s2 = s1.map ((item) -> rotate180 (clone item))
   combine [s1, s2]
@@ -317,7 +317,7 @@ rot_dual = (unit, num, distance, between) ->
 alt_rot_dual = (unit, num, distance, between) ->
   num = Math.floor(num / 2)
   unit = make_sure_is_array unit
-  s1 = alt_single unit, num, distance
+  s1 = rot_single unit, num, distance
   s1 = s1.map ((item) ->
     i1 = adjust_y (rotate90pad item), -between/2
     i2 = mirror_x (clone i1)
