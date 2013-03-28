@@ -217,7 +217,7 @@ def simple_silk_label(g, x, vl, ll):
 def simple_special_single(g, x, vl, ll):
   direction = x['direction']
   if direction == 'x':
-    f = 'alt_single'
+    f = 'rot_single'
   else:
     f = 'single'
   # varname selection here is not perfect; should depend on actual naming
