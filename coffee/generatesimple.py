@@ -212,7 +212,7 @@ def simple_silk_label(g, x, vl, ll):
   elif v == 'VALUE':
     _simple_name_value('value', 'Value', g, x, vl, ll)
   else:
-    _simple_silk_label(g, x)
+    _simple_silk_label(g, x, vl, ll)
 
 def simple_special_single(g, x, vl, ll):
   direction = x['direction']
