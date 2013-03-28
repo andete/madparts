@@ -69,9 +69,9 @@ class GLDraw:
 
   def _txt(self, shape, dx, dy, x, y, on_pad=False):
     if 'name' in shape:
-      s = shape['name']
+      s = str(shape['name'])
     elif 'value' in shape:
-      s = shape['value']
+      s = str(shape['value'])
     else: return
     if not on_pad:
       self.set_color(shape['type'])
