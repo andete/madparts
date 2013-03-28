@@ -63,6 +63,14 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
     self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
     self.add_action(footprintMenu, '&Reload', self.reload_footprint, 'Ctrl+R')
+    footprintMenu.addSeparator()
+
+    self.display_docu = self.setting('gui/displaydocu') == 'True'
+    self.display_restrict = self.setting('gui/displayrestrict') == 'True'
+    self.display_stop = self.setting('gui/displaystop') == 'True'
+    self.docu_action = self.add_action(footprintMenu, "&Display Docu", self.docu_changed, checkable=True, checked=self.display_docu)
+    self.restrict_action = self.add_action(footprintMenu, "&Display Restrict", self.restrict_changed, checkable=True, checked=self.display_restrict)
+    self.stop_action = self.add_action(footprintMenu, "&Display Stop", self.stop_changed, checkable=True, checked=self.display_stop)
 
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
@@ -209,14 +217,19 @@ class MainWin(QtGui.QMainWindow):
 """
     QtGui.QMessageBox.about(self, "about madparts", a)
 
-  def add_action(self, menu, text, slot, shortcut=None):
+  def add_action(self, menu, text, slot, shortcut=None, checkable=False, checked=False):
     action = QtGui.QAction(text, self)
+    if checkable:
+      action.setCheckable(True)
+      if checked:
+        action.setChecked(True)
     menu.addAction(action)
     if slot == None:
       action.setDisabled(True)
     else:
       action.triggered.connect(slot)
     if shortcut != None: action.setShortcut(shortcut)
+    return action
 
   ### GUI SLOTS
 
@@ -467,6 +480,21 @@ class MainWin(QtGui.QMainWindow):
     self.rescan_library(selected_library)
     self.status('Importing done.')
 
+  def docu_changed(self):
+    self.display_docu = self.docu_action.isChecked()
+    self.settings.setValue('gui/displaydocu', str(self.display_docu))
+    self.compile()
+
+  def restrict_changed(self):
+    self.display_restrict = self.restrict_action.isChecked()
+    self.settings.setValue('gui/displayrestrict', str(self.display_restrict))
+    self.compile()
+
+  def stop_changed(self):
+    self.display_stop = self.stop_action.isChecked()
+    self.settings.setValue('gui/displaystop', str(self.display_stop))
+    self.compile()
+
   ### OTHER METHODS
 
   def setting(self, key):
@@ -512,7 +540,10 @@ class MainWin(QtGui.QMainWindow):
       if self.auto_zoom.isChecked():
         (dx, dy, x1, y1, x2, y2) = inter.size(interim)
         self.update_zoom(dx, dy, x1, y1, x2, y2)
-      self.glw.set_shapes(inter.prepare_for_display(interim))
+      filter_out = []
+      if not self.display_docu: filter_out.append('docu')
+      if not self.display_restrict: filter_out.append('restrict')
+      self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)

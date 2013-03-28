@@ -37,4 +37,7 @@ default_settings = {
   'gl/colorscheme': 'default',
   'gui/keyidle': 1.5,
   'gl/autozoom': True,
+  'gui/displaydocu': True,
+  'gui/displayrestrict': False,
+  'gui/displaystop': False,
 }

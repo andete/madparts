@@ -35,7 +35,8 @@ def get_meta(inter):
       return shape
   return None
 
-def prepare_for_display(inter):
+def prepare_for_display(inter, filter_out):
+  inter = filter(lambda x: x['type'] not in filter_out, inter)
   h = {
     'silk': 4,
     'docu': 3,
