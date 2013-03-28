@@ -301,9 +301,10 @@ def _check_dual_alt(r1, r2):
   for (p1, p2) in zip(r1, r2):
     n1 = int(p1['name'])
     n2 = int(p2['name'])
+    print i, n1, n2
     if not (n1 == i and n2 == i+1):
       return False
-    i = i + 1
+    i = i + 2
   return True
 
 def _check_dual(orig_pads, horizontal):
@@ -367,7 +368,7 @@ def _check_dual(orig_pads, horizontal):
       r2.reverse()
     sort_pads = r1 + r2
   else:
-    sort_pads = list.join(map(lambda (a,b): [a,b], zip(r1, r2)))
+    sort_pads = list_combine(map(lambda (a,b): [a,b], zip(r1, r2)))
   mods = _make_mods(['x','y'], pad, sort_pads)
   rot = 0
   if 'rot' in pad: rot = pad['rot']

@@ -118,7 +118,7 @@ def _simple_pad_disc_octagon(g, constructor, x, vl, ll):
 def simple_pad_disc(g, x, vl, ll):
   _simple_pad_disc_octagon(g, 'RoundPad', x, vl, ll)
 
-def simple_pad_octagon(g, x):
+def simple_pad_octagon(g, x, vl, ll):
   _simple_pad_disc_octagon(g, 'OctagonPad', x, vl, ll)
 
 def _simple_circle(prefix, g, x):
@@ -233,7 +233,7 @@ l = %s [%s], %s, %s
 
 def simple_special_dual(g, x, vl, ll):
   direction_is_x = x['direction'] == 'x'
-  alt = x['alt'] == 'True'
+  alt = x['alt']
   f = 'dual'
   if direction_is_x: f = 'rot_dual'
   if alt: f = 'alt_%s' % (f)

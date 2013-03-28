@@ -24,3 +24,8 @@ def f_eq(a, b):
 
 def f_neq(a, b):
   return not f_eq(a, b)
+
+def list_combine(l):
+  l2 = []
+  for x in l: l2 = l2 + x
+  return l2
