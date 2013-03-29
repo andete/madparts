@@ -444,7 +444,9 @@ def _check_quad(orig_pads):
   special['between'] = between
   special['e'] = abs(left_x[0]['y'] - left_x[1]['y'])
   sort_pads = left_x + down_y + right_x + up_y
-  mods = _make_mods(['x','y', 'rot'], pad, sort_pads)
+  # skipping dx and dy is not entirely correct but deals with
+  # footprints that don't use rotate but swap dx and dy instead
+  mods = _make_mods(['x','y', 'rot', 'dx', 'dy'], pad, sort_pads)
   return [pad, special] + mods
 
 def _find_pad_patterns(pads):
