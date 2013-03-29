@@ -18,6 +18,7 @@ class Global(PyV8.JSClass):
 
 js_make_js_from_coffee = None
 js_make_js_ctx = None
+js_ctx_cleanup_count = 0
 
 def prepare_coffee_compiler():
   global js_make_js_from_coffee
@@ -50,6 +51,14 @@ def eval_coffee_footprint(coffee):
   # only compile the compiler once
   global js_make_js_ctx
   global js_make_js_from_coffee
+  global js_ctx_cleanup_count
+  js_ctx_cleanup_count = js_ctx_cleanup_count + 1
+  # HACK: occationally cleanup the context to avoid compiler slowdown
+  # will need a better approach in the future
+  if js_ctx_cleanup_count == 10:
+    js_make_js_ctx = None
+    js_make_js_from_coffee = None
+    js_ctx_cleanup_count = 0
   if js_make_js_ctx == None:
     prepare_coffee_compiler()
   try:
