@@ -378,12 +378,74 @@ def _check_dual(orig_pads, horizontal):
   pad['rot'] = rot
   if rot == 0:
     del pad['rot']
-  l = [pad, special]
-  return l + mods
+  return [pad, special] + mods
 
-def _check_quad(pads):
-  print 'quad?'
-  return pads
+def _split_quad(pads):
+  minx = reduce(lambda a,x: min(a, x['x']) , pads, 0)
+  maxx = reduce(lambda a,x: max(a, x['x']) , pads, 0)
+  miny = reduce(lambda a,x: min(a, x['y']) , pads, 0)
+  maxy = reduce(lambda a,x: max(a, x['y']) , pads, 0)
+  h = {
+    'minx': [],
+    'maxx': [],
+    'miny': [],
+    'maxy': []
+  }
+  for pad in pads:
+    if pad['x'] == minx: h['minx'].append(pad)
+    if pad['x'] == maxx: h['maxx'].append(pad)
+    if pad['y'] == miny: h['miny'].append(pad)
+    if pad['y'] == maxy: h['maxy'].append(pad)
+  h['minx'] = sorted(h['minx'], lambda a,b: cmp(a['y'], b['y']), reverse=True)
+  h['maxx'] = sorted(h['maxx'], lambda a,b: cmp(a['y'], b['y']))
+  h['miny'] = sorted(h['miny'], lambda a,b: cmp(a['x'], b['x']))
+  h['maxy'] = sorted(h['maxy'], lambda a,b: cmp(a['x'], b['x']), reverse=True)
+  return (h['minx'], h['miny'], h['maxx'], h['maxy']) 
+
+
+def _check_quad(orig_pads):
+  n = len(orig_pads)
+  if not (n % 4 == 0):
+    print 'quad: n not dividable by 4'
+    return orig_pads
+  (left_x, down_y, right_x, up_y) = _split_quad(orig_pads)
+  if len(left_x) != n/4 or len(down_y) != n/4 or len(right_x) != n/4 or len(up_y) != n/4:
+    print 'quad: some row is not n/4 length'
+    return origpads
+  dx = right_x[0]['x'] - left_x[0]['x']
+  dy = up_y[0]['y'] - down_y[0]['y']
+  if f_neq(dx, dy):
+    print 'quad: distance not equal between x and y rows', dx, dy
+    return orig_pads
+  between = dx   
+  if not _equidistant(left_x, 'y'):
+    print 'quad: left row not equidistant'
+    return orig_pads
+  if not _equidistant(right_x, 'y'):
+    print 'quad: right row not equidistant'
+    return orig_pads
+  if not _equidistant(up_y, 'x'):
+    print 'quad: up row not equidistant'
+    return orig_pads
+  if not _equidistant(down_y, 'x'):
+    print 'quad: down row not equidistant'
+    return orig_pads
+  # we have a quad!
+  # create a pad based on the second pad
+  # the first one might be special...
+  pad = _clone_pad(left_x[1], ['x','y'])
+  pad_type = pad['type']
+  # create a special pseudo entry
+  special = {}
+  special['type'] = 'special'
+  special['shape'] = 'quad'
+  special['ref'] = pad_type
+  special['num'] = len(orig_pads)
+  special['between'] = between
+  special['e'] = abs(left_x[0]['y'] - left_x[1]['y'])
+  sort_pads = left_x + down_y + right_x + up_y
+  mods = _make_mods(['x','y', 'rot'], pad, sort_pads)
+  return [pad, special] + mods
 
 def _find_pad_patterns(pads):
   n = len(pads)
@@ -407,7 +469,7 @@ def _find_pad_patterns(pads):
 
   # possibly a quad
   if x_diff == (n/4)+2 and y_diff == (n/4)+2:
-    print "quad"
+    return _check_quad(pads)
   return pads
 
 def find_pad_patterns(inter):

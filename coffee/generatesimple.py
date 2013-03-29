@@ -248,6 +248,19 @@ l = %s [%s], %s, %s, %s
   vl.remove(var)
   vl.append('l')
   ll.append(a)
+
+def simple_special_quad(g, x, vl, ll):
+  # varname selection here is not perfect; should depend on actual naming
+  var = "%s1" % (x['ref'])
+  num = x['num']
+  e = x['e']
+  between = x['between']
+  a = """\
+l = quad [%s], %s, %s, %s
+""" % (var, num, e, between)
+  vl.remove(var)
+  vl.append('l')
+  ll.append(a)
     
 def simple_special_mod(g, x, vl, ll):
   x2 = copy.deepcopy(x)
@@ -295,6 +308,7 @@ simple_dispatch = {
  'stop_rect': partial(_simple_t_rect, 'stop'),
  'special_single': simple_special_single,
  'special_dual': simple_special_dual,
+ 'special_quad': simple_special_quad,
  'special_mod': simple_special_mod,
 }
 
