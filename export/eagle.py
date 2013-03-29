@@ -170,10 +170,10 @@ class Export:
       y = fget(shape,'y')
       dy = fget(shape,'dy', 1)
       s = shape['value']
-      if s == "NAME": 
+      if s.upper() == "NAME": 
         s = ">NAME"
         layer = type_to_layer_number('name')
-      if s == "VALUE": 
+      if s.upper() == "VALUE": 
         s = ">VALUE"
         layer = type_to_layer_number('value')
       label['x'] = x - len(s)*dy/2
@@ -332,9 +332,9 @@ class Import:
       y = float(text['y']) + size/2
       x = float(text['x']) + len(s)*size/2
       res['value'] = s
-      if layer == 25 and s == '>NAME':
+      if layer == 25 and s.upper() == '>NAME':
         res['value'] = 'NAME'
-      elif layer == 27 and s == '>VALUE':
+      elif layer == 27 and s.upper() == '>VALUE':
         res['value'] = 'VALUE'
       if x != 0: res['x'] = x
       if y != 0: res['y'] = y
