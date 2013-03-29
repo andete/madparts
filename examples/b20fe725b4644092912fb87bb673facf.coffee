@@ -30,7 +30,6 @@ footprint = () ->
     make -3.175, -1.885
   ]
   
-
   label = new Label 'IV-9'
   label.dy = 1.5
 
