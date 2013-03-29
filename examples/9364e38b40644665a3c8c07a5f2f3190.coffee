@@ -26,7 +26,7 @@ footprint = () ->
 
   silk = silk_square half_line_size, line_width
 
-  pads[0].ro = 100
+  pads[1-1].ro = 100
 
   dot = new Disc (line_width)
   dot.x = -half 
