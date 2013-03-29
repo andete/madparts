@@ -19,8 +19,8 @@ footprint = () ->
   pad = new LongPad diameter, drill
   l = dual [pad], n, e, between
 
-  l[0].shape = 'disc'
-  l[0].r = diameter*3/4
+  l[1-1].shape = 'disc'
+  l[1-1].r = diameter*3/4
 
   silk1 = new Line line_width
   silk1.x1 = half-diameter-0.5
