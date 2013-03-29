@@ -3,14 +3,13 @@ madparts
 
 A functional footprint editor.
 
-warning
-=======
+documentation
+=============
 
-This project is still under heavy development.
-It is not recommended for usage unless for experimental reasons.
+Please check out the [wiki](https://github.com/andete/madparts/wiki).
 
-dependencies
-============
+source dependencies
+===================
 
 * python (tested with 2.7)
 * numpy (tested with 1.6.2)
@@ -21,3 +20,5 @@ dependencies
 * python-imaging (tested with 1.1.7)
 
 Requires openGL 2.1 available on the display.
+
+Detailed build instructions can be found in the source tree.
