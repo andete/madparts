@@ -12,9 +12,9 @@ from gui.dialogs import *
 import gui.gldraw, gui.library
 
 import coffee.pycoffee as pycoffee
-import coffee.generatesimple
+import coffee.generatesimple as generatesimple
 
-import inter.util
+from inter import inter
 
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
@@ -63,6 +63,14 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
     self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
     self.add_action(footprintMenu, '&Reload', self.reload_footprint, 'Ctrl+R')
+    footprintMenu.addSeparator()
+
+    self.display_docu = self.setting('gui/displaydocu') == 'True'
+    self.display_restrict = self.setting('gui/displayrestrict') == 'True'
+    self.display_stop = self.setting('gui/displaystop') == 'True'
+    self.docu_action = self.add_action(footprintMenu, "&Display Docu", self.docu_changed, checkable=True, checked=self.display_docu)
+    self.restrict_action = self.add_action(footprintMenu, "&Display Restrict", self.restrict_changed, checkable=True, checked=self.display_restrict)
+    self.stop_action = self.add_action(footprintMenu, "&Display Stop", self.stop_changed, checkable=True, checked=self.display_stop)
 
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
@@ -84,6 +92,10 @@ class MainWin(QtGui.QMainWindow):
     self.export_library_filetype = ""
     self.is_fresh_from_file = True
     self.selected_library = None
+    self.gl_dx = 0
+    self.gl_dy = 0
+    self.gl_w = 0
+    self.gl_h = 0
 
   ### GUI HELPERS
 
@@ -205,14 +217,19 @@ class MainWin(QtGui.QMainWindow):
 """
     QtGui.QMessageBox.about(self, "about madparts", a)
 
-  def add_action(self, menu, text, slot, shortcut=None):
+  def add_action(self, menu, text, slot, shortcut=None, checkable=False, checked=False):
     action = QtGui.QAction(text, self)
+    if checkable:
+      action.setCheckable(True)
+      if checked:
+        action.setChecked(True)
     menu.addAction(action)
     if slot == None:
       action.setDisabled(True)
     else:
       action.triggered.connect(slot)
     if shortcut != None: action.setShortcut(shortcut)
+    return action
 
   ### GUI SLOTS
 
@@ -354,8 +371,8 @@ class MainWin(QtGui.QMainWindow):
     self.glw.zoomfactor = int(self.zoom_selector.text())
     self.glw.zoom_changed = True
     self.glw.auto_zoom = self.auto_zoom.isChecked()
-    if self.glw.auto_zoom:
-      self.glw.update_zoomfactor()
+    #if self.glw.auto_zoom:
+    #  self.glw.update_zoomfactor()
     self.glw.updateGL()
 
   def auto_zoom_changed(self):
@@ -443,11 +460,13 @@ class MainWin(QtGui.QMainWindow):
     l = []
     for footprint_name in footprint_names:
       interim = importer.import_footprint(footprint_name) 
+      interim = inter.sort_by_type(interim)
+      interim = inter.find_pad_patterns(interim)
       l.append((footprint_name, interim))
     cl = []
     for (footprint_name, interim) in l:
       try:
-       coffee = coffee.generatesimple.generate_coffee(interim)
+       coffee = generatesimple.generate_coffee(interim)
        cl.append((footprint_name, coffee))
       except Exception as ex:
         tb = traceback.format_exc()
@@ -460,6 +479,21 @@ class MainWin(QtGui.QMainWindow):
         f.write(coffee)
     self.rescan_library(selected_library)
     self.status('Importing done.')
+
+  def docu_changed(self):
+    self.display_docu = self.docu_action.isChecked()
+    self.settings.setValue('gui/displaydocu', str(self.display_docu))
+    self.compile()
+
+  def restrict_changed(self):
+    self.display_restrict = self.restrict_action.isChecked()
+    self.settings.setValue('gui/displayrestrict', str(self.display_restrict))
+    self.compile()
+
+  def stop_changed(self):
+    self.display_stop = self.stop_action.isChecked()
+    self.settings.setValue('gui/displaystop', str(self.display_stop))
+    self.compile()
 
   ### OTHER METHODS
 
@@ -475,21 +509,46 @@ class MainWin(QtGui.QMainWindow):
   def status(self, s):
     self.statusBar().showMessage(s)
 
-  def compile(self):
+  def update_zoom(self, dx, dy, x1, y1, x2, y2):
+    # TODO: keep x1, y1, x2, y2 in account
+    w = self.glw.width()
+    h = self.glw.height()
+    if dx == self.gl_dx and dy == self.gl_dy and w == self.gl_w and h == self.gl_h:
+      return
+    self.gl_dx = dx
+    self.gl_dy = dy
+    self.gl_w = w
+    self.gl_h = h
+    zoomx = float(w) / dx
+    zoomy = float(h) / dy
+    zoom = int(min(zoomx, zoomy))
+    self.zoom_selector.setText(str(zoom))
+    self.glw.zoomfactor = zoom
+    self.glw.zoom_changed = True
 
+  def compile(self):
     code = self.te1.toPlainText()
+    compilation_failed_last_time = self.executed_footprint == []
     self.executed_footprint = []
     try:
       interim = pycoffee.eval_coffee_footprint(code)
       if interim != None:
-        interim = inter.util.add_names(interim)
+        interim = inter.cleanup_js(interim)
+        interim = inter.add_names(interim)
       self.executed_footprint = interim
       self.te2.setPlainText(str(interim))
-      self.glw.set_shapes(inter.util.prepare_for_display(interim))
+      if self.auto_zoom.isChecked():
+        (dx, dy, x1, y1, x2, y2) = inter.size(interim)
+        self.update_zoom(dx, dy, x1, y1, x2, y2)
+      filter_out = []
+      if not self.display_docu: filter_out.append('docu')
+      if not self.display_restrict: filter_out.append('restrict')
+      self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.is_fresh_from_file:
         with open(self.active_footprint_file(), "w+") as f:
           f.write(code)
-      #self.status("Compilation successful.")
+      if compilation_failed_last_time:
+        self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2, 0])
     # TODO: get rid of exception handling code duplication
@@ -590,4 +649,6 @@ if __name__ == '__main__':
     widget = MainWin()
     widget.show()
     app.exec_()
-    os.unlink(widget.glw.font_file)
+    # on windows we can't delete the file; TODO investigate how to work around that
+    if sys.platform != 'win32':
+      os.unlink(widget.glw.font_file)

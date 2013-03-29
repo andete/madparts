@@ -18,29 +18,24 @@ footprint = () ->
   value = new Value (-half - 1.5 - pad_len_adj)
 
   pad = new Smd
-
   pad.dx = 1.67 + pad_len_adj
   pad.dy = 0.36
   pad.ro = 50
-  pad.adj = pad_len_adj/2
-  #pad.drill = 0.1
-  #pad.drill_dx = -0.5
 
-  pads = quad pad, num_pads, e, size
+  pads = quad [pad], num_pads, e, size + pad_len_adj/2
 
   silk = silk_square half_line_size, line_width
 
-  pads[0].ro = 100
+  # make pad 1 round
+  pads[1-1].ro = 100
 
+  # draw a little dot near pin 1
   dot = new Disc line_width
   dot.x = -half
   dot.y = half - 1
  
+  # draw a cute circle in the middle
   dut = new Circle line_width
   dut.r = 1
-  #dut.irx = 2
-  #dut.iry = 0.5
-  #dut.drill = 2
-  #dut.drill_dy = 0.25
 
   combine [name, value, pads, silk, dot, dut]

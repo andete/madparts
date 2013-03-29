@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup, Tag
 
 from util.util import *
 
-import inter.util
+from inter import inter
 
 # TODO: get from eagle XML isof hardcoded; 
 # however in practice this is quite low prio as everybody probably
@@ -82,50 +82,60 @@ class Export:
     # make a deep copy so we can make mods without harm
     interim = copy.deepcopy(interim)
     interim = self.add_ats_to_names(interim)
-    meta = inter.util.get_meta(interim)
+    meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
+    # make name eagle compatible
+    name = re.sub(' ','_',name)
     # check if there is an existing package
     # and if so, replace it
     packages = self.soup.eagle.drawing.packages('package')
     package = None
     for some_package in packages:
       if some_package['name'] == name:
-        package = package
+        package = some_package
+        package.clear()
         break
-    if package != None:
-      package.clear()
-    else:
+    if package == None:
       package = self.soup.new_tag('package')
       self.soup.eagle.drawing.packages.append(package)
       package['name'] = name
 
-    def pad(shape, layer):
+    def pad(shape):
       pad = self.soup.new_tag('pad')
       pad['name'] = shape['name']
-      pad['layer'] = type_to_layer_number('pad')
+      # don't set layer in a pad, it is implicit
       pad['x'] = fget(shape, 'x')
       pad['y'] = fget(shape, 'y')
-      pad['drill'] = fget(shape, 'drill')
+      drill = fget(shape, 'drill')
+      pad['drill'] = drill
       pad['rot'] = "R%d" % (fget(shape, 'rot'))
-      shape = 'circle'
-      if 'shape' in pad: shape = pad['shape']
-      if shape == 'circle':
+      r = fget(shape, 'r')
+      shape2 = 'disc' # disc is the default
+      if 'shape' in shape:
+        shape2 = shape['shape']
+      if shape2 == 'disc':
         pad['shape'] = 'round'
-        pad['diameter'] = pad['r']/2
-      elif shape == 'octagon':
+        print r, drill, drill*1.5
+        if f_neq(r, drill*1.5):
+          pad['diameter'] = r*2
+      elif shape2 == 'octagon':
         pad['shape'] = 'octagon'
-        pad['diameter'] = pad['r']/2
-      elif shape == 'rect':
+        if f_neq(r, drill*1.5):
+          pad['diameter'] = r*2
+      elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         if ro == 0: 
           res['shape'] = 'square'
-          res['diameter'] = pad['dx']
+          if f_neq(shape['dx'], drill*1.5):
+            res['diameter'] = shape['dx']
         elif 'drill_dx' in shape:
           pad['shape'] = 'offset'
-          pad['diameter'] = pad['dy']
+          if f_neq(shape['dy'], drill*1.5):
+            pad['diameter'] = shape['dy']
         else:
           pad['shape'] = 'long'
-          pad['diameter'] = pad['dy']
+          if f_neq(shape['dy'], drill*1.5):
+            pad['diameter'] = shape['dy']
       package.append(pad)
 
     def smd(shape):
@@ -142,10 +152,14 @@ class Export:
 
     def rect(shape, layer):
       rect = self.soup.new_tag('rectangle')
-      rect['x1'] = fget(shape, 'x1')
-      rect['y1'] = fget(shape, 'y1')
-      rect['x2'] = fget(shape, 'x2')
-      rect['y2'] = fget(shape, 'y2')
+      x = fget(shape, 'x')
+      y = fget(shape, 'y')
+      dx = fget(shape, 'dx')
+      dy = fget(shape, 'dy')
+      rect['x1'] = x - dx/2
+      rect['x2'] = x + dx/2
+      rect['y1'] = y - dy/2
+      rect['y2'] = y + dy/2
       rect['rot'] = "R%d" % (fget(shape, 'rot'))
       rect['layer'] = layer
       package.append(rect)
@@ -156,10 +170,10 @@ class Export:
       y = fget(shape,'y')
       dy = fget(shape,'dy', 1)
       s = shape['value']
-      if s == "NAME": 
+      if s.upper() == "NAME": 
         s = ">NAME"
         layer = type_to_layer_number('name')
-      if s == "VALUE": 
+      if s.upper() == "VALUE": 
         s = ">VALUE"
         layer = type_to_layer_number('value')
       label['x'] = x - len(s)*dy/2
@@ -222,7 +236,7 @@ class Export:
       if s == 'line': line(shape, layer)
       elif s == 'circle': circle(shape, layer)
       elif s == 'disc': disc(shape, layer)
-      elif s == 'label': circle(shape, layer)
+      elif s == 'label': label(shape, layer)
       elif s == 'rect': rect(shape, layer)
 
     def unknown(shape):
@@ -262,7 +276,7 @@ class Export:
         multi_names[k] = 1
     def adapt(x):
       if x['type'] == 'smd' or x['type'] == 'pad':
-        name = x['name']
+        name = re.sub(' ','_', x['name'])
         if name in multi_names:
           x['name'] = "%s@%d" % (name, multi_names[name])
           multi_names[name] = multi_names[name] + 1
@@ -293,7 +307,7 @@ class Import:
           return True
         return False
 
-    [package] = self.soup.find_all(package_has_name)
+    package = self.soup.find_all(package_has_name)[0]
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name
@@ -318,9 +332,9 @@ class Import:
       y = float(text['y']) + size/2
       x = float(text['x']) + len(s)*size/2
       res['value'] = s
-      if layer == 25 and s == '>NAME':
+      if layer == 25 and s.upper() == '>NAME':
         res['value'] = 'NAME'
-      elif layer == 27 and s == '>VALUE':
+      elif layer == 27 and s.upper() == '>VALUE':
         res['value'] = 'VALUE'
       if x != 0: res['x'] = x
       if y != 0: res['y'] = y
@@ -347,10 +361,14 @@ class Import:
       res = {}
       res['type'] = layer_number_to_type(int(rect['layer']))
       res['shape'] = 'rect'
-      res['x1'] = float(rect['x1'])
-      res['y1'] = float(rect['y1'])
-      res['x2'] = float(rect['x2'])
-      res['y2'] = float(rect['y2'])
+      x1 = float(rect['x1'])
+      y1 = float(rect['y1'])
+      x2 = float(rect['x2'])
+      y2 = float(rect['y2'])
+      res['x'] = (x1+x2)/2
+      res['y'] = (y1+y2)/2
+      res['dx'] = abs(x1-x2)
+      res['dy'] = abs(y1-y2)
       if rect.has_key('rot'):
         res['rot'] = int(rect['rot'][1:])
       return res
@@ -385,8 +403,8 @@ class Import:
       res = {}
       res['type'] = 'pad'
       res['name'] = clean_name(pad['name'])
-      res['x'] = pad['x']
-      res['y'] = pad['y']
+      res['x'] = float(pad['x'])
+      res['y'] = float(pad['y'])
       drill = float(pad['drill'])
       res['drill'] = drill
       if pad.has_key('diameter'):
@@ -396,11 +414,13 @@ class Import:
       if pad.has_key('rot'):
         res['rot'] = int(pad['rot'][1:])
       shape = 'round'
-      if pad.has_key('shape'): shape = pad['shape']
+      if pad.has_key('shape'):
+        shape = pad['shape']
       if shape == 'round':
         res['shape'] = 'disc'
         res['r'] = 0.0
-        if dia/2 > drill: res['r'] = dia/2
+        #if dia/2 > drill:
+        res['r'] = dia/2
       elif shape == 'square':
         res['shape'] = 'rect'
         res['dx'] = dia

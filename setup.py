@@ -3,14 +3,16 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import glob, sys, os
+import glob, sys, platform
 
 from setuptools import setup
 
 with open('README.md') as file:
     long_description = file.read()
 
-arch = os.uname()[4]
+arch = platform.uname()[4]
+
+extra_data_files = []
 
 if sys.platform == 'darwin':
   OPTIONS = {
@@ -26,9 +28,11 @@ if sys.platform == 'darwin':
       options=dict(py2app=OPTIONS),
       )
 elif sys.platform == 'win32':
+  import py2exe
+  extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
       setup_requires=['py2exe'],
-      app=['madparts.py'],
+      console=['madparts.py'],
       )
 elif sys.platform.startswith('linux'):
    extra_options = dict(
@@ -72,7 +76,7 @@ setup(
         },
   data_files = [
     ('share/madparts/examples', glob.glob('examples/*.coffee')),
-    ],
+    ] + extra_data_files,
   platforms = ["Windows", "Linux", "Mac OS-X"],
   **extra_options
   )

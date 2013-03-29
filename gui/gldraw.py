@@ -8,12 +8,12 @@ from OpenGL.GL import *
 import OpenGL.arrays.vbo as vbo
 
 import numpy as np
-import math
+import math, sys
 import os.path, pkg_resources, tempfile
 
 from util.util import *
 from defaultsettings import color_schemes
-import inter.util
+from inter import inter
 
 import glFreeType
 import shaders
@@ -61,7 +61,7 @@ class GLDraw:
     self.square_data_vbo = vbo.VBO(self.square_data)
 
   def set_color(self, t):
-    (r,g,b,a) = self.color[t]
+    (r,g,b,a) = self.color.get(t, self.color['unknown'])
     glColor4f(r,g,b,a)
 
   def zoom(self):
@@ -69,9 +69,9 @@ class GLDraw:
 
   def _txt(self, shape, dx, dy, x, y, on_pad=False):
     if 'name' in shape:
-      s = shape['name']
+      s = str(shape['name'])
     elif 'value' in shape:
-      s = shape['value']
+      s = str(shape['value'])
     else: return
     if not on_pad:
       self.set_color(shape['type'])
@@ -91,12 +91,13 @@ class GLDraw:
     glPopMatrix ()
     glDisable(GL_TEXTURE_2D)
 
-  def label(self, shape):
+  def label(self, shape, labels):
     x = fget(shape,'x')
     y = fget(shape,'y')
     dy = fget(shape,'dy', 1.2)
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     self._txt(shape, dx, dy, x, y)
+    return labels
 
   def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
     self.circle_shader.bind()
@@ -122,7 +123,7 @@ class GLDraw:
     glDrawArrays(GL_QUADS, 0, 4)
     self.hole_shader.release() 
 
-  def disc(self, shape):
+  def disc(self, shape, labels):
     r = fget(shape, 'r')
     rx = fget(shape, 'rx', r)
     ry = fget(shape, 'ry', r)
@@ -136,9 +137,10 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True)
+      labels.append(lambda: self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True))
+    return labels
 
-  def circle(self, shape):
+  def circle(self, shape, labels):
     r = fget(shape, 'r')
     rx = fget(shape, 'rx', r)
     ry = fget(shape, 'ry', r)
@@ -153,7 +155,8 @@ class GLDraw:
     iry = iry - w/2
     self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry)
     if 'name' in shape:
-      self._txt(shape, rx*2, ry*2, x, y, True)
+      labels.append(lambda: self._txt(shape, rx*2, ry*2, x, y, True))
+    return labels
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
     self.octagon_shader.bind()
@@ -167,7 +170,7 @@ class GLDraw:
     glDrawArrays(GL_QUADS, 0, 4)
     self.octagon_shader.release() 
 
-  def octagon(self, shape):
+  def octagon(self, shape, labels):
     r = fget(shape, 'r', 0.0)
     dx = fget(shape, 'dx', r*2)
     dy = fget(shape, 'dy', r*2)
@@ -181,9 +184,10 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      self._txt(shape, dx, dy, x, y, True)
+      labels.append(lambda: self._txt(shape, dx, dy, x, y, True))
+    return labels
 
-  def rect(self, shape):
+  def rect(self, shape, labels):
     x = fget(shape, 'x')
     y = fget(shape, 'y')
     dx = fget(shape, 'dx')
@@ -218,47 +222,51 @@ class GLDraw:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
       m = min(dx, dy)
-      self._txt(shape ,m, m, x, y, True)
+      labels.append(lambda: self._txt(shape ,m, m, x, y, True))
+    return labels
 
-  def line(self, shape):
+  def line(self, shape, labels):
     x1 = fget(shape, 'x1')
     y1 = fget(shape, 'y1')
     x2 = fget(shape, 'x2')
     y2 = fget(shape, 'y2')
-    if (x1 > x2):
-      (x1, x2) = (x2, x1)
-      (y1, y2) = (y2, y1)
     w = fget(shape, 'w')
     r = w/2
-    dx = abs(x1-x2)
-    dy = abs(y1-y2)
+
+    dx = x2-x1
+    dy = y2-y1
     l = math.sqrt(dx*dx + dy*dy)
-    s = dy / l
-    c = dx / l
-    ddy = r * c
-    ddx = r * s
+    px = dy * r / l # trigoniometrics
+    py = dx * r / l # trigoniometrics
     glBegin(GL_QUADS)
-    if (y1 > y2):
-      ddx = -ddx
-      ddy = -ddy
-    glVertex3f(x1-ddx, y1+ddy, 0)
-    glVertex3f(x1+ddx, y1-ddy, 0)
-    glVertex3f(x2+ddx, y2-ddy, 0)
-    glVertex3f(x2-ddx, y2+ddy, 0)
+    glVertex3f(x1-px, y1+py, 0)
+    glVertex3f(x1+px, y1-py, 0)
+    glVertex3f(x2+px, y2-py, 0)
+    glVertex3f(x2-px, y2+py, 0)
     glEnd()
     self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
     self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)
-    
+    return labels
+ 
+  def skip(self, shape, labels):
+    return labels
+   
   def draw(self, shapes):
+    labels = []
     for shape in shapes:
       self.set_color(shape['type'])
       if 'shape' in shape:
-        if shape['shape'] == 'circle': self.circle(shape)
-        if shape['shape'] == 'disc': self.disc(shape)
-        if shape['shape'] == 'label': self.label(shape)
-        if shape['shape'] == 'line': self.line(shape)
-        if shape['shape'] == 'octagon': self.octagon(shape)
-        if shape['shape'] == 'rect': self.rect(shape)
+        dispatch = {
+          'circle': self.circle,
+          'disc': self.disc,
+          'label': self.label,
+          'line': self.line,
+          'octagon': self.octagon,
+          'rect': self.rect,
+        }
+        labels = dispatch.get(shape['shape'], self.skip)(shape, labels)
+    for draw_label in labels:
+      draw_label()
 
 class JYDGLWidget(QGLWidget):
 
@@ -345,8 +353,6 @@ class JYDGLWidget(QGLWidget):
     if self.shapes != None: self.gldraw.draw(self.shapes)
 
   def resizeGL(self, w, h):
-    if (not self.called_by_me) and self.auto_zoom:
-      self.update_zoomfactor()
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     # every 'zoomfactor' pixels is one mm
@@ -357,16 +363,7 @@ class JYDGLWidget(QGLWidget):
     glOrtho(-mm_visible_x/2, mm_visible_x/2, -mm_visible_y/2, mm_visible_y/2, -1, 1)
     glViewport(0, 0, w, h)
     if not self.called_by_me:
-      self.updateGL()
-
-  def update_zoomfactor(self):
-    (dx, dy) = inter.util.size(self.shapes)
-    w = self.width()
-    h = self.height()
-    zoomx = float(w) / dx
-    zoomy = float(h) / dy
-    self.zoomfactor = int(min(zoomx, zoomy))
-    self.parent.zoom_selector.setText(str(self.zoomfactor))
+      self.parent.compile()
 
   def set_shapes(self, s):
     self.shapes = s
@@ -382,8 +379,6 @@ class JYDGLWidget(QGLWidget):
           self.updateGL()
       else:
         if self.zoomfactor < 245:
-          self.zoom_changed = True
-          self.updateGL()
           self.zoomfactor = self.zoomfactor + 5
           self.parent.zoom_selector.setText(str(self.zoomfactor))
           self.zoom_changed = True

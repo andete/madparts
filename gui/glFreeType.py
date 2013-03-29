@@ -7,7 +7,15 @@
 # import freetype
 # We are going to use Python Image Library's font handling
 # From PIL 1.1.4:
-import ImageFont
+
+import sys
+
+if sys.platform == 'win32':
+  # we're using pillow 2.0 on win32
+  from PIL import ImageFont
+else:
+  import ImageFont
+  
 from OpenGL.GL import *
 
 def is_font_available (ft, facename):
