@@ -156,6 +156,7 @@ class GLDraw:
     self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry)
     if 'name' in shape:
       labels.append(lambda: self._txt(shape, rx*2, ry*2, x, y, True))
+    return labels
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
     self.octagon_shader.bind()
