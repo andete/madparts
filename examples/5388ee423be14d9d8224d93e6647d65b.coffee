@@ -1,7 +1,7 @@
 #format 1.0
-#name PIN 2X3
-#id c27da481bc86472abbbf234a65140d26
-#parent 708e13cc5f4e43f7833af53070ba5078
+#name PIN 2X3_alt
+#id 5388ee423be14d9d8224d93e6647d65b
+#parent c27da481bc86472abbbf234a65140d26
 #desc 2X3 pin pinheader
 footprint = () ->
 
@@ -39,7 +39,7 @@ footprint = () ->
 
   unit = [pad, silk1, silk2, silk3, silk4, silk5, silk6, silk7, silk8]
 
-  units = dual unit, n, d, d
+  units = alt_dual unit, n, d, d
   units[0].shape='disc'
 
   combine [name,value, units]

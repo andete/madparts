@@ -1,7 +1,7 @@
 #format 1.0
-#name PIN 2X3
-#id c27da481bc86472abbbf234a65140d26
-#parent 708e13cc5f4e43f7833af53070ba5078
+#name PIN 2X3_rot
+#id cc5eeb9a2cff48a4a61a3bc98f9debab
+#parent c27da481bc86472abbbf234a65140d26
 #desc 2X3 pin pinheader
 footprint = () ->
 
@@ -11,8 +11,8 @@ footprint = () ->
   pad_r = (d-0.34)/2
   n = 6
 
-  name = new Name (n*d/4+0.5)
-  value = new Value (-n*d/4-0.5)
+  name = new Name (4*d/4+0.5)
+  value = new Value (-4*d/4-0.5)
   
   # the basic pad
   pad = new OctagonPad pad_r, drill
@@ -39,7 +39,7 @@ footprint = () ->
 
   unit = [pad, silk1, silk2, silk3, silk4, silk5, silk6, silk7, silk8]
 
-  units = dual unit, n, d, d
+  units = rot_dual unit, n, d, d
   units[0].shape='disc'
 
   combine [name,value, units]
