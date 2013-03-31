@@ -8,7 +8,7 @@ import coffeescript, grind
 import PyV8
 from PyV8 import JSError
 
-supported_formats = ['1.0']
+supported_formats = ['1.0', '1.1']
 
 class Global(PyV8.JSClass):
 
