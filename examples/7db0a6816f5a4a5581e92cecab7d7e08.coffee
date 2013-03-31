@@ -1,4 +1,4 @@
-#format 1.0
+#format 1.1
 #name JEDEC_MS-012-AA_SOIC
 #id 7db0a6816f5a4a5581e92cecab7d7e08
 footprint = () ->

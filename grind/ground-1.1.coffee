@@ -58,6 +58,14 @@ make_sure_is_array = (unit) ->
   else
     unit
 
+generate_names = (l) ->
+  i = 0
+  for smd in l
+    if smd['type'] in ['smd', 'pad']
+      smd.name = (i+1)
+      i = i + 1
+  l
+
 ### SECTION 2: type constructors ###
 
 class Smd
@@ -261,7 +269,7 @@ single = (unit, num, distance) ->
       adjust_y item2, (-dy)
     )
   )
-  combine units
+  generate_names (combine units)
 
 # create a horizontal range of 'num' units 'distance' apart
 rot_single = (unit, num, distance) ->
@@ -274,7 +282,7 @@ rot_single = (unit, num, distance) ->
       adjust_x item2, dx
     )
   )
-  combine units
+  generate_names (combine units)
 
 # create a dual vertical range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
@@ -284,7 +292,7 @@ dual = (unit, num, distance, between) ->
   s1 = single unit, num, distance
   s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
   s2 = s1.map ((item) -> rotate180 (clone item))
-  combine [s1, s2]
+  generate_names (combine [s1, s2])
 
 # create a dual vertical range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
@@ -298,7 +306,7 @@ alt_dual = (unit, num, distance, between) ->
     i1 = adjust_x (rotate180pad item), -between/2
     i2 = mirror_y (clone i1)
     [i1,i2])
-  combine s1
+  generate_names (combine s1)
 
 # create a dual horizontal range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
@@ -308,7 +316,7 @@ rot_dual = (unit, num, distance, between) ->
   s1 = rot_single unit, num, distance
   s1 = s1.map ((item) -> adjust_y (rotate90pad item), -between/2)
   s2 = s1.map ((item) -> rotate180 (clone item))
-  combine [s1, s2]
+  generate_names (combine [s1, s2])
 
 # create a dual horizontal range of 'num' units 'distance' apart in the range
 # and 'between' apart between the two ranges
@@ -322,7 +330,7 @@ alt_rot_dual = (unit, num, distance, between) ->
     i1 = adjust_y (rotate90pad item), -between/2
     i2 = mirror_x (clone i1)
     [i1,i2])
-  combine s1
+  generate_names (combine s1)
 
 # create a quad of 'num' units 'distance' apart in the range
 # and 'between' apart between the opposide sides
@@ -335,7 +343,7 @@ quad = (unit, num, distance, between) ->
   s2 = s1.map ((item) -> rotate90 (clone item))
   s3 = s2.map ((item) -> rotate90 (clone item))
   s4 = s3.map ((item) -> rotate90 (clone item))
-  combine [s1,s2,s3,s4]
+  generate_names (combine [s1,s2,s3,s4])
 
 # create a sequence of lines from a list of coordinates
 lines = (width, coordinates) ->

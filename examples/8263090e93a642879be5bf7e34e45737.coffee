@@ -1,4 +1,4 @@
-#format 1.0
+#format 1.1
 #name PIN 2X3_alt_rot
 #id 8263090e93a642879be5bf7e34e45737
 #parent cc5eeb9a2cff48a4a61a3bc98f9debab
