@@ -640,15 +640,22 @@ class MainWin(QtGui.QMainWindow):
       self.lib_dir[name] = filen
       self.lib_exist[name] = exists
     self.settings.endArray()
-      
+
+def gui_main():
+  QtCore.QCoreApplication.setOrganizationName("madparts")
+  QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
+  QtCore.QCoreApplication.setApplicationName("madparts")
+  app = QtGui.QApplication(["madparts"])
+  widget = MainWin()
+  widget.show()
+  app.exec_()
+  # on windows we can't delete the file; TODO investigate how to work around that
+  if sys.platform != 'win32':
+    os.unlink(widget.glw.font_file)
+
 if __name__ == '__main__':
-    QtCore.QCoreApplication.setOrganizationName("madparts")
-    QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
-    QtCore.QCoreApplication.setApplicationName("madparts")
-    app = QtGui.QApplication(["madparts"])
-    widget = MainWin()
-    widget.show()
-    app.exec_()
-    # on windows we can't delete the file; TODO investigate how to work around that
-    if sys.platform != 'win32':
-      os.unlink(widget.glw.font_file)
+    if len(sys.argv) == 1:
+      gui_main()
+    else:
+      import cli
+      cli_main()
