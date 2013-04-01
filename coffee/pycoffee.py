@@ -6,9 +6,25 @@ import pkg_resources
 import coffeescript, grind
 
 import PyV8
+import _PyV8
 from PyV8 import JSError
 
 supported_formats = ['1.0', '1.1']
+
+# taken from PyV8, but simplified to avoid self-referencing structures
+# in a rather primitive way (limiting nesting depth to 5)
+# to avoid the out-of-memory error in the python interpreter they introduce
+def pyv8_convert(obj, nest=0):
+    if nest == 5:
+      raise ReferenceError("structure nesting deeper then 5 not allowed")
+    nest = nest + 1
+    if type(obj) == _PyV8.JSArray:
+        return [pyv8_convert(v, nest) for v in obj]
+
+    if type(obj) == _PyV8.JSObject:
+        return dict([[str(k), pyv8_convert(obj.__getattr__(str(k)), nest)] for k in obj.__members__])
+
+    return obj
 
 class Global(PyV8.JSClass):
 
@@ -68,7 +84,7 @@ def eval_coffee_footprint(coffee):
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:
       js_res = ctxt.eval("(function() {\n" + ground_js + js + "\n}).call(this);\n")
-      pl = PyV8.convert(js_res)
+      pl = pyv8_convert(js_res)
       pl.append(meta)
       return pl
   finally:
