@@ -72,6 +72,9 @@ class MainWin(QtGui.QMainWindow):
     self.restrict_action = self.add_action(footprintMenu, "&Display Restrict", self.restrict_changed, checkable=True, checked=self.display_restrict)
     self.stop_action = self.add_action(footprintMenu, "&Display Stop", self.stop_changed, checkable=True, checked=self.display_stop)
 
+    footprintMenu.addSeparator()
+    self.add_action(footprintMenu, '&Force Compile', self.compile, 'Ctrl+F')
+
     libraryMenu = menuBar.addMenu('&Library')
     self.add_action(libraryMenu, '&Add', self.add_library)
     self.add_action(libraryMenu, '&Disconnect', self.disconnect_library)
@@ -85,7 +88,7 @@ class MainWin(QtGui.QMainWindow):
     self.first_keypress = False
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
-    self.timer.timeout.connect(self.editor_text_changed)
+    self.timer.timeout.connect(self.key_idle_timer_timeout)
 
     self.executed_footprint = []
     self.export_library_filename = ""
@@ -326,6 +329,9 @@ class MainWin(QtGui.QMainWindow):
     self.compile()
     if self.is_fresh_from_file:
       self.is_fresh_from_file = False
+
+  def key_idle_timer_timeout(self): 
+    self.editor_text_changed()
 
   def export_previous(self):
     if self.export_library_filename == "":
