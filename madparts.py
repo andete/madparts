@@ -648,6 +648,10 @@ def gui_main():
   app = QtGui.QApplication(["madparts"])
   widget = MainWin()
   widget.show()
+  if widget.glw.glversion < 2.1:
+    s = "OpenGL 2.1 or better is required (%s found)" % (widget.glw.glversion)
+    QtGui.QMessageBox.critical(widget, "error", s)
+    return
   app.exec_()
   # on windows we can't delete the file; TODO investigate how to work around that
   if sys.platform != 'win32':

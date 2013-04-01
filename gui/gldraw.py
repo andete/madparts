@@ -301,6 +301,7 @@ class JYDGLWidget(QGLWidget):
     self.dot_field_vbo = vbo.VBO(self.dot_field_data)
 
   def initializeGL(self):
+    self.glversion = float(glGetString(GL_VERSION).split()[0])
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     #glEnable(GL_TEXTURE_2D) # Enables texture mapping
