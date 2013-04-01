@@ -1,9 +1,10 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import os.path, re, string
+import os.path, re, string, traceback
 import pkg_resources
 import coffeescript, grind
+from inter import inter
 
 import PyV8
 import _PyV8
@@ -124,3 +125,30 @@ def new_coffee(new_id, new_name):
 footprint = () ->
   []
 """ % (new_name, new_id)
+
+def compile_coffee(code):
+  try:
+    interim = eval_coffee_footprint(code)
+    if interim != None:
+      interim = inter.cleanup_js(interim)
+      interim = inter.add_names(interim)
+      return (None, None, interim)
+    else:
+      return ('internal error', 'internal error', None)
+  except JSError as ex:
+    s = str(ex)
+    s = s.replace('JSError: Error: ', '')
+    return ('coffee error:\n' + s, s, None)
+  except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
+    print traceback.format_exc()
+    return ('coffee error:\n' + str(ex), str(ex), None)
+  except RuntimeError as ex:
+    if str(ex) == 'maximum recursion depth exceeded while calling a Python object':
+      msg = 'Error: please make sure your coffeescript does not contain self-referencing recursive elements because those can\'t be compiled into a result at the moment'
+    else:
+      tb = traceback.format_exc()
+      msg = str(ex) + "\n"+tb
+    return (msg, "", None)
+  except Exception as ex:
+    tb = traceback.format_exc()
+    return ('other error:\n' + str(ex) + "\n"+tb, str(ex), None)

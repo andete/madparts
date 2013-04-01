@@ -537,11 +537,8 @@ class MainWin(QtGui.QMainWindow):
     code = self.te1.toPlainText()
     compilation_failed_last_time = self.executed_footprint == []
     self.executed_footprint = []
-    try:
-      interim = pycoffee.eval_coffee_footprint(code)
-      if interim != None:
-        interim = inter.cleanup_js(interim)
-        interim = inter.add_names(interim)
+    (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
+    if interim != None:
       self.executed_footprint = interim
       self.te2.setPlainText(str(interim))
       if self.auto_zoom.isChecked():
@@ -558,37 +555,10 @@ class MainWin(QtGui.QMainWindow):
         self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2, 0])
-    # TODO: get rid of exception handling code duplication
-    except pycoffee.JSError as ex:
+    else:
       self.executed_footprint = []
-      s = str(ex)
-      s = s.replace('JSError: Error: ', '')
-      self.te2.setPlainText('coffee error:\n' + s)
-      self.status(s)
-      [s1, s2] = self.lsplitter.sizes()
-      self.lsplitter.setSizes([s1+s2-150, 150])
-    except (ReferenceError, IndexError, AttributeError, SyntaxError, TypeError, NotImplementedError) as ex:
-      self.executed_footprint = []
-      self.te2.setPlainText('coffee error:\n' + str(ex))
-      print traceback.format_exc()
-      self.status(str(ex))
-      [s1, s2] = self.lsplitter.sizes()
-      self.lsplitter.setSizes([s1+s2-150, 150])
-    except RuntimeError as ex:
-      if str(ex) == 'maximum recursion depth exceeded while calling a Python object':
-        msg = 'Error: please make sure your coffeescript does not contain self-referencing recursive elements because those can\'t be compiled into a result at the moment'
-      else:
-        tb = traceback.format_exc()
-        msg = str(ex) + "\n"+tb
-      self.executed_footprint = []
-      self.te2.setPlainText(msg)
-      [s1, s2] = self.lsplitter.sizes()
-      self.lsplitter.setSizes([s1+s2-150, 150])
-    except Exception as ex:
-      self.executed_footprint = []
-      tb = traceback.format_exc()
-      self.te2.setPlainText('other error:\n' + str(ex) + "\n"+tb)
-      self.status(str(ex))
+      self.te2.setPlainText(error_txt)
+      self.status(status_txt)
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2-150, 150])
   
@@ -669,4 +639,4 @@ if __name__ == '__main__':
       gui_main()
     else:
       import cli
-      cli_main()
+      sys.exit(cli.cli_main())
