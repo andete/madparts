@@ -276,7 +276,7 @@ class Export:
         multi_names[k] = 1
     def adapt(x):
       if x['type'] == 'smd' or x['type'] == 'pad':
-        name = re.sub(' ','_', x['name'])
+        name = re.sub(' ','_', str(x['name']))
         if name in multi_names:
           x['name'] = "%s@%d" % (name, multi_names[name])
           multi_names[name] = multi_names[name] + 1
