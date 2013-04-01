@@ -201,7 +201,7 @@ class MainWin(QtGui.QMainWindow):
     rhbox.addWidget(QtGui.QLabel("Zoom: "))
     rhbox.addWidget(self.zoom_selector)
     self.auto_zoom = QtGui.QCheckBox("Auto")
-    self.auto_zoom.setChecked(bool(self.setting('gl/autozoom')))
+    self.auto_zoom.setChecked(self.setting('gl/autozoom') == 'True')
     self.auto_zoom.stateChanged.connect(self.zoom)
     self.auto_zoom.stateChanged.connect(self.auto_zoom_changed)
     rhbox.addWidget(self.auto_zoom)
@@ -326,7 +326,8 @@ class MainWin(QtGui.QMainWindow):
         self.timer.start(float(key_idle))
         return
     self.first_keypress = True
-    self.compile()
+    if self.setting('gui/autocompile') == 'True':
+      self.compile()
     if self.is_fresh_from_file:
       self.is_fresh_from_file = False
 

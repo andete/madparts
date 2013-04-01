@@ -40,4 +40,5 @@ default_settings = {
   'gui/displaydocu': True,
   'gui/displayrestrict': False,
   'gui/displaystop': False,
+  'gui/autocompile': True,
 }
