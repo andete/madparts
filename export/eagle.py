@@ -329,8 +329,20 @@ class Import:
       s = text.string
       layer = int(text['layer'])
       size = float(text['size'])
-      y = float(text['y']) + size/2
-      x = float(text['x']) + len(s)*size/2
+      align = 'bottom-left' # eagle default
+      if text.has_key('align'):
+        align = text['align']
+      if align == 'center':
+        x = float(text['x'])
+        y = float(text['y'])
+      elif align == 'bottom-left':
+        x = float(text['x']) + len(s)*size/2
+        y = float(text['y']) + size/2
+      else:
+        # TODO deal with all other cases
+        # eagle supports: bottom-left | bottom-center | bottom-right | center-left | center | center-right | top-left | top-center | top-right
+        x = float(text['x']) + len(s)*size/2
+        y = float(text['y']) + size/2
       res['value'] = s
       if layer == 25 and s.upper() == '>NAME':
         res['value'] = 'NAME'
