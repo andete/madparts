@@ -626,7 +626,9 @@ def gui_main():
   widget = MainWin()
   widget.show()
   if widget.glw.glversion < 2.1:
-    s = "OpenGL 2.1 or better is required (%s found)" % (widget.glw.glversion)
+    s = """\
+OpenGL 2.1 or better is required (%s found)
+(or use software openGL like mesa)""" % (widget.glw.glversion)
     QtGui.QMessageBox.critical(widget, "error", s)
     return
   app.exec_()
