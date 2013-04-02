@@ -23,30 +23,46 @@ def export_footprint(remaining):
   meta = filter(lambda x: x['type'] == 'meta', interim)[0]
   name = meta['name']
   print name, 'compiled.'
-  library_file = args.library
   try:
-    version = export.eagle.check_xml_file(library_file)
+    version = export.eagle.check_xml_file(args.library)
   except Exception as ex:
     print >> sys.stderr, str(ex)
     return 1
-  exporter = export.eagle.Export(library_file)
+  exporter = export.eagle.Export(args.library)
   exporter.export_footprint(interim)
   exporter.save()
-  print "Exported to "+library_file+"."
+  print "Exported to "+args.library+"."
   return 0
 
 def import_footprint(remaining):
   print >> sys.stderr, 'Not implemented: import footprint'
   return 1
 
+def list_library(remaining):
+  parser = argparse.ArgumentParser(prog=sys.argv[0] + ' list')
+  parser.add_argument('library', help='library file')
+  args = parser.parse_args(remaining)
+  try:
+    version = export.eagle.check_xml_file(args.library)
+  except Exception as ex:
+    print >> sys.stderr, str(ex)
+    return 1
+  importer = export.eagle.Import(args.library)
+  names = map(lambda (a,_): a, importer.list_names())
+  for name in names: print name
+  return 0
+
 def cli_main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('command', help='command to execute', choices=['import','export'])
+  parser.add_argument('command', help='command to execute', 
+    choices=['import','export', 'list'])
   (args, remaining) = parser.parse_known_args()
   if args.command == 'import':
     return import_footprint(remaining)
-  else:
+  elif args.command == 'export':
     return export_footprint(remaining)
+  else:
+    return list_library(remaining)
 
 if __name__ == '__main__':
   sys.exit(cli_main())
