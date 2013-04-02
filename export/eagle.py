@@ -115,7 +115,6 @@ class Export:
         shape2 = shape['shape']
       if shape2 == 'disc':
         pad['shape'] = 'round'
-        print r, drill, drill*1.5
         if f_neq(r, drill*1.5):
           pad['diameter'] = r*2
       elif shape2 == 'octagon':

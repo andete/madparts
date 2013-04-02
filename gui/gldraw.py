@@ -81,7 +81,7 @@ class GLDraw:
     dxp = dx * self.zoom() # dx in pixels
     dyp = dy * self.zoom() # dy in pixels
     (fdx, fdy) = self.font.ft.getsize(s)
-    scale = min(dxp / fdx, dyp / fdy)
+    scale = 1.6*min(dxp / fdx, dyp / fdy)
     sdx = -scale*fdx/2
     sdy = -scale*fdy/2
     glEnable(GL_TEXTURE_2D) # Enables texture mapping
@@ -94,7 +94,7 @@ class GLDraw:
   def label(self, shape, labels):
     x = fget(shape,'x')
     y = fget(shape,'y')
-    dy = fget(shape,'dy', 1.2)
+    dy = fget(shape,'dy', 1)
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     self._txt(shape, dx, dy, x, y)
     return labels
@@ -137,7 +137,7 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      labels.append(lambda: self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True))
+      labels.append(lambda: self._txt(shape, max(rx*1.5, drill), max(ry*1.5, drill), x, y, True))
     return labels
 
   def circle(self, shape, labels):
@@ -155,7 +155,7 @@ class GLDraw:
     iry = iry - w/2
     self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry)
     if 'name' in shape:
-      labels.append(lambda: self._txt(shape, rx*2, ry*2, x, y, True))
+      labels.append(lambda: self._txt(shape, rx*1.5, ry*1.5, x, y, True))
     return labels
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
@@ -184,7 +184,7 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      labels.append(lambda: self._txt(shape, dx, dy, x, y, True))
+      labels.append(lambda: self._txt(shape, dx/1.5, dy/1.5, x, y, True))
     return labels
 
   def rect(self, shape, labels):
@@ -221,7 +221,7 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      m = min(dx, dy)
+      m = min(dx, dy)/1.5
       labels.append(lambda: self._txt(shape ,m, m, x, y, True))
     return labels
 

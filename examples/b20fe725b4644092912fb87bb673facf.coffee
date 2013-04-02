@@ -31,7 +31,7 @@ footprint = () ->
   ]
   
   label = new Label 'IV-9'
-  label.dy = 1.5
+  label.dy = 1
 
   silk1 = new Line line_width
   silk1.x1 = -2.0
