@@ -35,6 +35,10 @@ def export_footprint(remaining):
   return 0
 
 def import_footprint(remaining):
+  parser = argparse.ArgumentParser(prog=sys.argv[0] + ' import')
+  parser.add_argument('library', help='library file')
+  parser.add_argument('footprint', help='footprint name')
+  args = parser.parse_args(remaining)
   print >> sys.stderr, 'Not implemented: import footprint'
   return 1
 
