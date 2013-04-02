@@ -175,10 +175,11 @@ class Export:
       if s.upper() == "VALUE": 
         s = ">VALUE"
         layer = type_to_layer_number('value')
-      label['x'] = x - len(s)*dy/2
-      label['y'] = y - dy/2
+      label['x'] = x
+      label['y'] = y
       label['size'] = dy
       label['layer'] = layer
+      label['align'] = 'center'
       label.string = s
       package.append(label)
     
