@@ -78,6 +78,14 @@ class Export:
   def save(self):
     _save_xml_file(self.fn, self.soup)
 
+  def get_data(self):
+   return str(self.soup)
+
+  # remark that this pretty formatting is NOT what is used in the final
+  # eagle XML as eagle does not get rid of heading and trailing \n and such
+  def get_pretty_data(self):
+   return str(self.soup.prettify())
+
   def export_footprint(self, interim):
     # make a deep copy so we can make mods without harm
     interim = copy.deepcopy(interim)
