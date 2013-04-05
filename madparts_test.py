@@ -278,17 +278,17 @@ Id: 708e13cc5f4e43f7833af53070ba5078
 </package>"""
   _export_eagle_package(code, 'PIN_1X2', expected)
 
-def test_eagle_pad_smd():
-  code = """\
+_one_coffee = """\
 #format 1.1
 #name TEST_EAGLE
 #id 708e13cc5f4e43f7833af53070ba5078
 #desc eagle test
-footprint = () ->
-  pad = new %s
-  [pad]
+footprint = () -> 
+  item = new %s
+  [item]
 """
-  expected = """\
+
+_one_coffee_eagle = """\
 <package name="TEST_EAGLE">
  <description>
   eagle test
@@ -298,22 +298,32 @@ Id: 708e13cc5f4e43f7833af53070ba5078
  </description>
  %s
 </package>"""
-  def _eagle_pad_smd_test(d):
+
+def _eagle_pad(diameter, drill, rot, shape, x, y):
+  return """<pad diameter="%s" drill="%s" name="1" rot="R%s" shape="%s" x="%s" y="%s"/>""" % (diameter, drill, rot, shape, x, y)
+
+def _eagle_smd(dx, dy, rot, roundness, x, y):
+  return """<smd dx="%s" dy="%s" layer="1" name="1" rot="R%s" roundness="%s" x="%s" y="%s"/>""" % (dx, dy, rot, roundness, x, y)
+
+_one_coffee_tests = [
+ (['RoundPad 0.5, 0.5'], _eagle_pad(1.0, 0.5, 0, 'round', 0.0, 0.0)),
+ (['SquarePad 1.0, 0.5'], _eagle_pad(1.0, 0.5, 0, 'square', 0.0, 0.0)), 
+ (['LongPad 1.0, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'long', 0.0, 0.0)),
+ (['OctagonPad 0.5, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'octagon', 0.0, 0.0)),
+ (['LongPad 1.0, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'long', 0.0, 0.0)),
+ (['OffsetPad 1.0, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'offset', 0.0, 0.0)),
+ (['Smd','dx=1.0','dy=0.3'], _eagle_smd(1.0, 0.3, 0, 0, 0.0, 0.0)),
+]
+
+def test_eagle_export_one():
+  def _eagle_do(d):
     (pad, epad) = d
-    data = _export_eagle_package(code % (pad), 'TEST_EAGLE', expected % (epad))
-  for d in [
-      ('RoundPad 0.5, 0.5', 
-       '<pad diameter="1.0" drill="0.5" name="1" rot="R0" shape="round" x="0.0" y="0.0"/>'),
-      ('SquarePad 1.0, 0.5', 
-       '<pad diameter="1.0" drill="0.5" name="1" rot="R0" shape="square" x="0.0" y="0.0"/>'),
-      ('LongPad 1.0, 0.5', 
-       '<pad diameter="1.0" drill="0.5" name="1" rot="R0" shape="long" x="0.0" y="0.0"/>'),
-      ('OctagonPad 0.5, 0.5', 
-       '<pad diameter="1.0" drill="0.5" name="1" rot="R0" shape="octagon" x="0.0" y="0.0"/>'),
-      ('OffsetPad 1.0, 0.5', 
-       '<pad diameter="1.0" drill="0.5" name="1" rot="R0" shape="offset" x="0.0" y="0.0"/>'),
-      ('Smd', 
-       '<smd dx="0.0" dy="0.0" layer="1" name="1" rot="R0" roundness="0" x="0.0" y="0.0"/>'),
-      ]:
-    yield _eagle_pad_smd_test, d
+    v = pad[0]
+    for x in pad[1:]:
+      v = v + "\n  item.%s" % (x)
+    code = _one_coffee % (v)
+    expected = _one_coffee_eagle % (epad)
+    data = _export_eagle_package(code, 'TEST_EAGLE', expected)
+  for d in _one_coffee_tests:
+    yield _eagle_do, d
 
