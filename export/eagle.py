@@ -142,15 +142,15 @@ class Export:
         if ro == 0: 
           pad['shape'] = 'square'
           if f_neq(shape['dx'], drill*1.5):
-            pad['diameter'] = shape['dx']
+            pad['diameter'] = float(shape['dx'])
         elif 'drill_dx' in shape:
           pad['shape'] = 'offset'
           if f_neq(shape['dy'], drill*1.5):
-            pad['diameter'] = shape['dy']
+            pad['diameter'] = float(shape['dy'])
         else:
           pad['shape'] = 'long'
           if f_neq(shape['dy'], drill*1.5):
-            pad['diameter'] = shape['dy']
+            pad['diameter'] = float(shape['dy'])
       package.append(pad)
 
     def smd(shape):
