@@ -12,12 +12,10 @@ size:
 clean:
 	rm -rf build dist madparts.egg-info
 
-linux:
+sdist:
 	python setup.py sdist
 
-clitest:
-	@./madparts.py \
-		-f examples/7db0a6816f5a4a5581e92cecab7d7e08.coffee \
-		-l /tmp/empty.lbr export
+test:
+	@nosetests
 
-.PHONY: all clean size linux
+.PHONY: all clean size sdist test
