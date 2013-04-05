@@ -140,9 +140,9 @@ class Export:
       elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         if ro == 0: 
-          res['shape'] = 'square'
+          pad['shape'] = 'square'
           if f_neq(shape['dx'], drill*1.5):
-            res['diameter'] = shape['dx']
+            pad['diameter'] = shape['dx']
         elif 'drill_dx' in shape:
           pad['shape'] = 'offset'
           if f_neq(shape['dy'], drill*1.5):
