@@ -86,6 +86,14 @@ class Export:
   def get_pretty_data(self):
    return str(self.soup.prettify())
 
+  def get_pretty_footprint(self, eagle_name):
+    packages = self.soup.eagle.drawing.packages('package')
+    for some_package in packages:
+      if some_package['name'] == eagle_name:
+        return str(some_package.prettify())
+    raise Exception("Footprint not found")
+   
+
   def export_footprint(self, interim):
     # make a deep copy so we can make mods without harm
     interim = copy.deepcopy(interim)
@@ -268,7 +276,7 @@ class Export:
           'docu': silk,
           'smd': smd,
           }.get(shape['type'], unknown)(shape)
-        # TODO octagon
+    return name
 
   def add_ats_to_names(self, interim):
     t = {}
