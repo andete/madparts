@@ -466,9 +466,7 @@ class MainWin(QtGui.QMainWindow):
     lib_dir = QtCore.QDir(self.lib_dir[selected_library])
     l = []
     for footprint_name in footprint_names:
-      interim = importer.import_footprint(footprint_name) 
-      interim = inter.sort_by_type(interim)
-      interim = inter.find_pad_patterns(interim)
+      interim = inter.import_footprint(importer, footprint_name) 
       l.append((footprint_name, interim))
     cl = []
     for (footprint_name, interim) in l:

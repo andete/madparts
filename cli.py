@@ -3,9 +3,10 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import argparse, sys
+import argparse, sys, traceback
 
 import coffee.pycoffee as pycoffee
+import coffee.generatesimple as generatesimple
 from inter import inter
 import export.eagle
 
@@ -39,8 +40,29 @@ def import_footprint(remaining):
   parser.add_argument('library', help='library file')
   parser.add_argument('footprint', help='footprint name')
   args = parser.parse_args(remaining)
-  print >> sys.stderr, 'Not implemented: import footprint'
-  return 1
+  try:
+    version = export.eagle.check_xml_file(args.library)
+  except Exception as ex:
+    print >> sys.stderr, str(ex)
+    return 1
+  importer = export.eagle.Import(args.library)
+  names = map(lambda (a,_): a, importer.list_names())
+  if not args.footprint in names:
+    print >> sys.stderr, "Footprint %s not found in %s." % (args.footprint, args.library)
+    return 1
+  interim = inter.import_footprint(importer, args.footprint) 
+  try:
+    coffee = generatesimple.generate_coffee(interim)
+  except Exception as ex:
+    tb = traceback.format_exc()
+    print >> sys.stderr, "Footprint %s\nerror: %s" % (args.footprint, str(ex) + '\n' + tb)
+    return 1
+  meta = pycoffee.eval_coffee_meta(coffee)
+  new_file_name = "%s.coffee" % (meta['id'])
+  with open(new_file_name, 'w+') as f:
+    f.write(coffee)
+  print "%s/%s written to %s." % (args.library, args.footprint, new_file_name)
+  return 0
 
 def list_library(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' list')
