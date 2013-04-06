@@ -301,7 +301,12 @@ class JYDGLWidget(QGLWidget):
     self.dot_field_vbo = vbo.VBO(self.dot_field_data)
 
   def initializeGL(self):
-    self.glversion = float(glGetString(GL_VERSION).split()[0])
+    self.glversion = glGetString(GL_VERSION)
+    self.glversion = self.glversion.split()[0] # take numeric part
+    self.glversion = self.glversion.split('.') # split on dots
+    if len(self.glversion) < 2:
+      raise Exception("Error parsing openGL version")
+    self.glversion = float("%s.%s" % (self.glversion[0], self.glversion[1]))
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     #glEnable(GL_TEXTURE_2D) # Enables texture mapping
