@@ -2,6 +2,8 @@
 # License: GPL
 
 from nose.tools import *
+from functools import partial
+import copy
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
@@ -32,6 +34,7 @@ def _export_eagle_package(code, expected_name, expected):
   assert eagle_name == expected_name
   data = exporter.get_pretty_footprint(eagle_name)
   assert_multi_line_equal(data, expected)
+  #print code, expected
   return data
 
 def test_export_eagle_full_lib():
@@ -315,19 +318,43 @@ def _code_pad(t, args, mods):
 _one_coffee_tests = [
  ([_code_pad, 'RoundPad', [0.5, 0.5], []], 
   [_eagle_pad, 1.0, 0.5, 0, 'round', 0.0, 0.0]),
+
  ([_code_pad, 'SquarePad', [1.0, 0.5], []], 
   [_eagle_pad, 1.0, 0.5, 0, 'square', 0.0, 0.0]), 
+
  ([_code_pad, 'LongPad', [1.0, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'long', 0.0, 0.0]),
+
  ([_code_pad, 'OctagonPad', [0.5, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'octagon', 0.0, 0.0]),
+
  ([_code_pad, 'LongPad', [1.0, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'long', 0.0, 0.0]),
+
  ([_code_pad, 'OffsetPad', [1.0, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'offset', 0.0, 0.0]),
+
  ([_code_pad, 'Smd', [], [('dx',1.0),('dy', 0.3)]], 
   [_eagle_smd, 1.0, 0.3, 0, 0, 0.0, 0.0]),
 ]
+
+def _no_mod(a,b):
+  return (a,b)
+
+def _mod_x(code, eagle):
+  code[3].append(('x', 7.3))
+  eagle[5] = 7.3
+  return (code, eagle)
+
+def _mod_y(code, eagle):
+  code[3].append(('y', -4.2))
+  eagle[6] = -4.2
+  return (code, eagle) 
+
+def _mod_rotate(rot, code, eagle):
+  code[3].append(('rot', rot))
+  eagle[3] = rot
+  return (code, eagle)
 
 def test_eagle_export_one():
   def _eagle_do(d, mod):
@@ -341,9 +368,12 @@ def test_eagle_export_one():
     item_text = item_func(*item_args)
     expected = _one_coffee_eagle % (item_text)
     data = _export_eagle_package(code, 'TEST_EAGLE', expected)
-  def no_mod(a, b):
-   return (a, b)
-  mods = [no_mod]
+  mods = [
+    _no_mod, _mod_x, _mod_y, 
+    partial(_mod_rotate, 90), partial(_mod_rotate, 180),
+    partial(_mod_rotate, 270)
+    ]
   for mod in mods:
     for d in _one_coffee_tests:
-      yield _eagle_do, d, mod
+      d2 = copy.deepcopy(d)
+      yield _eagle_do, d2, mod
