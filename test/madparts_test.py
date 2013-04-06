@@ -13,7 +13,7 @@ import export.eagle
 assert_multi_line_equal.im_class.maxDiff = None
 
 def _export_eagle(code, expected):
-  eagle_lib = 'export/eagle_empty.lbr'
+  eagle_lib = 'test/eagle_empty.lbr'
   (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
   assert interim != None
   version = export.eagle.check_xml_file(eagle_lib)
@@ -24,7 +24,7 @@ def _export_eagle(code, expected):
   assert_multi_line_equal(data, expected)
 
 def _export_eagle_package(code, expected_name, expected):
-  eagle_lib = 'export/eagle_empty.lbr'
+  eagle_lib = 'test/eagle_empty.lbr'
   (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
   assert interim != None
   version = export.eagle.check_xml_file(eagle_lib)
