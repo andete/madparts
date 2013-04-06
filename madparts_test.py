@@ -305,30 +305,37 @@ def _eagle_pad(diameter, drill, rot, shape, x, y):
 def _eagle_smd(dx, dy, rot, roundness, x, y):
   return """<smd dx="%s" dy="%s" layer="1" name="1" rot="R%s" roundness="%s" x="%s" y="%s"/>""" % (dx, dy, rot, roundness, x, y)
 
+def _code_pad(t, args, mods):
+  sargs = map(lambda a: str(a), args)
+  v = "%s %s" % (t, ','.join(sargs)) 
+  for mod in mods:
+    v = v + "\n  item.%s = %s" % mod
+  return v
+
 _one_coffee_tests = [
- (['RoundPad 0.5, 0.5'], 
+ ([_code_pad, 'RoundPad', [0.5, 0.5], []], 
   [_eagle_pad, 1.0, 0.5, 0, 'round', 0.0, 0.0]),
- (['SquarePad 1.0, 0.5'], 
+ ([_code_pad, 'SquarePad', [1.0, 0.5], []], 
   [_eagle_pad, 1.0, 0.5, 0, 'square', 0.0, 0.0]), 
- (['LongPad 1.0, 0.5'],  
+ ([_code_pad, 'LongPad', [1.0, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'long', 0.0, 0.0]),
- (['OctagonPad 0.5, 0.5'],  
+ ([_code_pad, 'OctagonPad', [0.5, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'octagon', 0.0, 0.0]),
- (['LongPad 1.0, 0.5'],  
+ ([_code_pad, 'LongPad', [1.0, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'long', 0.0, 0.0]),
- (['OffsetPad 1.0, 0.5'],  
+ ([_code_pad, 'OffsetPad', [1.0, 0.5], []],  
   [_eagle_pad, 1.0, 0.5, 0, 'offset', 0.0, 0.0]),
- (['Smd','dx=1.0','dy=0.3'], 
+ ([_code_pad, 'Smd', [], [('dx',1.0),('dy', 0.3)]], 
   [_eagle_smd, 1.0, 0.3, 0, 0, 0.0, 0.0]),
 ]
 
 def test_eagle_export_one():
   def _eagle_do(d, mod):
     (code_list, item_list) = mod(*d)
-    v = code_list[0]
-    for x in code_list[1:]:
-      v = v + "\n  item.%s" % (x)
-    code = _one_coffee % (v)
+    code_func = code_list[0]
+    code_args = code_list[1:]
+    code_text = code_func(*code_args)
+    code = _one_coffee % (code_text)
     item_func = item_list[0]
     item_args = item_list[1:]
     item_text = item_func(*item_args)
