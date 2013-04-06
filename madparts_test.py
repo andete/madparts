@@ -306,24 +306,37 @@ def _eagle_smd(dx, dy, rot, roundness, x, y):
   return """<smd dx="%s" dy="%s" layer="1" name="1" rot="R%s" roundness="%s" x="%s" y="%s"/>""" % (dx, dy, rot, roundness, x, y)
 
 _one_coffee_tests = [
- (['RoundPad 0.5, 0.5'], _eagle_pad(1.0, 0.5, 0, 'round', 0.0, 0.0)),
- (['SquarePad 1.0, 0.5'], _eagle_pad(1.0, 0.5, 0, 'square', 0.0, 0.0)), 
- (['LongPad 1.0, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'long', 0.0, 0.0)),
- (['OctagonPad 0.5, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'octagon', 0.0, 0.0)),
- (['LongPad 1.0, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'long', 0.0, 0.0)),
- (['OffsetPad 1.0, 0.5'],  _eagle_pad(1.0, 0.5, 0, 'offset', 0.0, 0.0)),
- (['Smd','dx=1.0','dy=0.3'], _eagle_smd(1.0, 0.3, 0, 0, 0.0, 0.0)),
+ (['RoundPad 0.5, 0.5'], 
+  [_eagle_pad, 1.0, 0.5, 0, 'round', 0.0, 0.0]),
+ (['SquarePad 1.0, 0.5'], 
+  [_eagle_pad, 1.0, 0.5, 0, 'square', 0.0, 0.0]), 
+ (['LongPad 1.0, 0.5'],  
+  [_eagle_pad, 1.0, 0.5, 0, 'long', 0.0, 0.0]),
+ (['OctagonPad 0.5, 0.5'],  
+  [_eagle_pad, 1.0, 0.5, 0, 'octagon', 0.0, 0.0]),
+ (['LongPad 1.0, 0.5'],  
+  [_eagle_pad, 1.0, 0.5, 0, 'long', 0.0, 0.0]),
+ (['OffsetPad 1.0, 0.5'],  
+  [_eagle_pad, 1.0, 0.5, 0, 'offset', 0.0, 0.0]),
+ (['Smd','dx=1.0','dy=0.3'], 
+  [_eagle_smd, 1.0, 0.3, 0, 0, 0.0, 0.0]),
 ]
 
 def test_eagle_export_one():
-  def _eagle_do(d):
-    (pad, epad) = d
-    v = pad[0]
-    for x in pad[1:]:
+  def _eagle_do(d, mod):
+    (code_list, item_list) = mod(*d)
+    v = code_list[0]
+    for x in code_list[1:]:
       v = v + "\n  item.%s" % (x)
     code = _one_coffee % (v)
-    expected = _one_coffee_eagle % (epad)
+    item_func = item_list[0]
+    item_args = item_list[1:]
+    item_text = item_func(*item_args)
+    expected = _one_coffee_eagle % (item_text)
     data = _export_eagle_package(code, 'TEST_EAGLE', expected)
-  for d in _one_coffee_tests:
-    yield _eagle_do, d
-
+  def no_mod(a, b):
+   return (a, b)
+  mods = [no_mod]
+  for mod in mods:
+    for d in _one_coffee_tests:
+      yield _eagle_do, d, mod
