@@ -44,7 +44,7 @@ def layer_number_to_type(layer):
 
 def _load_xml_file(fn):
   with open(fn) as f:
-    return BeautifulSoup(f, "xml")
+    return BeautifulSoup(f, 'xml')
   
 def _save_xml_file(fn, soup):
   with open(fn, 'w+') as f:
@@ -316,14 +316,14 @@ class Import:
 
   def import_footprint(self, name):
 
-    def package_has_name(tag):
-      if tag.name == 'package' and tag.has_key('name'):
-        n = tag['name']
-        if n == name:
-          return True
-        return False
-
-    package = self.soup.find_all(package_has_name)[0]
+    packages = self.soup.eagle.drawing.packages('package')
+    package = None
+    for p in packages:
+       if p['name'] == name:
+         package = p
+         break
+    if package == None:
+      raise Exception("footprint not found %s " % (name))
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name

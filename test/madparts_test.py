@@ -3,7 +3,9 @@
 
 from nose.tools import *
 from functools import partial
-import copy
+import copy, shutil, os
+
+from bs4 import BeautifulSoup
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
@@ -36,6 +38,24 @@ def _export_eagle_package(code, expected_name, expected):
   assert_multi_line_equal(data, expected)
   #print code, expected
   return data
+
+def _import_eagle_package(eagle_package_xml, import_name, expected):
+  eagle_lib = 'test/foo.lbr'
+  shutil.copyfile('test/eagle_empty.lbr', eagle_lib)
+  try:
+    importer = export.eagle.Import(eagle_lib)
+    # trick to get our package xml into the empty eagle library
+    package_soup = BeautifulSoup(eagle_package_xml, 'xml')
+    package_soup.is_xml = False
+    importer.soup.drawing.packages.append(package_soup)
+    with open(eagle_lib, 'w+') as f:
+      f.write(str(importer.soup))
+    importer = export.eagle.Import(eagle_lib)
+    interim = inter.import_footprint(importer, import_name) 
+    coffee = generatesimple.generate_coffee(interim)
+    assert_multi_line_equal(coffee, expected)
+  finally:
+    os.unlink(eagle_lib)
 
 def test_export_eagle_full_lib():
    code = """\
@@ -375,5 +395,28 @@ def test_eagle_export_one():
     ]
   for mod in mods:
     for d in _one_coffee_tests:
+      d2 = copy.deepcopy(d)
+      yield _eagle_do, d2, mod
+
+def test_eagle_import_one():
+  def _eagle_do(d, mod):
+    (code_list, item_list) = mod(*d)
+    code_func = code_list[0]
+    code_args = code_list[1:]
+    code_text = code_func(*code_args)
+    expected_code = _one_coffee % (code_text)
+    item_func = item_list[0]
+    item_args = item_list[1:]
+    item_text = item_func(*item_args)
+    eagle_xml = _one_coffee_eagle % (item_text)
+    generated_code = _import_eagle_package(eagle_xml, 'TEST_EAGLE', expected_code)
+  mods = [
+    _no_mod, _mod_x, _mod_y, 
+    partial(_mod_rotate, 90), partial(_mod_rotate, 180),
+    partial(_mod_rotate, 270)
+    ]
+  # only do one test, as it fails currently anyway
+  for mod in mods[0:1]:
+    for d in _one_coffee_tests[0:1]:
       d2 = copy.deepcopy(d)
       yield _eagle_do, d2, mod

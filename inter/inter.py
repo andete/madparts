@@ -195,6 +195,7 @@ def _count_num_values(pads, param):
   return (i, res)
 
 def _equidistant(pads, direction):
+  if len(pads) < 2: return False
   expected = abs(pads[1][direction] - pads[0][direction])
   prev = pads[1][direction]
   for item in pads[2:]:
