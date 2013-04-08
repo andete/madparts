@@ -306,9 +306,9 @@ _one_coffee = """\
 #name TEST_EAGLE
 #id 708e13cc5f4e43f7833af53070ba5078
 #desc eagle test
-footprint = () -> 
-  item = new %s
-  [item]
+footprint = () ->
+  %s = new %s
+  combine [%s]
 """
 
 _one_coffee_eagle = """\
@@ -329,10 +329,14 @@ def _eagle_smd(dx, dy, rot, roundness, x, y):
   return """<smd dx="%s" dy="%s" layer="1" name="1" rot="R%s" roundness="%s" x="%s" y="%s"/>""" % (dx, dy, rot, roundness, x, y)
 
 def _code_pad(t, args, mods):
+  if t == 'Smd':
+    varname = 'smd1'
+  else:
+    varname = 'pad1'
   sargs = map(lambda a: str(a), args)
-  v = "%s %s" % (t, ','.join(sargs)) 
+  v = "%s %s" % (t, ', '.join(sargs)) 
   for mod in mods:
-    v = v + "\n  item.%s = %s" % mod
+    v = v + ("\n  %s" % (varname)) + (".%s = %s" % mod)
   return v
 
 _one_coffee_tests = [
@@ -382,7 +386,11 @@ def test_eagle_export_one():
     code_func = code_list[0]
     code_args = code_list[1:]
     code_text = code_func(*code_args)
-    code = _one_coffee % (code_text)
+    if code_args[0] == 'Smd':
+      varname = 'smd1'
+    else:
+      varname = 'pad1'
+    code = _one_coffee % (varname, code_text, varname)
     item_func = item_list[0]
     item_args = item_list[1:]
     item_text = item_func(*item_args)
@@ -404,7 +412,12 @@ def test_eagle_import_one():
     code_func = code_list[0]
     code_args = code_list[1:]
     code_text = code_func(*code_args)
-    expected_code = _one_coffee % (code_text)
+    if code_args[0] == 'Smd':
+      varname = 'smd1'
+    else:
+      varname = 'pad1'
+    code = _one_coffee % (varname, code_text, varname)
+    expected_code = _one_coffee % (varname, code_text, varname)
     item_func = item_list[0]
     item_args = item_list[1:]
     item_text = item_func(*item_args)

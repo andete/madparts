@@ -117,7 +117,7 @@ def clone_coffee_meta(coffee, old_meta, new_id, new_name):
 
 def new_coffee(new_id, new_name):
   return """\
-#format 1.0
+#format 1.1
 #name %s
 #id %s
 #desc TODO
