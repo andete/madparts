@@ -18,7 +18,7 @@ def valid(varname, g):
 
 def new_coffee_meta(meta):
   a = """\
-#format 1.0
+#format 1.1
 #name %s
 #id %s
 """ % (meta['name'], meta['id'])
