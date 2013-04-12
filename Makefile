@@ -19,4 +19,7 @@ test:
 	@nosetests
 	#@nosetests test/madparts_test.py:test_eagle_import_one
 
+coverage:
+	@nosetests --with-coverage --cover-package=coffee,export,gui,inter,syntax,util
+
 .PHONY: all clean size sdist test
