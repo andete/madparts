@@ -1,5 +1,5 @@
 all:
-	@./madparts.py
+	@./madparts
 
 size:
 	@echo 'python:'
