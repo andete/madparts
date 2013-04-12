@@ -32,6 +32,9 @@ def _add_if(x, a, varname, key, quote = False):
     if type(x[key]) == type(1.1):
       if f_eq(x[key], 0.0):
         return a
+    if type(x[key]) == type(1):
+      if x[key] == 0:
+        return a
     if not quote:
       a = a + "%s.%s = %s\n" % (varname, key, x[key])
     else:
@@ -47,13 +50,13 @@ def _simple_rect(prefix, constructor, x, g, vl, ll):
   a = """\
 %s = new %s
 """ % (varname, constructor)
+  a = _add_if(x, a, varname, 'dx')
+  a = _add_if(x, a, varname, 'dy')
   a = _add_if(x, a, varname, 'name', True)
   a = _add_if(x, a, varname, 'rot')
   a = _add_if(x, a, varname, 'ro')
   a = _add_if(x, a, varname, 'x')
   a = _add_if(x, a, varname, 'y')
-  a = _add_if(x, a, varname, 'dx')
-  a = _add_if(x, a, varname, 'dy')
   vl.append(varname)
   ll.append(a)
   return varname
@@ -79,7 +82,7 @@ def simple_pad_rect(g, x, vl, ll):
     if 'drill_dx' in x and x['drill_dx'] == -dy/2:
       a = """\
 %s = new OffsetPad %s, %s
-""" % (varname, dx, drill)
+""" % (varname, dy, drill)
     else:
       a = """\
 %s = new LongPad %s, %s
@@ -112,6 +115,7 @@ def _simple_pad_disc_octagon(g, constructor, x, vl, ll):
   a = _add_if(x, a, varname, 'name')
   a = _add_if(x, a, varname, 'x')
   a = _add_if(x, a, varname, 'y')
+  a = _add_if(x, a, varname, 'rot')
   vl.append(varname)
   ll.append(a)
 

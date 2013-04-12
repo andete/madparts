@@ -382,7 +382,8 @@ class Import:
       if smd.has_key('rot'):
         res['rot'] = int(smd['rot'][1:])
       if smd.has_key('roundness'):
-        res['ro'] = smd['roundness']
+        if smd['roundness'] != '0':
+          res['ro'] = smd['roundness']
       return res
 
     def rect(rect):

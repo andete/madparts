@@ -450,9 +450,24 @@ def _check_quad(orig_pads):
   mods = _make_mods(['x','y', 'rot', 'dx', 'dy'], pad, sort_pads)
   return [pad, special] + mods
 
+def _check_sequential(pads):
+  for (i, pad) in zip(range(0, len(pads)), pads):
+    print i, pad
+    if 'name' in pad:
+      if pad['name'] == str(i):
+         del pad['name']
+      else:
+         return pads
+  return pads
+
 def _find_pad_patterns(pads):
   n = len(pads)
-  print n
+  if n == 1:
+    if 'name' in pads[0]:
+      if pads[0]['name'] == '1':
+        del pads[0]['name']
+    return pads
+
   (x_diff, _z) = _count_num_values(pads, 'x')
   print 'x diff ', x_diff
   (y_diff, _z) = _count_num_values(pads, 'y')
@@ -473,6 +488,7 @@ def _find_pad_patterns(pads):
   # possibly a quad
   if x_diff == (n/4)+2 and y_diff == (n/4)+2:
     return _check_quad(pads)
+
   return pads
 
 def find_pad_patterns(inter):
