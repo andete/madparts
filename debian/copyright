@@ -1,0 +1,25 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: madparts
+Upstream-Contact: Joost Yervante Damad <joost@damad.be>
+Source: https://github.com/andete/madparts
+
+Files: *
+Copyright: 2013, Joost Yervante Damad <joost@damad.be>
+License: GPL
+
+Files: debian/*
+Copyright: 2013, Joost Yervante Damad <joost@damad.be>
+License: GPL
+
+Files: gui/FreeMonoBold.ttf
+Copyright: 2002-2009, Free Software Foundation
+License: GPL
+
+Files: coffeescript/*
+Copyright: 2009-2012, Jeremy Ashkenas
+License: MIT
+
+Files: gui/glFreeType.py
+Copyright: 
+ 2003, Sven Olsen
+ 2004, Brian Leair
