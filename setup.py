@@ -22,7 +22,7 @@ if sys.platform == 'darwin':
       }
   extra_options = dict(
       setup_requires=['py2app'],
-      app=['madparts.py'],
+      app=['madparts'],
       # Cross-platform applications generally expect sys.argv to
       # be used for opening files.
       options=dict(py2app=OPTIONS),
@@ -32,13 +32,13 @@ elif sys.platform == 'win32':
   extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
       setup_requires=['py2exe'],
-      console=['madparts.py'],
+      console=['madparts'],
       )
 elif sys.platform.startswith('linux'):
    extra_options = dict(
        # Normally unix-like platforms will use "setup.py install"
        # and install the main script as such
-       scripts=['madparts.py'],
+       scripts=['madparts'],
        )
    if not arch in ['x86_64']:
      raise Exception("unsupported arch %s" % (arch))
@@ -65,11 +65,11 @@ setup(
         'util',
         ],
   package_data= { 
-        'coffee-script': ['*.js', 'LICENSE', 'README'],
+        'coffeescript': ['*.js', 'LICENSE', 'README'],
         'grind': ['*.coffee'],
         'gui': [
           'freefont.COPYING', 'FreeMonoBold.ttf',
-          '../GPL', '../README.md', # dirty trick ;)
+          '../COPYING', '../README.md', # dirty trick ;)
           ],
         'shaders': ['*.vert', '*.frag'],
         },
