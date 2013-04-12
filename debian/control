@@ -2,7 +2,7 @@ Source: madparts
 Maintainer: Joost Yervante Damad <joost@damad.be>
 Section: python
 Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3), python (>= 2.6.6-3), debhelper (>= 7.4.3), python-numpy (>= 1.6), python-bs4 (>= 4.1.0), python-pyv8
+Build-Depends: python-setuptools (>= 0.6b3), python (>= 2.6.6-3), debhelper (>= 7.4.3)
 Standards-Version: 3.9.1
 
 Package: madparts
