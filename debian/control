@@ -7,7 +7,7 @@ Standards-Version: 3.9.1
 
 Package: madparts
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-numpy (>= 1.6), python-pyside (>= 1.1.1), python-opengl (>= 3.0.1), python-bs4 (>= 4.1.0), python-imaging (>= 1.1.7), python-pyv8
+Depends: ${misc:Depends}, ${python:Depends}, python-numpy (>= 1.6), python-pyside (>= 1.1.0), python-opengl (>= 3.0), python-bs4 (>= 4.0), python-imaging (>= 1.1.7), python-pyv8
 Description: a functional electronics footprint editor
  Madparts has as key features:
   * a footprint is a small program, giving you huge expressiveness
