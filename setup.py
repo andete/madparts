@@ -60,6 +60,7 @@ setup(
         'grind',
         'gui',
         'inter',
+        'main',
         'shaders',
         'syntax',
         'util',

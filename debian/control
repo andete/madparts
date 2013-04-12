@@ -2,17 +2,18 @@ Source: madparts
 Maintainer: Joost Yervante Damad <joost@damad.be>
 Section: python
 Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 7.4.3)
+Build-Depends: python-setuptools (>= 0.6b3), python (>= 2.6.6-3), debhelper (>= 7.4.3)
 Standards-Version: 3.9.1
 
-Package: python-madparts
+Package: madparts
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}
 Description: a functional electronics footprint editor
  Madparts has as key features:
- * a footprint is a small program, giving you huge expressiveness
- * import from, export to eagle cad libraries
- * high level pattern detection for single, dual quad formations of pads
- * instant graphical feedback with continuous compilation process
- * easy collaboration because footprints are separate files and libraries
-   are just directories
+  * a footprint is a small program, giving you huge expressiveness
+  * import from, export to eagle CAD libraries
+  * high level pattern detection for single, dual quad formations
+    of pads
+  * instant graphical feedback with continuous compilation process
+  * easy collaboration because footprints are separate files and
+    libraries are just directories

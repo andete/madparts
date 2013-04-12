@@ -3,9 +3,12 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import sys
+import sys, string
 
 if __name__ == '__main__':
+    if string.find(sys.platform, 'linux') == 0:
+      sys.path.append('/usr/share/madparts')
+
     if len(sys.argv) == 1:
       import main.madparts
       main.madparts.gui_main()
