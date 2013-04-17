@@ -112,7 +112,7 @@ def clone_coffee_meta(coffee, old_meta, new_id, new_name):
     return not re.match('^#\w+',l) or re.match('^#desc \w+', l)
   no_meta_l = [l for l in coffee.splitlines() if not_meta_except_desc(l)]
   no_meta_coffee = '\n'.join(no_meta_l)
-  new_meta = "#format 1.0\n#name %s\n#id %s\n#parent %s\n" % (new_name, new_id, old_meta['id'])
+  new_meta = "#format 1.1\n#name %s\n#id %s\n#parent %s\n" % (new_name, new_id, old_meta['id'])
   return new_meta + no_meta_coffee
 
 def new_coffee(new_id, new_name):
