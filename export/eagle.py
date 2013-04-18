@@ -89,7 +89,7 @@ class Export:
   def get_pretty_footprint(self, eagle_name):
     packages = self.soup.eagle.drawing.packages('package')
     for some_package in packages:
-      if some_package['name'] == eagle_name:
+      if some_package['name'].lower() == eagle_name.lower():
         return str(some_package.prettify())
     raise Exception("Footprint not found")
    
@@ -107,7 +107,7 @@ class Export:
     packages = self.soup.eagle.drawing.packages('package')
     package = None
     for some_package in packages:
-      if some_package['name'] == name:
+      if some_package['name'].lower() == name.lower():
         package = some_package
         package.clear()
         break

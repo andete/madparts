@@ -19,4 +19,6 @@ footprint = () ->
 
   units = alt_dual smd, n, d, between
  
+  units[0].ro = 100
+
   combine [name,value, units]

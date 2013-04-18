@@ -18,15 +18,16 @@ footprint = () ->
   smd.dx = d/2
   smd.dy = dy
 
-  unit = [smd]
-
-  units = rot_single unit, n, d
+  units = rot_single smd, n, d
 
   for unit in units
     if unit.name % 2 == 0
      unit.y = -offset
     else
      unit.y = offset
+  
+  units[0].ro = 100
+  
      
 
   combine [name,value, units]
