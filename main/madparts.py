@@ -378,8 +378,9 @@ class MainWin(QtGui.QMainWindow):
     self.glw.zoomfactor = int(self.zoom_selector.text())
     self.glw.zoom_changed = True
     self.glw.auto_zoom = self.auto_zoom.isChecked()
-    #if self.glw.auto_zoom:
-    #  self.glw.update_zoomfactor()
+    if self.glw.auto_zoom:
+      (dx, dy, x1, y1, x2, y2) = inter.size(self.executed_footprint)
+      self.update_zoom(dx, dy, x1, y1, x2, y2, True)
     self.glw.updateGL()
 
   def auto_zoom_changed(self):
@@ -514,12 +515,12 @@ class MainWin(QtGui.QMainWindow):
   def status(self, s):
     self.statusBar().showMessage(s)
 
-  def update_zoom(self, dx, dy, x1, y1, x2, y2):
+  def update_zoom(self, dx, dy, x1, y1, x2, y2, force=False):
     # TODO: keep x1, y1, x2, y2 in account
     w = self.glw.width()
     h = self.glw.height()
     if dx == self.gl_dx and dy == self.gl_dy and w == self.gl_w and h == self.gl_h:
-      return
+      if not force: return
     self.gl_dx = dx
     self.gl_dy = dy
     self.gl_w = w
@@ -527,6 +528,7 @@ class MainWin(QtGui.QMainWindow):
     zoomx = float(w) / dx
     zoomy = float(h) / dy
     zoom = int(min(zoomx, zoomy))
+    print "zoom!", zoom
     self.zoom_selector.setText(str(zoom))
     self.glw.zoomfactor = zoom
     self.glw.zoom_changed = True
