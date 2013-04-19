@@ -8,7 +8,7 @@ import argparse, sys, traceback, os.path, glob
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
 from inter import inter
-import inter.library
+import coffee.library
 import export.eagle
 
 def export_footprint(remaining):
@@ -66,7 +66,7 @@ def import_footprint(remaining):
   return 0
 
 def _list_directory(dirname):
-  library = inter.library.Library('library', dirname)
+  library = coffee.library.Library('library', dirname)
   for meta in library.meta_list:
     print meta.id, meta.name
   return 0

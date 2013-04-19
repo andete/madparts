@@ -4,7 +4,7 @@
 import os, os.path, glob
 import coffee.pycoffee as pycoffee
 
-class Footprint:
+class Meta:
 
   def __init__(self, meta):
     self.meta = meta
@@ -34,7 +34,7 @@ class Library:
       meta['readonly'] = not os.access(self.directory, os.W_OK)
       meta['filename'] = path
       self.meta_list.append(meta)
-    self.meta_list = [Footprint(meta) for meta in self.meta_list]
+    self.meta_list = [Meta(meta) for meta in self.meta_list]
     self.meta_list.sort(key=lambda x: x.name)
     self.meta_by_id = {}
     for meta in self.meta_list:
