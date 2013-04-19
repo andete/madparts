@@ -8,6 +8,7 @@ import argparse, sys, traceback, os.path, glob
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
 from inter import inter
+import inter.library
 import export.eagle
 
 def export_footprint(remaining):
@@ -65,12 +66,8 @@ def import_footprint(remaining):
   return 0
 
 def _list_directory(dirname):
-  for path in glob.glob(dirname + '/*.coffee'):
-    with open(path) as f:
-      code = f.read()
-    meta = pycoffee.eval_coffee_meta(code)
-    if not 'name' in meta:
-      raise Exception('Error loading footprint from %s' % (path))
+  library = inter.library.Library('library', dirname)
+  for meta in library.meta_list:
     print meta['id'], meta['name']
   return 0
 
