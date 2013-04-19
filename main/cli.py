@@ -3,7 +3,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import argparse, sys, traceback
+import argparse, sys, traceback, os.path, glob
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
@@ -65,6 +65,13 @@ def import_footprint(remaining):
   return 0
 
 def _list_directory(dirname):
+  for path in glob.glob(dirname + '/*.coffee'):
+    with open(path) as f:
+      code = f.read()
+    meta = pycoffee.eval_coffee_meta(code)
+    if not 'name' in meta:
+      raise Exception('Error loading footprint from %s' % (path))
+    print meta['id'], meta['name']
   return 0
 
 def list_library(remaining):
