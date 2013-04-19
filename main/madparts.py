@@ -528,7 +528,6 @@ class MainWin(QtGui.QMainWindow):
     zoomx = float(w) / dx
     zoomy = float(h) / dy
     zoom = int(min(zoomx, zoomy))
-    print "zoom!", zoom
     self.zoom_selector.setText(str(zoom))
     self.glw.zoomfactor = zoom
     self.glw.zoom_changed = True

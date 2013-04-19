@@ -64,10 +64,15 @@ def import_footprint(remaining):
   print "%s/%s written to %s." % (args.library, args.footprint, new_file_name)
   return 0
 
+def _list_directory(dirname):
+  return 0
+
 def list_library(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' list')
   parser.add_argument('library', help='library file')
   args = parser.parse_args(remaining)
+  if os.path.isdir(args.library):
+    return _list_directory(args.library)
   try:
     version = export.eagle.check_xml_file(args.library)
   except Exception as ex:
