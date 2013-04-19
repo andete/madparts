@@ -68,7 +68,7 @@ def import_footprint(remaining):
 def _list_directory(dirname):
   library = inter.library.Library('library', dirname)
   for meta in library.meta_list:
-    print meta['id'], meta['name']
+    print meta.id, meta.name
   return 0
 
 def list_library(remaining):

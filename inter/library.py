@@ -4,6 +4,13 @@
 import os, os.path, glob
 import coffee.pycoffee as pycoffee
 
+class Footprint:
+
+  def __init__(self, meta):
+    self.meta = meta
+    for k in meta:
+      self.__dict__[k] = meta[k]
+
 class Library:
 
   def __init__(self, name, directory):
@@ -25,11 +32,13 @@ class Library:
         self.fail_list.append(meta)
         continue
       meta['readonly'] = not os.access(self.directory, os.W_OK)
+      meta['filename'] = path
       self.meta_list.append(meta)
-    self.meta_list.sort(cmp=lambda x,y: cmp(x['name'], y['name']))
+    self.meta_list = [Footprint(meta) for meta in self.meta_list]
+    self.meta_list.sort(key=lambda x: x.name)
     self.meta_by_id = {}
     for meta in self.meta_list:
-      self.meta_by_id[meta['id']] = meta
+      self.meta_by_id[meta.id] = meta
     self.meta_by_name = {}
     for meta in self.meta_list:
-      self.meta_by_name[meta['name']] = meta
+      self.meta_by_name[meta.name] = meta
