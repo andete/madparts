@@ -16,9 +16,9 @@ footprint = () ->
   smd = new Smd
   smd.dx = dx
   smd.dy = d/2
+  smd.ro = 25
 
   units = alt_dual smd, n, d, between
  
   units[0].ro = 100
-
   combine [name,value, units]

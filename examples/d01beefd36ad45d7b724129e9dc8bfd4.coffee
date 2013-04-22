@@ -11,23 +11,21 @@ footprint = () ->
   height = 6.35
   offset = height/2-dy/2
 
-  name = new Name (height/2+1)
-  value = new Value (-height/2-1)
+  name = new Name (height-1)
+  value = new Value (-height+1)
   
   smd = new Smd
-  smd.dx = d/2
-  smd.dy = dy
+  smd.dy = d/2
+  smd.dx = dy
+  smd.ro = 25
 
-  units = rot_single smd, n, d
+  units = single smd, n, d
 
   for unit in units
     if unit.name % 2 == 0
-     unit.y = -offset
+     unit.x = -offset
     else
-     unit.y = offset
+     unit.x = offset
   
-  units[0].ro = 100
-  
-     
-
+  units[0].ro = 100 
   combine [name,value, units]

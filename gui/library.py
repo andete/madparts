@@ -8,7 +8,7 @@ from PySide import QtGui, QtCore
 import coffee.pycoffee as pycoffee
 from util.util import *
 
-class Footprint():
+class Footprint:
   def __init__(self, lib_name):
     self.lib_name = lib_name
  
