@@ -22,15 +22,15 @@ def library_combo(parent):
   selected = parent.selected_library
   if selected == None:
     selected = parent.active_library
-  for x in parent.lib_dir.items():
-    l_combo.addItem(x[0], x)
-    if not parent.lib_exist[x[0]]:
+  for lib in parent.lib.values():
+    l_combo.addItem(lib.name, lib.directory)
+    if not lib.exists:
       i = l_combo.model().index(l_combo.count()-1, 0) 
       # trick to make disabled
       l_combo.model().setData(i, 0, QtCore.Qt.UserRole-1)
     elif selected == None:
-      selected = x[0]
-    if x[0] == selected:
+      selected = lib.name
+    if lib.name == selected:
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
@@ -250,7 +250,8 @@ class AddLibraryDialog(QtGui.QDialog):
     result = QtGui.QFileDialog.getExistingDirectory(self, "Select Directory")
     if result == '': return
     self.dir_edit.setText(result)
-    if result in self.parent.lib_dir.values():
+    all_dirs = [lib.directory for lib in self.parent.lib.values()]
+    if result in all_dirs:
       self.dir_error = 'directory already exists as library'
       self.dir_ok = False
     else:
@@ -262,7 +263,7 @@ class AddLibraryDialog(QtGui.QDialog):
     if name == '':
       self.name_error = 'please provide a name'
       self.name_ok = False
-    elif name in self.parent.lib_dir.keys():
+    elif name in self.parent.lib.keys():
       self.name_error = 'name is already in use'
       self.name_ok = False
     else:

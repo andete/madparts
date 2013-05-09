@@ -45,12 +45,13 @@ class Footprint:
 
 class Library(QtGui.QStandardItem):
 
-  def __init__(self, name, directory):
-    super(Library, self).__init__(name)
-    print "making %s" % (name)
-    self.name = name
-    self.setData(('library', name), QtCore.Qt.UserRole)
-    self.directory = directory
+  def __init__(self, coffee_lib):
+    self.name = coffee_lib.name
+    super(Library, self).__init__(self.name)
+    # TODO rely more on coffee_lib for functionality
+    print "making %s" % (self.name)
+    self.setData(('library', self.name), QtCore.Qt.UserRole)
+    self.directory = coffee_lib.directory
     self.selected_foot = None
     self.setEditable(False)
     self.scan()

@@ -13,6 +13,7 @@ import gui.gldraw, gui.library
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
+import coffee.library
 
 from inter import inter
 
@@ -32,12 +33,11 @@ class MainWin(QtGui.QMainWindow):
         example_lib = QtCore.QDir('share/madparts/examples').absolutePath()
       else:
         example_lib = QtCore.QDir('examples').absolutePath()
-      self.lib_dir = {'Examples':example_lib}
-      self.lib_exist = {'Examples':True}
+      library = coffee.library.Library('Examples', example_lib)
+      self.lib = {'Examples': library}
       self.save_libraries()
     else:
-      self.lib_dir = {}
-      self.lib_exist = {}
+      self.lib = {}
       self.load_libraries()
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
@@ -108,11 +108,12 @@ class MainWin(QtGui.QMainWindow):
     self.model.setHorizontalHeaderLabels(['name','id'])
     parentItem = self.model.invisibleRootItem()
     first = True
-    for (name, directory) in self.lib_dir.items():
-      lib = gui.library.Library(name, directory)
-      parentItem.appendRow(lib)
+    first_foot = None
+    for coffee_lib in self.lib.values():
+      guilib = gui.library.Library(coffee_lib)
+      parentItem.appendRow(guilib)
       if first:
-        first_foot = lib.first_footprint()
+        first_foot = guilib.first_footprint()
         first = first_foot == None
     return first_foot
 
@@ -128,11 +129,14 @@ class MainWin(QtGui.QMainWindow):
     self.tree_selection_model = tree.selectionModel()
     self.tree_selection_model.currentRowChanged.connect(self.row_changed)
     tree.doubleClicked.connect(self.show_footprint_tab)
-    first_foot.select(self.tree_selection_model)
+    self.active_footprint_id = None
+    self.active_library = None
+    if first_foot != None:
+      first_foot.select(self.tree_selection_model)
+      self.active_footprint_id = first_foot.id
+      self.active_library = first_foot.lib_name
     self.tree = tree
     self._tree_footprint_selected()
-    self.active_footprint_id = first_foot.id
-    self.active_library = first_foot.lib_name
     return tree
 
   def _tree_footprint_selected(self):
@@ -252,7 +256,7 @@ class MainWin(QtGui.QMainWindow):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = pycoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
-    lib_dir = QtCore.QDir(self.lib_dir[new_lib])
+    lib_dir = QtCore.QDir(self.lib[new_lib].directory)
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -274,7 +278,7 @@ class MainWin(QtGui.QMainWindow):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = pycoffee.new_coffee(new_id, new_name)
-    lib_dir = QtCore.QDir(self.lib_dir[new_lib])
+    lib_dir = QtCore.QDir(self.lib[new_lib].directory)
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -296,7 +300,7 @@ class MainWin(QtGui.QMainWindow):
     fn = my_id + '.coffee'
     old_lib = self.active_library
     new_code = old_code.replace("#name %s" % (old_name), "#name %s" % (new_name))
-    new_lib_dir = QtCore.QDir(self.lib_dir[new_lib])
+    new_lib_dir = QtCore.QDir(self.lib[new_lib].directory)
     new_file_name = new_lib_dir.filePath(fn)
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -305,7 +309,7 @@ class MainWin(QtGui.QMainWindow):
     if old_lib == new_lib: 
       self.rescan_library(old_lib, my_id) # just to update the name
     else:
-      old_lib_dir = QtCore.QDir(self.lib_dir[old_lib])
+      old_lib_dir = QtCore.QDir(self.lib[old_lib].directory)
       old_lib_dir.remove(fn)
       self.rescan_library(old_lib)
       self.rescan_library(new_lib, my_id)
@@ -359,7 +363,7 @@ class MainWin(QtGui.QMainWindow):
     self.selected_library = None
     self._tree_footprint_selected()
     (lib_name, fpid) = x
-    directory = self.lib_dir[lib_name]
+    directory = self.lib[lib_name].directory
     fn = fpid + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
@@ -387,7 +391,7 @@ class MainWin(QtGui.QMainWindow):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
 
   def remove_footprint(self):
-    directory = self.lib_dir[self.active_library]
+    directory = self.lib[self.active_library].directory
     fn = self.active_footprint_id + '.coffee'
     QtCore.QDir(directory).remove(fn)
     # fall back to first_foot in library, if any
@@ -405,7 +409,7 @@ class MainWin(QtGui.QMainWindow):
           library.first_foot.select(self.tree_selection_model)
           self.active_footprint_id = library.first_foot.id
           self.active_library = library.first_foot.lib_name
-    directory = self.lib_dir[self.active_library]
+    directory = self.lib[self.active_library].directory
     fn = self.active_footprint_id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
@@ -417,12 +421,12 @@ class MainWin(QtGui.QMainWindow):
     dialog = AddLibraryDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (name, directory) = dialog.get_data()
-    self.lib_dir[name] = directory
-    self.lib_exist[name] = True
+    lib = coffee.library.Library(name, directory)
+    self.lib[name] = lib
     self.save_libraries()
     root = self.model.invisibleRootItem()
-    lib = gui.library.Library(name, directory)
-    root.appendRow(lib)
+    guilib = gui.library.Library(lib)
+    root.appendRow(guilib)
     self.tree.expandAll()
 
   def reload_library(self):
@@ -437,8 +441,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = DisconnectLibraryDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     lib_name = dialog.get_data()
-    del self.lib_dir[lib_name]
-    del self.lib_exist[lib_name]
+    del self.lib[lib_name]
     self.save_libraries()
     root = self.model.invisibleRootItem()
     for row_index in range(0, root.rowCount()):
@@ -453,7 +456,7 @@ class MainWin(QtGui.QMainWindow):
         library.first_foot.select(self.tree_selection_model)
         self.active_footprint_id = library.first_foot.id
         self.active_library = library.first_foot.lib_name
-        directory = self.lib_dir[self.active_library]
+        directory = self.lib[self.active_library].directory
         fn = self.active_footprint_id + '.coffee'
         ffn = QtCore.QDir(directory).filePath(fn)
         with open(ffn) as f:
@@ -464,7 +467,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, importer, selected_library) = dialog.get_data()
-    lib_dir = QtCore.QDir(self.lib_dir[selected_library])
+    lib_dir = QtCore.QDir(self.lib[selected_library].directory)
     l = []
     for footprint_name in footprint_names:
       interim = inter.import_footprint(importer, footprint_name) 
@@ -505,12 +508,6 @@ class MainWin(QtGui.QMainWindow):
 
   def setting(self, key):
     return self.settings.value(key, default_settings[key])
-
-  def library_by_directory(self, directory):
-    for x in self.lib_dir.keys():
-      if self.lib_dir[x] == directory:
-        return x
-    return None
 
   def status(self, s):
     self.statusBar().showMessage(s)
@@ -594,16 +591,16 @@ class MainWin(QtGui.QMainWindow):
         return library
 
   def active_footprint_file(self):
-   dir = QtCore.QDir(self.lib_dir[self.active_library])
+   dir = QtCore.QDir(self.lib[self.active_library].directory)
    return dir.filePath(self.active_footprint_id + '.coffee')
 
   def save_libraries(self):
-    l = self.lib_dir.items()
+    l = self.lib.values()
     self.settings.beginWriteArray('library')
     for i in range(len(l)):
       self.settings.setArrayIndex(i)
-      self.settings.setValue('name', l[i][0])
-      self.settings.setValue('file', l[i][1])
+      self.settings.setValue('name', l[i].name)
+      self.settings.setValue('file', l[i].directory)
     self.settings.endArray()
 
   def load_libraries(self):
@@ -612,9 +609,8 @@ class MainWin(QtGui.QMainWindow):
       self.settings.setArrayIndex(i)
       name = self.settings.value('name')
       filen = self.settings.value('file')
-      exists = QtCore.QDir(filen).exists()
-      self.lib_dir[name] = filen
-      self.lib_exist[name] = exists
+      library = coffee.library.Library(name, filen)
+      self.lib[name] = library
     self.settings.endArray()
 
 def gui_main():

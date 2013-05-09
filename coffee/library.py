@@ -16,7 +16,12 @@ class Library:
   def __init__(self, name, directory):
     self.name = name
     self.directory = directory
-    self.readonly = not os.access(self.directory, os.W_OK)
+    self.exists = os.path.exists(self.directory)
+    self.is_dir = True
+    self.readonly = False
+    if self.exists:
+      self.is_dir = os.path.isdir(self.directory)
+      self.readonly = not os.access(self.directory, os.W_OK)
     self.meta_list = []
     self.fail_list = []
     self._scan()
@@ -24,6 +29,7 @@ class Library:
   def _scan(self, select_id = None):
     self.meta_list = []
     self.fail_list = []
+    if not self.exists: return
     for path in glob.glob(self.directory + '/*.coffee'):
       with open(path) as f:
         code = f.read()
