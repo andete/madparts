@@ -55,8 +55,8 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(editMenu, '&Preferences', self.preferences)
 
     footprintMenu = menuBar.addMenu('&Footprint')
-    self.add_action(footprintMenu, '&Clone', self.clone_footprint, 'Ctrl+Alt+C')
-    self.add_action(footprintMenu, '&Delete', self.remove_footprint, 'Ctrl+Alt+D')
+    self.add_action(footprintMenu, '&Clone', self.library_tree.clone_footprint, 'Ctrl+Alt+C')
+    self.add_action(footprintMenu, '&Delete', self.library_tree.remove_footprint, 'Ctrl+Alt+D')
     self.add_action(footprintMenu, '&New', self.new_footprint, 'Ctrl+Alt+N')
     self.add_action(footprintMenu, '&Move', self.move_footprint, 'Ctrl+Alt+M')
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
@@ -179,30 +179,6 @@ class MainWin(QtGui.QMainWindow):
     dialog = PreferencesDialog(self)
     dialog.exec_()
 
-  def clone_footprint(self):    
-    if self.executed_footprint == []:
-      s = "Can't clone if footprint doesn't compile."
-      QtGui.QMessageBox.warning(self, "warning", s)
-      self.status(s) 
-      return
-    old_code = self.te1.toPlainText()
-    old_meta = pycoffee.eval_coffee_meta(old_code)
-    dialog = CloneFootprintDialog(self, old_meta, old_code)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (new_id, new_name, new_lib) = dialog.get_data()
-    new_code = pycoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
-    lib_dir = QtCore.QDir(self.lib[new_lib].directory)
-    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
-    with open(new_file_name, 'w+') as f:
-      f.write(new_code)
-    s = "%s/%s cloned to %s/%s." % (self.active_library, old_meta['name'], new_lib, new_name)
-    self.te1.setPlainText(new_code)
-    self.rescan_library(new_lib, new_id)
-    self.active_footprint_id = new_id
-    self.active_library = new_lib
-    self.show_footprint_tab()
-    self.status(s)
-
   def reload_footprint(self):
     with open(self.library_tree.active_footprint_file(), 'r') as f:
       self.te1.setPlainText(f.read())
@@ -324,31 +300,6 @@ class MainWin(QtGui.QMainWindow):
 
   def auto_zoom_changed(self):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
-
-  def remove_footprint(self):
-    directory = self.lib[self.active_library].directory
-    fn = self.active_footprint_id + '.coffee'
-    QtCore.QDir(directory).remove(fn)
-    # fall back to first_foot in library, if any
-    library = self.rescan_library(self.active_library)
-    if library.select_first_foot():
-      self.active_footprint_id = library.first_foot_id
-      self.active_library = library.name
-    # else fall back to any first foot...
-    else:
-      root = self.model.invisibleRootItem()
-      for row_index in range(0, root.rowCount()):
-        library = root.child(row_index)
-        if library.select_first_foot():
-          self.active_footprint_id = library.first_foot.id
-          self.active_library = library.name
-    directory = self.lib[self.active_library].directory
-    fn = self.active_footprint_id + '.coffee'
-    ffn = QtCore.QDir(directory).filePath(fn)
-    with open(ffn) as f:
-       self.te1.setPlainText(f.read())
-    # else... ?
-    # TODO we don't support being completely footless now
 
   def add_library(self):
     dialog = AddLibraryDialog(self)
@@ -510,17 +461,6 @@ class MainWin(QtGui.QMainWindow):
     except Exception as ex:
       self.status(str(ex))
       raise
-
-  def rescan_library(self, name, select_id = None):
-    root = self.model.invisibleRootItem()
-    for row_index in range(0, root.rowCount()):
-      library = root.child(row_index)
-      if library.name == name:
-        library.scan()
-        if select_id is not None:
-          library.select(select_id)
-        self.tree.expandAll()
-        return library
 
   def save_libraries(self):
     l = self.lib.values()

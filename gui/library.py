@@ -8,6 +8,7 @@ from PySide.QtCore import Qt
 
 import coffee.pycoffee as pycoffee
 from util.util import *
+from gui.dialogs import *
 
 class LibraryTree(QtGui.QTreeView):
 
@@ -67,8 +68,8 @@ class LibraryTree(QtGui.QTreeView):
       self.addAction(action)
       if slot != None: action.triggered.connect(slot)
       else: action.setDisabled(True)
-    _add('&Remove', self.parent.remove_footprint)
-    _add('&Clone', self.parent.clone_footprint)
+    _add('&Remove', self.remove_footprint)
+    _add('&Clone', self.clone_footprint)
     _add('&Move', self.parent.move_footprint)
     _add('&Export previous', self.parent.export_previous)
     _add('E&xport', self.parent.export_footprint)
@@ -87,6 +88,68 @@ class LibraryTree(QtGui.QTreeView):
     _add('&Import', self.parent.import_footprints)
     _add('&Reload', self.parent.reload_library)
     _add('&New', self.parent.new_footprint)
+
+  def remove_footprint(self):
+    directory = self.parent.lib[self.active_library].directory
+    fn = self.active_footprint_id + '.coffee'
+    QtCore.QDir(directory).remove(fn)
+    # fall back to first_foot in library, if any
+    library = self.rescan_library(self.active_library)
+    if library.select_first_foot():
+      self.active_footprint_id = library.first_foot_id
+      self.active_library = library.name
+    # else fall back to any first foot...
+    else:
+      root = self.model.invisibleRootItem()
+      for row_index in range(0, root.rowCount()):
+        library = root.child(row_index)
+        if library.select_first_foot():
+          self.active_footprint_id = library.first_foot.id
+          self.active_library = library.name
+    directory = self.parent.lib[self.active_library].directory
+    fn = self.active_footprint_id + '.coffee'
+    ffn = QtCore.QDir(directory).filePath(fn)
+    with open(ffn) as f:
+       self.parent.te1.setPlainText(f.read())
+    # else... ?
+    # TODO we don't support being completely footless now
+
+  def clone_footprint(self):    
+    if self.parent.executed_footprint == []:
+      s = "Can't clone if footprint doesn't compile."
+      QtGui.QMessageBox.warning(self, "warning", s)
+      self.parent.status(s) 
+      return
+    old_code = self.parent.te1.toPlainText()
+    old_meta = pycoffee.eval_coffee_meta(old_code)
+    dialog = CloneFootprintDialog(self.parent, old_meta, old_code)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (new_id, new_name, new_lib) = dialog.get_data()
+    new_code = pycoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
+    lib_dir = QtCore.QDir(self.parent.lib[new_lib].directory)
+    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
+    with open(new_file_name, 'w+') as f:
+      f.write(new_code)
+    s = "%s/%s cloned to %s/%s." % (self.active_library, old_meta['name'], new_lib, new_name)
+    self.parent.te1.setPlainText(new_code)
+    self.rescan_library(new_lib, new_id)
+    self.active_footprint_id = new_id
+    self.active_library = new_lib
+    self.parent.show_footprint_tab()
+    self.parent.status(s)
+
+  def rescan_library(self, name, select_id = None):
+    root = self.model.invisibleRootItem()
+    for row_index in range(0, root.rowCount()):
+      library = root.child(row_index)
+      if library.name == name:
+        library.scan()
+        if select_id is not None:
+          library.select(select_id)
+        self.expandAll()
+        return library
+    return None
+
 
 
 class Library(QtGui.QStandardItem):
