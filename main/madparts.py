@@ -111,7 +111,7 @@ class MainWin(QtGui.QMainWindow):
     first_foot_id = None
     first_foot_lib = None
     for coffee_lib in self.lib.values():
-      guilib = gui.library.Library(coffee_lib)
+      guilib = gui.library.Library(self.tree_selection_model, coffee_lib)
       parentItem.appendRow(guilib)
       if first:
         first_foot_id = guilib.first_foot_id
@@ -120,23 +120,25 @@ class MainWin(QtGui.QMainWindow):
     return (first_foot_lib, first_foot_id)
 
   def _tree(self):
-    (first_foot_lib, first_foot_id) = self._make_model()
     tree = QtGui.QTreeView()
+    self.tree_selection_model = tree.selectionModel
+    (first_foot_lib, first_foot_id) = self._make_model()
     tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     tree.setModel(self.model)
+    self.tree_selection_model().currentRowChanged.connect(self.row_changed)
     tree.setRootIsDecorated(False)
     tree.expandAll()
     tree.setItemsExpandable(False)
     tree.resizeColumnToContents(0)
-    self.tree_selection_model = tree.selectionModel()
-    self.tree_selection_model.currentRowChanged.connect(self.row_changed)
     tree.doubleClicked.connect(self.show_footprint_tab)
     self.active_footprint_id = None
     self.active_library = None
-    if first_foot_lib is not None and first_foot_lib is not None:
-      first_foot_lib.select(self.tree_selection_model, first_foot_id)
-      self.active_footprint_id = first_foot_id
-      self.active_library = first_foot_lib.name
+    if first_foot_lib is not None:
+      print "selected", first_foot_lib.name
+      if first_foot_lib.select_first_foot():
+        print "selected", first_foot_id
+        self.active_footprint_id = first_foot_id
+        self.active_library = first_foot_lib.name
     self.tree = tree
     self._tree_footprint_selected()
     return tree
@@ -398,19 +400,17 @@ class MainWin(QtGui.QMainWindow):
     QtCore.QDir(directory).remove(fn)
     # fall back to first_foot in library, if any
     library = self.rescan_library(self.active_library)
-    if library.first_foot != None:
-      library.first_foot.select(self.tree_selection_model)
-      self.active_footprint_id = library.first_foot.id
-      self.active_library = library.first_foot.lib_name
+    if library.select_first_foot():
+      self.active_footprint_id = library.first_foot_id
+      self.active_library = library.name
     # else fall back to any first foot...
     else:
       root = self.model.invisibleRootItem()
       for row_index in range(0, root.rowCount()):
         library = root.child(row_index)
-        if library.first_foot != None:
-          library.first_foot.select(self.tree_selection_model)
+        if library.select_first_foot():
           self.active_footprint_id = library.first_foot.id
-          self.active_library = library.first_foot.lib_name
+          self.active_library = library.name
     directory = self.lib[self.active_library].directory
     fn = self.active_footprint_id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
@@ -427,7 +427,7 @@ class MainWin(QtGui.QMainWindow):
     self.lib[name] = lib
     self.save_libraries()
     root = self.model.invisibleRootItem()
-    guilib = gui.library.Library(lib)
+    guilib = gui.library.Library(self.tree_selection_model, lib)
     root.appendRow(guilib)
     self.tree.expandAll()
 
@@ -454,10 +454,9 @@ class MainWin(QtGui.QMainWindow):
     # select first foot of the first library which contains foots
     for row_index in range(0, root.rowCount()):
       library = root.child(row_index)
-      if library.first_foot != None:
-        library.first_foot.select(self.tree_selection_model)
-        self.active_footprint_id = library.first_foot.id
-        self.active_library = library.first_foot.lib_name
+      if library.select_first_foot():
+        self.active_footprint_id = library.first_foot_id
+        self.active_library = library.name
         directory = self.lib[self.active_library].directory
         fn = self.active_footprint_id + '.coffee'
         ffn = QtCore.QDir(directory).filePath(fn)
@@ -586,9 +585,9 @@ class MainWin(QtGui.QMainWindow):
     for row_index in range(0, root.rowCount()):
       library = root.child(row_index)
       if library.name == name:
-        library.scan(select_id)
-        if library.selected_foot != None:
-          library.selected_foot.select(self.tree_selection_model)
+        library.scan()
+        if select_id is not None:
+          library.select(select_id)
         self.tree.expandAll()
         return library
 

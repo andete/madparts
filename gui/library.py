@@ -11,7 +11,8 @@ from util.util import *
 
 class Library(QtGui.QStandardItem):
 
-  def __init__(self, coffee_lib):
+  def __init__(self, selection_model, coffee_lib):
+    self.selection_model = selection_model
     self.coffee_lib = coffee_lib
     name = coffee_lib.name
     self.name = name
@@ -23,17 +24,24 @@ class Library(QtGui.QStandardItem):
     self.setEditable(False)
     self.items = {}
     self.id_items = {}
+    self.first_foot_id = None
     self.scan()
 
-  def select(self, selection_model, id):
+  def select(self, id):
     meta = self.coffee_lib.meta_by_id[id]
     print "%s/%s selected." % (meta.filename, meta.name)
     item = self.items[id]
     id_item = self.id_items[id]
-    selection_model.select(item.index(), QtGui.QItemSelectionModel.ClearAndSelect)
-    selection_model.select(id_item.index(), QtGui.QItemSelectionModel.Select)
+    self.selection_model().select(item.index(), QtGui.QItemSelectionModel.ClearAndSelect)
+    self.selection_model().select(id_item.index(), QtGui.QItemSelectionModel.Select)
 
-  def append(self, meta):
+  def select_first_foot(self):
+    if self.first_foot_id is not None:
+      self.select(self.first_foot_id)
+      return True
+    return False
+
+  def append(self, parent, meta):
     # print "adding %s to %s" % (self.name, parent.data(Qt.UserRole))
     name_item = QtGui.QStandardItem(meta.name)
     identify = ('footprint', (self.name, meta.id))
@@ -47,11 +55,15 @@ class Library(QtGui.QStandardItem):
     if meta.readonly:
       name_item.setForeground(QtGui.QBrush(Qt.gray))
       id_item.setForeground(QtGui.QBrush(Qt.gray))
-    self.appendRow([name_item, id_item])
+    parent.appendRow([name_item, id_item])
     self.items[meta.id] = name_item
     self.id_items[meta.id] = id_item
+    return name_item
 
-  def scan(self, select_id = None):
+  def scan(self):
+    self.coffee_lib.scan()
+    self.items = {}
+    self.id_items = {}
     self.selected_foot = None
     self.removeRows(0, self.rowCount())
     self.row_data = []
@@ -61,12 +73,12 @@ class Library(QtGui.QStandardItem):
       self.setForeground(QtGui.QBrush(Qt.red))
       return
 
-    def _add(meta_list):
+    def _add(parent, meta_list):
       if meta_list == []: return
       for meta in meta_list:
-        self.append(meta)
-        _add(map(lambda id: self.coffee_lib.meta_by_id[id], meta.child_ids))
+        new_item = self.append(parent, meta)
+        _add(new_item, map(lambda id: self.coffee_lib.meta_by_id[id], meta.child_ids))
        
-    _add(self.coffee_lib.root_meta_list)
+    _add(self, self.coffee_lib.root_meta_list)
     if self.coffee_lib.root_meta_list != []:
       self.first_foot_id = self.coffee_lib.root_meta_list[0].id
