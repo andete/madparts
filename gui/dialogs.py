@@ -17,14 +17,14 @@ def color_scheme_combo(parent, current):
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
-def library_combo(parent):
+def library_combo(parent, allow_non_existing=False):
   l_combo = QtGui.QComboBox()
   selected = parent.selected_library
   if selected == None:
     selected = parent.active_library
   for lib in parent.lib.values():
     l_combo.addItem(lib.name, lib.directory)
-    if not lib.exists:
+    if not lib.exists and not allow_non_existing:
       i = l_combo.model().index(l_combo.count()-1, 0) 
       # trick to make disabled
       l_combo.model().setData(i, 0, QtCore.Qt.UserRole-1)
@@ -193,7 +193,7 @@ class DisconnectLibraryDialog(QtGui.QDialog):
     self.resize(640,160) # TODO, there must be a better way to do this
     vbox = QtGui.QVBoxLayout()
     fl = QtGui.QFormLayout()
-    self.l_combo = library_combo(parent)
+    self.l_combo = library_combo(parent, True)
     fl.addRow("library:", self.l_combo)
     vbox.addLayout(fl)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel

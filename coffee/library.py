@@ -44,7 +44,7 @@ class Library:
       if not 'name' in meta or not 'id' in meta: 
         self.fail_list.append(meta)
         continue
-      meta['readonly'] = not os.access(self.directory, os.W_OK)
+      meta['readonly'] = not os.access(path, os.W_OK)
       meta['filename'] = path
       self.meta_list.append(meta)
     self.meta_list = [Meta(meta) for meta in self.meta_list]

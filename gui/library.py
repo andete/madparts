@@ -45,8 +45,8 @@ class Library(QtGui.QStandardItem):
     name_item.setEditable(False) # you edit them in the code
     id_item.setEditable(False)
     if meta.readonly:
-      name_item.setEnabled(False)
-      id_item.setEnabled(False)
+      name_item.setForeground(QtGui.QBrush(Qt.gray))
+      id_item.setForeground(QtGui.QBrush(Qt.gray))
     self.appendRow([name_item, id_item])
     self.items[meta.id] = name_item
     self.id_items[meta.id] = id_item
@@ -58,8 +58,7 @@ class Library(QtGui.QStandardItem):
     self.footprints = []
     self.first_foot_id = None
     if not self.coffee_lib.exists:
-      self.setEnabled(False)
-      self.setSelectable(False)
+      self.setForeground(QtGui.QBrush(Qt.red))
       return
 
     def _add(meta_list):
