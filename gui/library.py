@@ -70,7 +70,7 @@ class LibraryTree(QtGui.QTreeView):
       else: action.setDisabled(True)
     _add('&Remove', self.remove_footprint)
     _add('&Clone', self.clone_footprint)
-    _add('&Move', self.parent.move_footprint)
+    _add('&Move', self.move_footprint)
     _add('&Export previous', self.parent.export_previous)
     _add('E&xport', self.parent.export_footprint)
     _add('&Print')
@@ -87,7 +87,7 @@ class LibraryTree(QtGui.QTreeView):
     _add('&Disconnect', self.parent.disconnect_library)
     _add('&Import', self.parent.import_footprints)
     _add('&Reload', self.parent.reload_library)
-    _add('&New', self.parent.new_footprint)
+    _add('&New', self.new_footprint)
 
   def remove_footprint(self):
     directory = self.parent.lib[self.active_library].directory
@@ -137,6 +137,48 @@ class LibraryTree(QtGui.QTreeView):
     self.active_library = new_lib
     self.parent.show_footprint_tab()
     self.parent.status(s)
+
+  def new_footprint(self):
+    dialog = NewFootprintDialog(self.parent)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (new_id, new_name, new_lib) = dialog.get_data()
+    new_code = pycoffee.new_coffee(new_id, new_name)
+    lib_dir = QtCore.QDir(self.parent.lib[new_lib].directory)
+    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
+    with open(new_file_name, 'w+') as f:
+      f.write(new_code)
+    self.parent.te1.setPlainText(new_code)
+    self.rescan_library(new_lib, new_id)
+    self.active_footprint_id = new_id
+    self.active_library = new_lib
+    self.parent.show_footprint_tab()
+    self.parent.status("%s/%s created." % (new_lib, new_name))
+
+  def move_footprint(self):
+    old_code = self.parent.te1.toPlainText()
+    old_meta = pycoffee.eval_coffee_meta(old_code)
+    dialog = MoveFootprintDialog(self.parent, old_meta)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (new_name, new_lib) = dialog.get_data()
+    old_name = old_meta['name']
+    my_id = self.active_footprint_id
+    fn = my_id + '.coffee'
+    old_lib = self.active_library
+    new_code = old_code.replace("#name %s" % (old_name), "#name %s" % (new_name))
+    new_lib_dir = QtCore.QDir(self.parent.lib[new_lib].directory)
+    new_file_name = new_lib_dir.filePath(fn)
+    with open(new_file_name, 'w+') as f:
+      f.write(new_code)
+    self.parent.te1.setPlainText(new_code)
+    self.parent.status("moved %s/%s to %s/%s." % (old_lib, old_name, new_lib, new_name))
+    if old_lib == new_lib: 
+      self.rescan_library(old_lib, my_id) # just to update the name
+    else:
+      old_lib_dir = QtCore.QDir(self.parent.lib[old_lib].directory)
+      old_lib_dir.remove(fn)
+      self.rescan_library(old_lib)
+      self.rescan_library(new_lib, my_id)
+      self.active_library = new_lib
 
   def rescan_library(self, name, select_id = None):
     root = self.model.invisibleRootItem()

@@ -57,8 +57,8 @@ class MainWin(QtGui.QMainWindow):
     footprintMenu = menuBar.addMenu('&Footprint')
     self.add_action(footprintMenu, '&Clone', self.library_tree.clone_footprint, 'Ctrl+Alt+C')
     self.add_action(footprintMenu, '&Delete', self.library_tree.remove_footprint, 'Ctrl+Alt+D')
-    self.add_action(footprintMenu, '&New', self.new_footprint, 'Ctrl+Alt+N')
-    self.add_action(footprintMenu, '&Move', self.move_footprint, 'Ctrl+Alt+M')
+    self.add_action(footprintMenu, '&New', self.library_tree.new_footprint, 'Ctrl+Alt+N')
+    self.add_action(footprintMenu, '&Move', self.library_tree.move_footprint, 'Ctrl+Alt+M')
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
     self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
@@ -183,48 +183,6 @@ class MainWin(QtGui.QMainWindow):
     with open(self.library_tree.active_footprint_file(), 'r') as f:
       self.te1.setPlainText(f.read())
     self.status("%s reloaded." % (self.active_footprint_file()))
-
-  def new_footprint(self):
-    dialog = NewFootprintDialog(self)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (new_id, new_name, new_lib) = dialog.get_data()
-    new_code = pycoffee.new_coffee(new_id, new_name)
-    lib_dir = QtCore.QDir(self.lib[new_lib].directory)
-    new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
-    with open(new_file_name, 'w+') as f:
-      f.write(new_code)
-    self.te1.setPlainText(new_code)
-    self.rescan_library(new_lib, new_id)
-    self.active_footprint_id = new_id
-    self.active_library = new_lib
-    self.show_footprint_tab()
-    self.status("%s/%s created." % (new_lib, new_name))
-
-  def move_footprint(self):
-    old_code = self.te1.toPlainText()
-    old_meta = pycoffee.eval_coffee_meta(old_code)
-    dialog = MoveFootprintDialog(self, old_meta)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (new_name, new_lib) = dialog.get_data()
-    old_name = old_meta['name']
-    my_id = self.active_footprint_id
-    fn = my_id + '.coffee'
-    old_lib = self.active_library
-    new_code = old_code.replace("#name %s" % (old_name), "#name %s" % (new_name))
-    new_lib_dir = QtCore.QDir(self.lib[new_lib].directory)
-    new_file_name = new_lib_dir.filePath(fn)
-    with open(new_file_name, 'w+') as f:
-      f.write(new_code)
-    self.te1.setPlainText(new_code)
-    self.status("moved %s/%s to %s/%s." % (old_lib, old_name, new_lib, new_name))
-    if old_lib == new_lib: 
-      self.rescan_library(old_lib, my_id) # just to update the name
-    else:
-      old_lib_dir = QtCore.QDir(self.lib[old_lib].directory)
-      old_lib_dir.remove(fn)
-      self.rescan_library(old_lib)
-      self.rescan_library(new_lib, my_id)
-      self.active_library = new_lib
 
   def editor_text_changed(self):
     key_idle = self.setting("gui/keyidle")
