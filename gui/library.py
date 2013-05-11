@@ -7,6 +7,7 @@ from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 
 import coffee.pycoffee as pycoffee
+import coffee.library
 from util.util import *
 from gui.dialogs import *
 
@@ -15,6 +16,7 @@ class LibraryTree(QtGui.QTreeView):
   def __init__(self, parent):
     super(LibraryTree, self).__init__()
     self.parent = parent
+    self.lib = self.parent.lib
     self.active_footprint_id = None
     self.active_library = None
     self._populate()
@@ -44,7 +46,7 @@ class LibraryTree(QtGui.QTreeView):
     (first_foot_lib, first_foot_id) = self._make_model()
     self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     self.setModel(self.model)
-    self.selectionModel().currentRowChanged.connect(self.parent.row_changed)
+    self.selectionModel().currentRowChanged.connect(self.row_changed)
     self.setRootIsDecorated(False)
     self.expandAll()
     self.setItemsExpandable(False)
@@ -59,6 +61,27 @@ class LibraryTree(QtGui.QTreeView):
         self.active_footprint_id = first_foot_id
         self.active_library = first_foot_lib.name
     self._footprint_selected()
+
+  def row_changed(self, current, previous):
+    x = current.data(QtCore.Qt.UserRole)
+    if x == None: return
+    (t,x) = x
+    if t == 'library':
+      self.selected_library = x
+      self._library_selected()
+      return
+    # it is a footprint
+    self.selected_library = None
+    self._footprint_selected()
+    (lib_name, fpid) = x
+    directory = self.parent.lib[lib_name].directory
+    fn = fpid + '.coffee'
+    ffn = QtCore.QDir(directory).filePath(fn)
+    with open(ffn) as f:
+      self.parent.te1.setPlainText(f.read())
+      self.parent.is_fresh_from_file = True
+      self.active_footprint_id = fpid
+      self.active_library = lib_name
 
   def _footprint_selected(self):
     for action in self.actions():
@@ -84,7 +107,7 @@ class LibraryTree(QtGui.QTreeView):
       self.addAction(action)
       if slot != None: action.triggered.connect(slot)
       else: action.setDisabled(True)
-    _add('&Disconnect', self.parent.disconnect_library)
+    _add('&Disconnect', self.disconnect_library)
     _add('&Import', self.parent.import_footprints)
     _add('&Reload', self.parent.reload_library)
     _add('&New', self.new_footprint)
@@ -122,7 +145,7 @@ class LibraryTree(QtGui.QTreeView):
       return
     old_code = self.parent.te1.toPlainText()
     old_meta = pycoffee.eval_coffee_meta(old_code)
-    dialog = CloneFootprintDialog(self.parent, old_meta, old_code)
+    dialog = CloneFootprintDialog(self, old_meta, old_code)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = pycoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
@@ -139,7 +162,7 @@ class LibraryTree(QtGui.QTreeView):
     self.parent.status(s)
 
   def new_footprint(self):
-    dialog = NewFootprintDialog(self.parent)
+    dialog = NewFootprintDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = pycoffee.new_coffee(new_id, new_name)
@@ -157,7 +180,7 @@ class LibraryTree(QtGui.QTreeView):
   def move_footprint(self):
     old_code = self.parent.te1.toPlainText()
     old_meta = pycoffee.eval_coffee_meta(old_code)
-    dialog = MoveFootprintDialog(self.parent, old_meta)
+    dialog = MoveFootprintDialog(self, old_meta)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_name, new_lib) = dialog.get_data()
     old_name = old_meta['name']
@@ -179,6 +202,42 @@ class LibraryTree(QtGui.QTreeView):
       self.rescan_library(old_lib)
       self.rescan_library(new_lib, my_id)
       self.active_library = new_lib
+
+  def add_library(self):
+    dialog = AddLibraryDialog(self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    (name, directory) = dialog.get_data()
+    lib = coffee.library.Library(name, directory)
+    self.parent.lib[name] = lib
+    self.parent.save_libraries()
+    root = self.model.invisibleRootItem()
+    guilib = Library(self.selectionModel, lib)
+    root.appendRow(guilib)
+    self.expandAll()  
+
+  def disconnect_library(self):
+    dialog = DisconnectLibraryDialog(self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    lib_name = dialog.get_data()
+    del self.parent.lib[lib_name]
+    self.parent.save_libraries()
+    root = self.model.invisibleRootItem()
+    for row_index in range(0, root.rowCount()):
+      library = root.child(row_index)
+      if library.name == lib_name: break
+    root.removeRow(row_index)
+    if lib_name != self.active_library: return
+    # select first foot of the first library which contains foots
+    for row_index in range(0, root.rowCount()):
+      library = root.child(row_index)
+      if library.select_first_foot():
+        self.active_footprint_id = library.first_foot_id
+        self.active_library = library.name
+        directory = self.parent.lib[self.active_library].directory
+        fn = self.active_footprint_id + '.coffee'
+        ffn = QtCore.QDir(directory).filePath(fn)
+        with open(ffn) as f:
+          self.parent.te1.setPlainText(f.read())
 
   def rescan_library(self, name, select_id = None):
     root = self.model.invisibleRootItem()

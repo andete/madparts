@@ -76,8 +76,8 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Force Compile', self.compile, 'Ctrl+F')
 
     libraryMenu = menuBar.addMenu('&Library')
-    self.add_action(libraryMenu, '&Add', self.add_library)
-    self.add_action(libraryMenu, '&Disconnect', self.disconnect_library)
+    self.add_action(libraryMenu, '&Add', self.library_tree.add_library)
+    self.add_action(libraryMenu, '&Disconnect', self.library_tree.disconnect_library)
     self.add_action(libraryMenu, '&Import', self.import_footprints, 'Ctrl+Alt+I')
     self.add_action(libraryMenu, '&Reload', self.reload_library, 'Ctrl+Alt+R')
 
@@ -220,27 +220,6 @@ class MainWin(QtGui.QMainWindow):
      self.export_library_filetype = dialog.filetype
      self._export_footprint()
 
-  def row_changed(self, current, previous):
-    x = current.data(QtCore.Qt.UserRole)
-    if x == None: return
-    (t,x) = x
-    if t == 'library':
-      self.selected_library = x
-      self.library_tree._library_selected()
-      return
-    # it is a footprint
-    self.selected_library = None
-    self.library_tree._footprint_selected()
-    (lib_name, fpid) = x
-    directory = self.lib[lib_name].directory
-    fn = fpid + '.coffee'
-    ffn = QtCore.QDir(directory).filePath(fn)
-    with open(ffn) as f:
-      self.te1.setPlainText(f.read())
-      self.is_fresh_from_file = True
-      self.active_footprint_id = fpid
-      self.active_library = lib_name
-
   def show_footprint_tab(self):
     self.left_qtab.setCurrentIndex(1)
 
@@ -259,18 +238,6 @@ class MainWin(QtGui.QMainWindow):
   def auto_zoom_changed(self):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
 
-  def add_library(self):
-    dialog = AddLibraryDialog(self)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (name, directory) = dialog.get_data()
-    lib = coffee.library.Library(name, directory)
-    self.lib[name] = lib
-    self.save_libraries()
-    root = self.model.invisibleRootItem()
-    guilib = gui.library.Library(self.tree_selection_model, lib)
-    root.appendRow(guilib)
-    self.tree.expandAll()
-
   def reload_library(self):
     if self.selected_library != None:
       lib = self.selected_library
@@ -278,31 +245,6 @@ class MainWin(QtGui.QMainWindow):
       lib = self.active_library
     self.rescan_library(lib)
     self.status("%s reloaded." % (lib))
-
-  def disconnect_library(self):
-    dialog = DisconnectLibraryDialog(self)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
-    lib_name = dialog.get_data()
-    del self.lib[lib_name]
-    self.save_libraries()
-    root = self.model.invisibleRootItem()
-    for row_index in range(0, root.rowCount()):
-      library = root.child(row_index)
-      if library.name == lib_name: break
-    root.removeRow(row_index)
-    if lib_name != self.active_library: return
-    # select first foot of the first library which contains foots
-    for row_index in range(0, root.rowCount()):
-      library = root.child(row_index)
-      if library.select_first_foot():
-        self.active_footprint_id = library.first_foot_id
-        self.active_library = library.name
-        directory = self.lib[self.active_library].directory
-        fn = self.active_footprint_id + '.coffee'
-        ffn = QtCore.QDir(directory).filePath(fn)
-        with open(ffn) as f:
-          self.te1.setPlainText(f.read())
-    # TODO we don't support being completely footless now
 
   def import_footprints(self):
     dialog = ImportFootprintsDialog(self)
