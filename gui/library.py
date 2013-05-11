@@ -9,6 +9,86 @@ from PySide.QtCore import Qt
 import coffee.pycoffee as pycoffee
 from util.util import *
 
+class LibraryTree(QtGui.QTreeView):
+
+  def __init__(self, parent):
+    super(LibraryTree, self).__init__()
+    self.parent = parent
+    self.active_footprint_id = None
+    self.active_library = None
+    self._populate()
+
+  def active_footprint_file(self):
+   dir = QtCore.QDir(self.parent.lib[self.active_library].directory)
+   return dir.filePath(self.active_footprint_id + '.coffee')
+
+  def _make_model(self):
+    self.model = QtGui.QStandardItemModel()
+    self.model.setColumnCount(2)
+    self.model.setHorizontalHeaderLabels(['name','id'])
+    parentItem = self.model.invisibleRootItem()
+    first = True
+    first_foot_id = None
+    first_foot_lib = None
+    for coffee_lib in self.parent.lib.values():
+      guilib = Library(self.selectionModel, coffee_lib)
+      parentItem.appendRow(guilib)
+      if first:
+        first_foot_id = guilib.first_foot_id
+        first_foot_lib = guilib
+        first = first_foot_id is None
+    return (first_foot_lib, first_foot_id)
+
+  def _populate(self):
+    (first_foot_lib, first_foot_id) = self._make_model()
+    self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+    self.setModel(self.model)
+    self.selectionModel().currentRowChanged.connect(self.parent.row_changed)
+    self.setRootIsDecorated(False)
+    self.expandAll()
+    self.setItemsExpandable(False)
+    self.resizeColumnToContents(0)
+    self.doubleClicked.connect(self.parent.show_footprint_tab)
+    self.active_footprint_id = None
+    self.active_library = None
+    if first_foot_lib is not None:
+      print "selected", first_foot_lib.name
+      if first_foot_lib.select_first_foot():
+        print "selected", first_foot_id
+        self.active_footprint_id = first_foot_id
+        self.active_library = first_foot_lib.name
+    self._footprint_selected()
+
+  def _footprint_selected(self):
+    for action in self.actions():
+      self.removeAction(action)
+    def _add(text, slot = None):
+      action = QtGui.QAction(text, self)
+      self.addAction(action)
+      if slot != None: action.triggered.connect(slot)
+      else: action.setDisabled(True)
+    _add('&Remove', self.parent.remove_footprint)
+    _add('&Clone', self.parent.clone_footprint)
+    _add('&Move', self.parent.move_footprint)
+    _add('&Export previous', self.parent.export_previous)
+    _add('E&xport', self.parent.export_footprint)
+    _add('&Print')
+    _add('&Reload', self.parent.reload_footprint)
+
+  def _library_selected(self):
+    for action in self.actions():
+      self.removeAction(action)
+    def _add(text, slot = None):
+      action = QtGui.QAction(text, self)
+      self.addAction(action)
+      if slot != None: action.triggered.connect(slot)
+      else: action.setDisabled(True)
+    _add('&Disconnect', self.parent.disconnect_library)
+    _add('&Import', self.parent.import_footprints)
+    _add('&Reload', self.parent.reload_library)
+    _add('&New', self.parent.new_footprint)
+
+
 class Library(QtGui.QStandardItem):
 
   def __init__(self, selection_model, coffee_lib):

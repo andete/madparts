@@ -102,81 +102,11 @@ class MainWin(QtGui.QMainWindow):
 
   ### GUI HELPERS
 
-  def _make_model(self):
-    self.model = QtGui.QStandardItemModel()
-    self.model.setColumnCount(2)
-    self.model.setHorizontalHeaderLabels(['name','id'])
-    parentItem = self.model.invisibleRootItem()
-    first = True
-    first_foot_id = None
-    first_foot_lib = None
-    for coffee_lib in self.lib.values():
-      guilib = gui.library.Library(self.tree_selection_model, coffee_lib)
-      parentItem.appendRow(guilib)
-      if first:
-        first_foot_id = guilib.first_foot_id
-        first_foot_lib = guilib
-        first = first_foot_id is None
-    return (first_foot_lib, first_foot_id)
-
-  def _tree(self):
-    tree = QtGui.QTreeView()
-    self.tree_selection_model = tree.selectionModel
-    (first_foot_lib, first_foot_id) = self._make_model()
-    tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-    tree.setModel(self.model)
-    self.tree_selection_model().currentRowChanged.connect(self.row_changed)
-    tree.setRootIsDecorated(False)
-    tree.expandAll()
-    tree.setItemsExpandable(False)
-    tree.resizeColumnToContents(0)
-    tree.doubleClicked.connect(self.show_footprint_tab)
-    self.active_footprint_id = None
-    self.active_library = None
-    if first_foot_lib is not None:
-      print "selected", first_foot_lib.name
-      if first_foot_lib.select_first_foot():
-        print "selected", first_foot_id
-        self.active_footprint_id = first_foot_id
-        self.active_library = first_foot_lib.name
-    self.tree = tree
-    self._tree_footprint_selected()
-    return tree
-
-  def _tree_footprint_selected(self):
-    for action in self.tree.actions():
-      self.tree.removeAction(action)
-    def _add(text, slot = None):
-      action = QtGui.QAction(text, self.tree)
-      self.tree.addAction(action)
-      if slot != None: action.triggered.connect(slot)
-      else: action.setDisabled(True)
-    _add('&Remove', self.remove_footprint)
-    _add('&Clone', self.clone_footprint)
-    _add('&Move', self.move_footprint)
-    _add('&Export previous', self.export_previous)
-    _add('E&xport', self.export_footprint)
-    _add('&Print')
-    _add('&Reload', self.reload_footprint)
-
-  def _tree_library_selected(self):
-    for action in self.tree.actions():
-      self.tree.removeAction(action)
-    def _add(text, slot = None):
-      action = QtGui.QAction(text, self.tree)
-      self.tree.addAction(action)
-      if slot != None: action.triggered.connect(slot)
-      else: action.setDisabled(True)
-    _add('&Disconnect', self.disconnect_library)
-    _add('&Import', self.import_footprints)
-    _add('&Reload', self.reload_library)
-    _add('&New', self.new_footprint)
-
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.te1 = QtGui.QTextEdit()
     self.te1.setAcceptRichText(False)
-    with open(self.active_footprint_file()) as f:
+    with open(self.library_tree.active_footprint_file()) as f:
         self.te1.setPlainText(f.read())
     self.highlighter1 = CoffeeHighlighter(self.te1.document())
     self.te1.textChanged.connect(self.editor_text_changed)
@@ -192,7 +122,8 @@ class MainWin(QtGui.QMainWindow):
 
   def _left_part(self):
     lqtab = QtGui.QTabWidget()
-    lqtab.addTab(self._tree(), "library")
+    self.library_tree = gui.library.LibraryTree(self)
+    lqtab.addTab(self.library_tree, "library")
     lqtab.addTab(self._footprint(), "footprint")
     lqtab.setCurrentIndex(1)
     self.left_qtab = lqtab
@@ -273,7 +204,7 @@ class MainWin(QtGui.QMainWindow):
     self.status(s)
 
   def reload_footprint(self):
-    with open(self.active_footprint_file(), 'r') as f:
+    with open(self.library_tree.active_footprint_file(), 'r') as f:
       self.te1.setPlainText(f.read())
     self.status("%s reloaded." % (self.active_footprint_file()))
 
@@ -361,11 +292,11 @@ class MainWin(QtGui.QMainWindow):
     (t,x) = x
     if t == 'library':
       self.selected_library = x
-      self._tree_library_selected()
+      self.library_tree._library_selected()
       return
     # it is a footprint
     self.selected_library = None
-    self._tree_footprint_selected()
+    self.library_tree._footprint_selected()
     (lib_name, fpid) = x
     directory = self.lib[lib_name].directory
     fn = fpid + '.coffee'
@@ -546,7 +477,7 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_restrict: filter_out.append('restrict')
       self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.is_fresh_from_file:
-        with open(self.active_footprint_file(), "w+") as f:
+        with open(self.library_tree.active_footprint_file(), "w+") as f:
           f.write(code)
       if compilation_failed_last_time:
         self.status("Compilation successful.")
@@ -590,10 +521,6 @@ class MainWin(QtGui.QMainWindow):
           library.select(select_id)
         self.tree.expandAll()
         return library
-
-  def active_footprint_file(self):
-   dir = QtCore.QDir(self.lib[self.active_library].directory)
-   return dir.filePath(self.active_footprint_id + '.coffee')
 
   def save_libraries(self):
     l = self.lib.values()
