@@ -108,17 +108,19 @@ class MainWin(QtGui.QMainWindow):
     self.model.setHorizontalHeaderLabels(['name','id'])
     parentItem = self.model.invisibleRootItem()
     first = True
-    first_foot = None
+    first_foot_id = None
+    first_foot_lib = None
     for coffee_lib in self.lib.values():
       guilib = gui.library.Library(coffee_lib)
       parentItem.appendRow(guilib)
       if first:
-        first_foot = guilib.first_footprint()
-        first = first_foot == None
-    return first_foot
+        first_foot_id = guilib.first_foot_id
+        first_foot_lib = guilib
+        first = first_foot_id is None
+    return (first_foot_lib, first_foot_id)
 
   def _tree(self):
-    first_foot = self._make_model()
+    (first_foot_lib, first_foot_id) = self._make_model()
     tree = QtGui.QTreeView()
     tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     tree.setModel(self.model)
@@ -131,10 +133,10 @@ class MainWin(QtGui.QMainWindow):
     tree.doubleClicked.connect(self.show_footprint_tab)
     self.active_footprint_id = None
     self.active_library = None
-    if first_foot != None:
-      first_foot.select(self.tree_selection_model)
-      self.active_footprint_id = first_foot.id
-      self.active_library = first_foot.lib_name
+    if first_foot_lib is not None and first_foot_lib is not None:
+      first_foot_lib.select(self.tree_selection_model, first_foot_id)
+      self.active_footprint_id = first_foot_id
+      self.active_library = first_foot_lib.name
     self.tree = tree
     self._tree_footprint_selected()
     return tree
