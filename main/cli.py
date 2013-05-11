@@ -72,8 +72,8 @@ def _list_directory(dirname):
   return 0
 
 def list_library(remaining):
-  parser = argparse.ArgumentParser(prog=sys.argv[0] + ' list')
-  parser.add_argument('library', help='library file')
+  parser = argparse.ArgumentParser(prog=sys.argv[0] + ' ls')
+  parser.add_argument('library', help='library file', nargs='?', default='.')
   args = parser.parse_args(remaining)
   if os.path.isdir(args.library):
     return _list_directory(args.library)
@@ -90,7 +90,7 @@ def list_library(remaining):
 def cli_main():
   parser = argparse.ArgumentParser()
   parser.add_argument('command', help='command to execute', 
-    choices=['import','export', 'list'])
+    choices=['import','export', 'ls'])
   (args, remaining) = parser.parse_known_args()
   if args.command == 'import':
     return import_footprint(remaining)
