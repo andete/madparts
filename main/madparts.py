@@ -28,7 +28,7 @@ class MainWin(QtGui.QMainWindow):
   def __init__(self):
     super(MainWin, self).__init__()
 
-    self.libtree = gui.library.LibraryTree(self)
+    self.explorer = gui.library.Explorer(self)
 
     self.settings = QtCore.QSettings()
 
@@ -40,10 +40,10 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(editMenu, '&Preferences', self.preferences)
 
     footprintMenu = menuBar.addMenu('&Footprint')
-    self.add_action(footprintMenu, '&Clone', self.libtree.clone_footprint, 'Ctrl+Alt+C')
-    self.add_action(footprintMenu, '&Delete', self.libtree.remove_footprint, 'Ctrl+Alt+D')
-    self.ac_new = self.add_action(footprintMenu, '&New', self.libtree.new_footprint, 'Ctrl+Alt+N')
-    self.ac_move = self.add_action(footprintMenu, '&Move', self.libtree.move_footprint, 'Ctrl+Alt+M')
+    self.add_action(footprintMenu, '&Clone', self.explorer.clone_footprint, 'Ctrl+Alt+C')
+    self.add_action(footprintMenu, '&Delete', self.explorer.remove_footprint, 'Ctrl+Alt+D')
+    self.ac_new = self.add_action(footprintMenu, '&New', self.explorer.new_footprint, 'Ctrl+Alt+N')
+    self.ac_move = self.add_action(footprintMenu, '&Move', self.explorer.move_footprint, 'Ctrl+Alt+M')
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
     self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
@@ -61,15 +61,15 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Force Compile', self.compile, 'Ctrl+F')
 
     libraryMenu = menuBar.addMenu('&Library')
-    self.add_action(libraryMenu, '&Add', self.libtree.add_library)
-    self.add_action(libraryMenu, '&Disconnect', self.libtree.disconnect_library)
+    self.add_action(libraryMenu, '&Add', self.explorer.add_library)
+    self.add_action(libraryMenu, '&Disconnect', self.explorer.disconnect_library)
     self.add_action(libraryMenu, '&Import', self.import_footprints, 'Ctrl+Alt+I')
-    self.add_action(libraryMenu, '&Reload', self.libtree.reload_library, 'Ctrl+Alt+R')
+    self.add_action(libraryMenu, '&Reload', self.explorer.reload_library, 'Ctrl+Alt+R')
 
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
 
-    self.libtree.initialize_libraries(self.settings)
+    self.explorer.initialize_libraries(self.settings)
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
     splitter.addWidget(self._left_part())
@@ -97,7 +97,7 @@ class MainWin(QtGui.QMainWindow):
   def set_code_textedit_readonly(self, readonly):
     self.code_textedit.setReadOnly(readonly)
     pal = self.code_textedit.palette()
-    if self.libtree.active_footprint.readonly:
+    if self.explorer.active_footprint.readonly:
       pal.setColor(QtGui.QPalette.Base, Qt.lightGray)
     else:
       pal.setColor(QtGui.QPalette.Base, Qt.white)
@@ -111,9 +111,9 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.code_textedit = QtGui.QTextEdit()
     self.code_textedit.setAcceptRichText(False)
-    with open(self.libtree.active_footprint_file()) as f:
+    with open(self.explorer.active_footprint_file()) as f:
         self.code_textedit.setPlainText(f.read())
-    self.set_code_textedit_readonly(self.libtree.active_footprint.readonly)
+    self.set_code_textedit_readonly(self.explorer.active_footprint.readonly)
     self.highlighter1 = CoffeeHighlighter(self.code_textedit.document())
     self.code_textedit.textChanged.connect(self.editor_text_changed)
     self.result_textedit = QtGui.QTextEdit()
@@ -128,8 +128,8 @@ class MainWin(QtGui.QMainWindow):
 
   def _left_part(self):
     lqtab = QtGui.QTabWidget()
-    self.libtree.populate()
-    lqtab.addTab(self.libtree, "library")
+    self.explorer.populate()
+    lqtab.addTab(self.explorer, "library")
     lqtab.addTab(self._footprint(), "footprint")
     lqtab.setCurrentIndex(1)
     self.left_qtab = lqtab
@@ -186,9 +186,9 @@ class MainWin(QtGui.QMainWindow):
     dialog.exec_()
 
   def reload_footprint(self):
-    with open(self.libtree.active_footprint_file(), 'r') as f:
+    with open(self.explorer.active_footprint_file(), 'r') as f:
       self.code_textedit.setPlainText(f.read())
-    self.status("%s reloaded." % (self.libtree.active_footprint_file()))
+    self.status("%s reloaded." % (self.explorer.active_footprint_file()))
 
   def editor_text_changed(self):
     key_idle = self.setting("gui/keyidle")
@@ -246,7 +246,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, importer, selected_library) = dialog.get_data()
-    lib_dir = QtCore.QDir(self.libtree.lib[selected_library].directory)
+    lib_dir = QtCore.QDir(self.explorer.lib[selected_library].directory)
     l = []
     for footprint_name in footprint_names:
       interim = inter.import_footprint(importer, footprint_name) 
@@ -330,8 +330,8 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_docu: filter_out.append('docu')
       if not self.display_restrict: filter_out.append('restrict')
       self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
-      if not self.libtree.active_footprint.readonly:
-        with open(self.libtree.active_footprint_file(), "w+") as f:
+      if not self.explorer.active_footprint.readonly:
+        with open(self.explorer.active_footprint_file(), "w+") as f:
           f.write(code)
       if compilation_failed_last_time:
         self.status("Compilation successful.")

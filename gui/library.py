@@ -11,10 +11,10 @@ import coffee.library
 from util.util import *
 from gui.dialogs import *
 
-class LibraryTree(QtGui.QTreeView):
+class Explorer(QtGui.QTreeView):
 
   def __init__(self, parent):
-    super(LibraryTree, self).__init__()
+    super(Explorer, self).__init__()
     self.parent = parent
     self.coffee_lib = {}
     self.active_footprint = None
