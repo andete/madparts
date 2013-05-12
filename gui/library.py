@@ -19,6 +19,7 @@ class LibraryTree(QtGui.QTreeView):
     self.lib = {}
     self.active_footprint_id = None
     self.active_library = None
+    self.selected_library = None
 
   def initialize_libraries(self, settings):
 
@@ -111,7 +112,6 @@ class LibraryTree(QtGui.QTreeView):
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
       self.parent.code_textedit.setPlainText(f.read())
-      self.parent.is_fresh_from_file = True
       self.active_footprint_id = fpid
       self.active_library = lib_name
 
@@ -141,7 +141,7 @@ class LibraryTree(QtGui.QTreeView):
       else: action.setDisabled(True)
     _add('&Disconnect', self.disconnect_library)
     _add('&Import', self.parent.import_footprints)
-    _add('&Reload', self.parent.reload_library)
+    _add('&Reload', self.reload_library)
     _add('&New', self.new_footprint)
 
   def remove_footprint(self):
@@ -283,6 +283,13 @@ class LibraryTree(QtGui.QTreeView):
         return library
     return None
 
+  def reload_library(self):
+    if self.selected_library != None:
+      lib = self.selected_library
+    else:
+      lib = self.active_library
+    self.rescan_library(lib)
+    self.parent.status("%s reloaded." % (lib))
 
 
 class Library(QtGui.QStandardItem):

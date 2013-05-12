@@ -72,7 +72,7 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(libraryMenu, '&Add', self.libtree.add_library)
     self.add_action(libraryMenu, '&Disconnect', self.libtree.disconnect_library)
     self.add_action(libraryMenu, '&Import', self.import_footprints, 'Ctrl+Alt+I')
-    self.add_action(libraryMenu, '&Reload', self.reload_library, 'Ctrl+Alt+R')
+    self.add_action(libraryMenu, '&Reload', self.libtree.reload_library, 'Ctrl+Alt+R')
 
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
@@ -86,8 +86,6 @@ class MainWin(QtGui.QMainWindow):
     self.executed_footprint = []
     self.export_library_filename = ""
     self.export_library_filetype = ""
-    self.is_fresh_from_file = True
-    self.selected_library = None
     self.gl_dx = 0
     self.gl_dy = 0
     self.gl_w = 0
@@ -194,8 +192,6 @@ class MainWin(QtGui.QMainWindow):
     self.first_keypress = True
     if self.setting('gui/autocompile') == 'True':
       self.compile()
-    if self.is_fresh_from_file:
-      self.is_fresh_from_file = False
 
   def key_idle_timer_timeout(self): 
     self.editor_text_changed()
@@ -230,14 +226,6 @@ class MainWin(QtGui.QMainWindow):
 
   def auto_zoom_changed(self):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
-
-  def reload_library(self):
-    if self.selected_library != None:
-      lib = self.selected_library
-    else:
-      lib = self.active_library
-    self.rescan_library(lib)
-    self.status("%s reloaded." % (lib))
 
   def import_footprints(self):
     dialog = ImportFootprintsDialog(self)
@@ -320,9 +308,8 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_docu: filter_out.append('docu')
       if not self.display_restrict: filter_out.append('restrict')
       self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
-      if not self.is_fresh_from_file:
-        with open(self.libtree.active_footprint_file(), "w+") as f:
-          f.write(code)
+      with open(self.libtree.active_footprint_file(), "w+") as f:
+        f.write(code)
       if compilation_failed_last_time:
         self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
