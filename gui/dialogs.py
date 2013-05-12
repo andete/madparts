@@ -22,7 +22,7 @@ def library_combo(parent, allow_non_existing=False):
   selected = parent.selected_library
   if selected == None:
     selected = parent.active_library
-  for lib in parent.lib.values():
+  for lib in parent.coffee_lib.values():
     l_combo.addItem(lib.name, lib.directory)
     if not lib.exists and not allow_non_existing:
       i = l_combo.model().index(l_combo.count()-1, 0) 
@@ -250,7 +250,7 @@ class AddLibraryDialog(QtGui.QDialog):
     result = QtGui.QFileDialog.getExistingDirectory(self, "Select Directory")
     if result == '': return
     self.dir_edit.setText(result)
-    all_dirs = [lib.directory for lib in self.parent.lib.values()]
+    all_dirs = [lib.directory for lib in self.parent.coffee_lib.values()]
     if result in all_dirs:
       self.dir_error = 'directory already exists as library'
       self.dir_ok = False
@@ -263,7 +263,7 @@ class AddLibraryDialog(QtGui.QDialog):
     if name == '':
       self.name_error = 'please provide a name'
       self.name_ok = False
-    elif name in self.parent.lib.keys():
+    elif name in self.parent.coffee_lib.keys():
       self.name_error = 'name is already in use'
       self.name_ok = False
     else:
