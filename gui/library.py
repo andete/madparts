@@ -78,7 +78,7 @@ class LibraryTree(QtGui.QTreeView):
     fn = fpid + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
-      self.parent.te1.setPlainText(f.read())
+      self.parent.code_textedit.setPlainText(f.read())
       self.parent.is_fresh_from_file = True
       self.active_footprint_id = fpid
       self.active_library = lib_name
@@ -133,7 +133,7 @@ class LibraryTree(QtGui.QTreeView):
     fn = self.active_footprint_id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
-       self.parent.te1.setPlainText(f.read())
+       self.parent.code_textedit.setPlainText(f.read())
     # else... ?
     # TODO we don't support being completely footless now
 
@@ -143,7 +143,7 @@ class LibraryTree(QtGui.QTreeView):
       QtGui.QMessageBox.warning(self, "warning", s)
       self.parent.status(s) 
       return
-    old_code = self.parent.te1.toPlainText()
+    old_code = self.parent.code_textedit.toPlainText()
     old_meta = pycoffee.eval_coffee_meta(old_code)
     dialog = CloneFootprintDialog(self, old_meta, old_code)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
@@ -154,7 +154,7 @@ class LibraryTree(QtGui.QTreeView):
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
     s = "%s/%s cloned to %s/%s." % (self.active_library, old_meta['name'], new_lib, new_name)
-    self.parent.te1.setPlainText(new_code)
+    self.parent.code_textedit.setPlainText(new_code)
     self.rescan_library(new_lib, new_id)
     self.active_footprint_id = new_id
     self.active_library = new_lib
@@ -170,7 +170,7 @@ class LibraryTree(QtGui.QTreeView):
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
-    self.parent.te1.setPlainText(new_code)
+    self.parent.code_textedit.setPlainText(new_code)
     self.rescan_library(new_lib, new_id)
     self.active_footprint_id = new_id
     self.active_library = new_lib
@@ -178,7 +178,7 @@ class LibraryTree(QtGui.QTreeView):
     self.parent.status("%s/%s created." % (new_lib, new_name))
 
   def move_footprint(self):
-    old_code = self.parent.te1.toPlainText()
+    old_code = self.parent.code_textedit.toPlainText()
     old_meta = pycoffee.eval_coffee_meta(old_code)
     dialog = MoveFootprintDialog(self, old_meta)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
@@ -192,7 +192,7 @@ class LibraryTree(QtGui.QTreeView):
     new_file_name = new_lib_dir.filePath(fn)
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
-    self.parent.te1.setPlainText(new_code)
+    self.parent.code_textedit.setPlainText(new_code)
     self.parent.status("moved %s/%s to %s/%s." % (old_lib, old_name, new_lib, new_name))
     if old_lib == new_lib: 
       self.rescan_library(old_lib, my_id) # just to update the name
@@ -237,7 +237,7 @@ class LibraryTree(QtGui.QTreeView):
         fn = self.active_footprint_id + '.coffee'
         ffn = QtCore.QDir(directory).filePath(fn)
         with open(ffn) as f:
-          self.parent.te1.setPlainText(f.read())
+          self.parent.code_textedit.setPlainText(f.read())
 
   def rescan_library(self, name, select_id = None):
     root = self.model.invisibleRootItem()

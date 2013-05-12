@@ -34,7 +34,7 @@ class MainWin(QtGui.QMainWindow):
       else:
         example_lib = QtCore.QDir('examples').absolutePath()
       library = coffee.library.Library('Examples', example_lib)
-      self.lib = {'Examples': library}
+      self.lib = { 'Examples': library }
       self.save_libraries()
     else:
       self.lib = {}
@@ -55,10 +55,10 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(editMenu, '&Preferences', self.preferences)
 
     footprintMenu = menuBar.addMenu('&Footprint')
-    self.add_action(footprintMenu, '&Clone', self.library_tree.clone_footprint, 'Ctrl+Alt+C')
-    self.add_action(footprintMenu, '&Delete', self.library_tree.remove_footprint, 'Ctrl+Alt+D')
-    self.add_action(footprintMenu, '&New', self.library_tree.new_footprint, 'Ctrl+Alt+N')
-    self.add_action(footprintMenu, '&Move', self.library_tree.move_footprint, 'Ctrl+Alt+M')
+    self.add_action(footprintMenu, '&Clone', self.libtree.clone_footprint, 'Ctrl+Alt+C')
+    self.add_action(footprintMenu, '&Delete', self.libtree.remove_footprint, 'Ctrl+Alt+D')
+    self.add_action(footprintMenu, '&New', self.libtree.new_footprint, 'Ctrl+Alt+N')
+    self.add_action(footprintMenu, '&Move', self.libtree.move_footprint, 'Ctrl+Alt+M')
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
     self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
@@ -76,8 +76,8 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(footprintMenu, '&Force Compile', self.compile, 'Ctrl+F')
 
     libraryMenu = menuBar.addMenu('&Library')
-    self.add_action(libraryMenu, '&Add', self.library_tree.add_library)
-    self.add_action(libraryMenu, '&Disconnect', self.library_tree.disconnect_library)
+    self.add_action(libraryMenu, '&Add', self.libtree.add_library)
+    self.add_action(libraryMenu, '&Disconnect', self.libtree.disconnect_library)
     self.add_action(libraryMenu, '&Import', self.import_footprints, 'Ctrl+Alt+I')
     self.add_action(libraryMenu, '&Reload', self.reload_library, 'Ctrl+Alt+R')
 
@@ -104,17 +104,17 @@ class MainWin(QtGui.QMainWindow):
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-    self.te1 = QtGui.QTextEdit()
-    self.te1.setAcceptRichText(False)
-    with open(self.library_tree.active_footprint_file()) as f:
-        self.te1.setPlainText(f.read())
-    self.highlighter1 = CoffeeHighlighter(self.te1.document())
-    self.te1.textChanged.connect(self.editor_text_changed)
-    self.te2 = QtGui.QTextEdit()
-    self.te2.setReadOnly(True)
-    self.highlighter2 = JSHighlighter(self.te2.document())
-    lsplitter.addWidget(self.te1)
-    lsplitter.addWidget(self.te2)
+    self.code_textedit = QtGui.QTextEdit()
+    self.code_textedit.setAcceptRichText(False)
+    with open(self.libtree.active_footprint_file()) as f:
+        self.code_textedit.setPlainText(f.read())
+    self.highlighter1 = CoffeeHighlighter(self.code_textedit.document())
+    self.code_textedit.textChanged.connect(self.editor_text_changed)
+    self.result_textedit = QtGui.QTextEdit()
+    self.result_textedit.setReadOnly(True)
+    self.highlighter2 = JSHighlighter(self.result_textedit.document())
+    lsplitter.addWidget(self.code_textedit)
+    lsplitter.addWidget(self.result_textedit)
     self.lsplitter = lsplitter
     [s1, s2] = lsplitter.sizes()
     lsplitter.setSizes([min(s1+s2-150, 150), 150])
@@ -122,8 +122,8 @@ class MainWin(QtGui.QMainWindow):
 
   def _left_part(self):
     lqtab = QtGui.QTabWidget()
-    self.library_tree = gui.library.LibraryTree(self)
-    lqtab.addTab(self.library_tree, "library")
+    self.libtree = gui.library.LibraryTree(self)
+    lqtab.addTab(self.libtree, "library")
     lqtab.addTab(self._footprint(), "footprint")
     lqtab.setCurrentIndex(1)
     self.left_qtab = lqtab
@@ -180,8 +180,8 @@ class MainWin(QtGui.QMainWindow):
     dialog.exec_()
 
   def reload_footprint(self):
-    with open(self.library_tree.active_footprint_file(), 'r') as f:
-      self.te1.setPlainText(f.read())
+    with open(self.libtree.active_footprint_file(), 'r') as f:
+      self.code_textedit.setPlainText(f.read())
     self.status("%s reloaded." % (self.active_footprint_file()))
 
   def editor_text_changed(self):
@@ -313,13 +313,13 @@ class MainWin(QtGui.QMainWindow):
     self.glw.zoom_changed = True
 
   def compile(self):
-    code = self.te1.toPlainText()
+    code = self.code_textedit.toPlainText()
     compilation_failed_last_time = self.executed_footprint == []
     self.executed_footprint = []
     (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
     if interim != None:
       self.executed_footprint = interim
-      self.te2.setPlainText(str(interim))
+      self.result_textedit.setPlainText(str(interim))
       if self.auto_zoom.isChecked():
         (dx, dy, x1, y1, x2, y2) = inter.size(interim)
         self.update_zoom(dx, dy, x1, y1, x2, y2)
@@ -328,7 +328,7 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_restrict: filter_out.append('restrict')
       self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.is_fresh_from_file:
-        with open(self.library_tree.active_footprint_file(), "w+") as f:
+        with open(self.libtree.active_footprint_file(), "w+") as f:
           f.write(code)
       if compilation_failed_last_time:
         self.status("Compilation successful.")
@@ -336,7 +336,7 @@ class MainWin(QtGui.QMainWindow):
       self.lsplitter.setSizes([s1+s2, 0])
     else:
       self.executed_footprint = []
-      self.te2.setPlainText(error_txt)
+      self.result_textedit.setPlainText(error_txt)
       self.status(status_txt)
       [s1, s2] = self.lsplitter.sizes()
       self.lsplitter.setSizes([s1+s2-150, 150])
