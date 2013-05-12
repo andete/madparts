@@ -195,7 +195,7 @@ class DisconnectLibraryDialog(QtGui.QDialog):
     self.resize(640,160) # TODO, there must be a better way to do this
     vbox = QtGui.QVBoxLayout()
     fl = QtGui.QFormLayout()
-    self.l_combo = library_combo(parent, True)
+    self.l_combo = library_combo(parent, True, True)
     fl.addRow("library:", self.l_combo)
     vbox.addLayout(fl)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel

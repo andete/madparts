@@ -97,7 +97,9 @@ class MainWin(QtGui.QMainWindow):
   def set_code_textedit_readonly(self, readonly):
     self.code_textedit.setReadOnly(readonly)
     pal = self.code_textedit.palette()
-    if self.explorer.active_footprint.readonly:
+    if not self.explorer.has_footprint(): 
+      pal.setColor(QtGui.QPalette.Base, Qt.darkGray)
+    elif self.explorer.active_footprint.readonly:
       pal.setColor(QtGui.QPalette.Base, Qt.lightGray)
     else:
       pal.setColor(QtGui.QPalette.Base, Qt.white)
@@ -111,9 +113,12 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.code_textedit = QtGui.QTextEdit()
     self.code_textedit.setAcceptRichText(False)
-    with open(self.explorer.active_footprint_file()) as f:
+    if self.explorer.has_footprint():
+      with open(self.explorer.active_footprint_file()) as f:
         self.code_textedit.setPlainText(f.read())
-    self.set_code_textedit_readonly(self.explorer.active_footprint.readonly)
+      self.set_code_textedit_readonly(self.explorer.active_footprint.readonly)
+    else:
+      self.set_code_textedit_readonly(True)
     self.highlighter1 = CoffeeHighlighter(self.code_textedit.document())
     self.code_textedit.textChanged.connect(self.editor_text_changed)
     self.result_textedit = QtGui.QTextEdit()
@@ -317,6 +322,7 @@ class MainWin(QtGui.QMainWindow):
 
   def compile(self):
     code = self.code_textedit.toPlainText()
+    if code == "": return
     compilation_failed_last_time = self.executed_footprint == []
     self.executed_footprint = []
     (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)

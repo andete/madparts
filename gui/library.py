@@ -21,6 +21,9 @@ class Explorer(QtGui.QTreeView):
     self.active_library = None
     self.selected_library = None
 
+  def has_footprint(self):
+    return self.active_footprint is not None
+
   def initialize_libraries(self, settings):
 
     def load_libraries():
@@ -105,16 +108,16 @@ class Explorer(QtGui.QTreeView):
       return
     # it is a footprint
     self.selected_library = None
-    self._footprint_selected()
     (lib_name, fpid) = x
     directory = self.coffee_lib[lib_name].directory
     meta = self.coffee_lib[lib_name].meta_by_id[fpid]
     fn = meta.filename
     #ffn = QtCore.QDir(directory).filePath(fn)
-    with open(fn) as f:
-      self.parent.code_textedit.setPlainText(f.read())
     self.active_footprint = meta
     self.active_library = self.coffee_lib[lib_name]
+    self._footprint_selected()
+    with open(fn) as f:
+      self.parent.code_textedit.setPlainText(f.read())
     self.parent.set_code_textedit_readonly(meta.readonly)
 
   def _footprint_selected(self):

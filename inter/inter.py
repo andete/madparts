@@ -162,7 +162,7 @@ def bounding_box(inter):
 
 def size(inter):
   if inter == None or inter == []:
-    return (1,1)
+    return (1, 1, 0, 0, 0, 0)
   (x1,y1,x2,y2) = bounding_box(inter)
   dx = 2*max(abs(x2),abs(x1)) 
   dy = 2*max(abs(y2),abs(y1))
