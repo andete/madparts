@@ -16,8 +16,8 @@ class LibraryTree(QtGui.QTreeView):
   def __init__(self, parent):
     super(LibraryTree, self).__init__()
     self.parent = parent
-    self.lib = {}
-    self.active_footprint_id = None
+    self.coffee_lib = {}
+    self.active_footprint = None
     self.active_library = None
     self.selected_library = None
 
@@ -30,7 +30,7 @@ class LibraryTree(QtGui.QTreeView):
         name = settings.value('name')
         filen = settings.value('file')
         library = coffee.library.Library(name, filen)
-        self.lib[name] = library
+        self.coffee_lib[name] = library
       settings.endArray()
 
     if not 'library' in settings.childGroups():
@@ -39,14 +39,14 @@ class LibraryTree(QtGui.QTreeView):
       else:
         example_lib = QtCore.QDir('examples').absolutePath()
       library = coffee.library.Library('Examples', example_lib)
-      self.lib = { 'Examples': library }
+      self.coffee_lib = { 'Examples': library }
       self.save_libraries(settings)
     else:
-      self.lib = {}
+      self.coffee_lib = {}
       load_libraries()
 
   def save_libraries(self, settings):
-    l = self.lib.values()
+    l = self.coffee_lib.values()
     settings.beginWriteArray('library')
     for i in range(len(l)):
       settings.setArrayIndex(i)
@@ -55,8 +55,8 @@ class LibraryTree(QtGui.QTreeView):
     settings.endArray()
 
   def active_footprint_file(self):
-   dir = QtCore.QDir(self.lib[self.active_library].directory)
-   return dir.filePath(self.active_footprint_id + '.coffee')
+   if self.active_footprint is None: return None
+   return self.active_footprint.filename
 
   def _make_model(self):
     self.model = QtGui.QStandardItemModel()
@@ -64,19 +64,19 @@ class LibraryTree(QtGui.QTreeView):
     self.model.setHorizontalHeaderLabels(['name','id'])
     parentItem = self.model.invisibleRootItem()
     first = True
-    first_foot_id = None
+    first_foot_meta = None
     first_foot_lib = None
-    for coffee_lib in self.lib.values():
+    for coffee_lib in self.coffee_lib.values():
       guilib = Library(self.selectionModel, coffee_lib)
       parentItem.appendRow(guilib)
       if first:
-        first_foot_id = guilib.first_foot_id
+        first_foot_meta = guilib.first_foot_meta
         first_foot_lib = guilib
-        first = first_foot_id is None
-    return (first_foot_lib, first_foot_id)
+        first = first_foot_meta is None
+    return (first_foot_lib, first_foot_meta)
 
   def populate(self):
-    (first_foot_lib, first_foot_id) = self._make_model()
+    (first_foot_lib, first_foot_meta) = self._make_model()
     self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     self.setModel(self.model)
     self.selectionModel().currentRowChanged.connect(self.row_changed)
@@ -85,15 +85,15 @@ class LibraryTree(QtGui.QTreeView):
     self.setItemsExpandable(False)
     self.resizeColumnToContents(0)
     self.doubleClicked.connect(self.parent.show_footprint_tab)
-    self.active_footprint_id = None
+    self.active_footprint = None
     self.active_library = None
     if first_foot_lib is not None:
-      print "selected", first_foot_lib.name
+      #print "selected", first_foot_lib.name
       if first_foot_lib.select_first_foot():
-        print "selected", first_foot_id
-        self.active_footprint_id = first_foot_id
-        self.active_library = first_foot_lib.name
-    self._footprint_selected()
+        #print "selected", first_foot_meta.id
+        self.active_footprint = first_foot_meta
+        self.active_library = first_foot_lib.coffee_lib
+        self._footprint_selected()
 
   def row_changed(self, current, previous):
     x = current.data(QtCore.Qt.UserRole)
@@ -107,13 +107,15 @@ class LibraryTree(QtGui.QTreeView):
     self.selected_library = None
     self._footprint_selected()
     (lib_name, fpid) = x
-    directory = self.lib[lib_name].directory
-    fn = fpid + '.coffee'
-    ffn = QtCore.QDir(directory).filePath(fn)
-    with open(ffn) as f:
+    directory = self.coffee_lib[lib_name].directory
+    meta = self.coffee_lib[lib_name].meta_by_id[fpid]
+    fn = meta.filename
+    #ffn = QtCore.QDir(directory).filePath(fn)
+    with open(fn) as f:
       self.parent.code_textedit.setPlainText(f.read())
-      self.active_footprint_id = fpid
-      self.active_library = lib_name
+    self.active_footprint = meta
+    self.active_library = self.coffee_lib[lib_name]
+    self.parent.set_code_textedit_readonly(meta.readonly)
 
   def _footprint_selected(self):
     for action in self.actions():
@@ -145,14 +147,14 @@ class LibraryTree(QtGui.QTreeView):
     _add('&New', self.new_footprint)
 
   def remove_footprint(self):
-    directory = self.lib[self.active_library].directory
-    fn = self.active_footprint_id + '.coffee'
+    directory = self.active_library.directory
+    fn = self.active_footprint.filename
     QtCore.QDir(directory).remove(fn)
     # fall back to first_foot in library, if any
-    library = self.rescan_library(self.active_library)
+    library = self.rescan_library(self.active_library.name)
     if library.select_first_foot():
-      self.active_footprint_id = library.first_foot_id
-      self.active_library = library.name
+      self.active_footprint = library.first_foot_meta
+      self.active_library = library.coffee_lib
     # else fall back to any first foot...
     else:
       root = self.model.invisibleRootItem()
@@ -161,7 +163,7 @@ class LibraryTree(QtGui.QTreeView):
         if library.select_first_foot():
           self.active_footprint_id = library.first_foot.id
           self.active_library = library.name
-    directory = self.lib[self.active_library].directory
+    directory = self.coffee_lib[self.active_library].directory
     fn = self.active_footprint_id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
@@ -181,7 +183,7 @@ class LibraryTree(QtGui.QTreeView):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = pycoffee.clone_coffee_meta(old_code, old_meta, new_id, new_name)
-    lib_dir = QtCore.QDir(self.lib[new_lib].directory)
+    lib_dir = QtCore.QDir(self.coffee_lib[new_lib].directory)
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -198,7 +200,7 @@ class LibraryTree(QtGui.QTreeView):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_id, new_name, new_lib) = dialog.get_data()
     new_code = pycoffee.new_coffee(new_id, new_name)
-    lib_dir = QtCore.QDir(self.lib[new_lib].directory)
+    lib_dir = QtCore.QDir(self.coffee_lib[new_lib].directory)
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -220,7 +222,7 @@ class LibraryTree(QtGui.QTreeView):
     fn = my_id + '.coffee'
     old_lib = self.active_library
     new_code = old_code.replace("#name %s" % (old_name), "#name %s" % (new_name))
-    new_lib_dir = QtCore.QDir(self.lib[new_lib].directory)
+    new_lib_dir = QtCore.QDir(self.coffee_lib[new_lib].directory)
     new_file_name = new_lib_dir.filePath(fn)
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
@@ -229,7 +231,7 @@ class LibraryTree(QtGui.QTreeView):
     if old_lib == new_lib: 
       self.rescan_library(old_lib, my_id) # just to update the name
     else:
-      old_lib_dir = QtCore.QDir(self.lib[old_lib].directory)
+      old_lib_dir = QtCore.QDir(self.cofffee_lib[old_lib].directory)
       old_lib_dir.remove(fn)
       self.rescan_library(old_lib)
       self.rescan_library(new_lib, my_id)
@@ -240,7 +242,7 @@ class LibraryTree(QtGui.QTreeView):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (name, directory) = dialog.get_data()
     lib = coffee.library.Library(name, directory)
-    self.lib[name] = lib
+    self.coffee_lib[name] = lib
     self.save_libraries(self.parent.settings)
     root = self.model.invisibleRootItem()
     guilib = Library(self.selectionModel, lib)
@@ -251,7 +253,7 @@ class LibraryTree(QtGui.QTreeView):
     dialog = DisconnectLibraryDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     lib_name = dialog.get_data()
-    del self.lib[lib_name]
+    del self.coffee_lib[lib_name]
     self.save_libraries(self.parent.settings)
     root = self.model.invisibleRootItem()
     for row_index in range(0, root.rowCount()):
@@ -263,13 +265,12 @@ class LibraryTree(QtGui.QTreeView):
     for row_index in range(0, root.rowCount()):
       library = root.child(row_index)
       if library.select_first_foot():
-        self.active_footprint_id = library.first_foot_id
-        self.active_library = library.name
-        directory = self.lib[self.active_library].directory
-        fn = self.active_footprint_id + '.coffee'
-        ffn = QtCore.QDir(directory).filePath(fn)
-        with open(ffn) as f:
+        self.active_footprint = library.first_foot_meta
+        self.active_library = library.coffee_lib
+        fn = self.active_footprint.filename
+        with open(fn) as f:
           self.parent.code_textedit.setPlainText(f.read())
+        return
 
   def rescan_library(self, name, select_id = None):
     root = self.model.invisibleRootItem()
@@ -287,7 +288,7 @@ class LibraryTree(QtGui.QTreeView):
     if self.selected_library != None:
       lib = self.selected_library
     else:
-      lib = self.active_library
+      lib = self.active_library.name
     self.rescan_library(lib)
     self.parent.status("%s reloaded." % (lib))
 
@@ -307,11 +308,11 @@ class Library(QtGui.QStandardItem):
     self.setEditable(False)
     self.items = {}
     self.id_items = {}
-    self.first_foot_id = None
+    self.first_foot_meta = None
     self.scan()
 
-  def select(self, id):
-    meta = self.coffee_lib.meta_by_id[id]
+  def select(self, meta):
+    id = meta.id
     print "%s/%s selected." % (meta.filename, meta.name)
     item = self.items[id]
     id_item = self.id_items[id]
@@ -319,8 +320,8 @@ class Library(QtGui.QStandardItem):
     self.selection_model().select(id_item.index(), QtGui.QItemSelectionModel.Select)
 
   def select_first_foot(self):
-    if self.first_foot_id is not None:
-      self.select(self.first_foot_id)
+    if self.first_foot_meta is not None:
+      self.select(self.first_foot_meta)
       return True
     return False
 
@@ -351,7 +352,7 @@ class Library(QtGui.QStandardItem):
     self.removeRows(0, self.rowCount())
     self.row_data = []
     self.footprints = []
-    self.first_foot_id = None
+    self.first_foot_meta = None
     if not self.coffee_lib.exists:
       self.setForeground(QtGui.QBrush(Qt.red))
       return
@@ -364,4 +365,4 @@ class Library(QtGui.QStandardItem):
        
     _add(self, self.coffee_lib.root_meta_list)
     if self.coffee_lib.root_meta_list != []:
-      self.first_foot_id = self.coffee_lib.root_meta_list[0].id
+      self.first_foot_meta = self.coffee_lib.root_meta_list[0]

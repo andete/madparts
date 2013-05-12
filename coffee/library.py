@@ -31,6 +31,7 @@ class Library:
       self.readonly = not os.access(self.directory, os.W_OK)
     self.meta_list = []
     self.fail_list = []
+    self.meta_by_id = {}
     self.scan()
 
   def scan(self, select_id = None):

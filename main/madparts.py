@@ -7,6 +7,7 @@ import numpy as np
 import math, time, traceback, re, os, os.path, sys
 
 from PySide import QtGui, QtCore
+from PySide.QtCore import Qt
 
 from gui.dialogs import *
 import gui.gldraw, gui.library
@@ -93,12 +94,22 @@ class MainWin(QtGui.QMainWindow):
 
   ### GUI HELPERS
 
+  def set_code_textedit_readonly(self, readonly):
+    self.code_textedit.setReadOnly(readonly)
+    pal = self.code_textedit.palette()
+    if self.libtree.active_footprint.readonly:
+      pal.setColor(QtGui.QPalette.Base, Qt.lightGray)
+    else:
+      pal.setColor(QtGui.QPalette.Base, Qt.white)
+    self.code_textedit.setPalette(pal)
+
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.code_textedit = QtGui.QTextEdit()
     self.code_textedit.setAcceptRichText(False)
     with open(self.libtree.active_footprint_file()) as f:
         self.code_textedit.setPlainText(f.read())
+    self.set_code_textedit_readonly(self.libtree.active_footprint.readonly)
     self.highlighter1 = CoffeeHighlighter(self.code_textedit.document())
     self.code_textedit.textChanged.connect(self.editor_text_changed)
     self.result_textedit = QtGui.QTextEdit()
@@ -173,7 +184,7 @@ class MainWin(QtGui.QMainWindow):
   def reload_footprint(self):
     with open(self.libtree.active_footprint_file(), 'r') as f:
       self.code_textedit.setPlainText(f.read())
-    self.status("%s reloaded." % (self.active_footprint_file()))
+    self.status("%s reloaded." % (self.libtree.active_footprint_file()))
 
   def editor_text_changed(self):
     key_idle = self.setting("gui/keyidle")
@@ -308,8 +319,9 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_docu: filter_out.append('docu')
       if not self.display_restrict: filter_out.append('restrict')
       self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
-      with open(self.libtree.active_footprint_file(), "w+") as f:
-        f.write(code)
+      if not self.libtree.active_footprint.readonly:
+        with open(self.libtree.active_footprint_file(), "w+") as f:
+          f.write(code)
       if compilation_failed_last_time:
         self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
