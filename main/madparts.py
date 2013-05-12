@@ -27,18 +27,11 @@ class MainWin(QtGui.QMainWindow):
   def __init__(self):
     super(MainWin, self).__init__()
 
+    self.libtree = gui.library.LibraryTree(self)
+
     self.settings = QtCore.QSettings()
-    if not 'library' in self.settings.childGroups():
-      if sys.platform == 'darwin':
-        example_lib = QtCore.QDir('share/madparts/examples').absolutePath()
-      else:
-        example_lib = QtCore.QDir('examples').absolutePath()
-      library = coffee.library.Library('Examples', example_lib)
-      self.lib = { 'Examples': library }
-      self.save_libraries()
-    else:
-      self.lib = {}
-      self.load_libraries()
+
+    self.libtree.initialize_libraries(self.settings)
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
     splitter.addWidget(self._left_part())
@@ -122,7 +115,7 @@ class MainWin(QtGui.QMainWindow):
 
   def _left_part(self):
     lqtab = QtGui.QTabWidget()
-    self.libtree = gui.library.LibraryTree(self)
+    self.libtree.populate()
     lqtab.addTab(self.libtree, "library")
     lqtab.addTab(self._footprint(), "footprint")
     lqtab.setCurrentIndex(1)
@@ -250,7 +243,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, importer, selected_library) = dialog.get_data()
-    lib_dir = QtCore.QDir(self.lib[selected_library].directory)
+    lib_dir = QtCore.QDir(self.libtree.lib[selected_library].directory)
     l = []
     for footprint_name in footprint_names:
       interim = inter.import_footprint(importer, footprint_name) 
@@ -361,25 +354,6 @@ class MainWin(QtGui.QMainWindow):
     except Exception as ex:
       self.status(str(ex))
       raise
-
-  def save_libraries(self):
-    l = self.lib.values()
-    self.settings.beginWriteArray('library')
-    for i in range(len(l)):
-      self.settings.setArrayIndex(i)
-      self.settings.setValue('name', l[i].name)
-      self.settings.setValue('file', l[i].directory)
-    self.settings.endArray()
-
-  def load_libraries(self):
-    size = self.settings.beginReadArray('library')
-    for i in range(size):
-      self.settings.setArrayIndex(i)
-      name = self.settings.value('name')
-      filen = self.settings.value('file')
-      library = coffee.library.Library(name, filen)
-      self.lib[name] = library
-    self.settings.endArray()
 
 def gui_main():
   QtCore.QCoreApplication.setOrganizationName("madparts")
