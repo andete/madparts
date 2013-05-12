@@ -289,7 +289,8 @@ class LibraryTree(QtGui.QTreeView):
       if library.name == name:
         library.scan()
         if select_id is not None:
-          library.select(select_id)
+          select_meta = self.coffee_lib[name].meta_by_id[select_id]
+          library.select(select_meta)
         self.expandAll()
         return library
     return None

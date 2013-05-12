@@ -301,8 +301,15 @@ class MainWin(QtGui.QMainWindow):
     self.gl_dy = dy
     self.gl_w = w
     self.gl_h = h
-    zoomx = float(w) / dx
-    zoomy = float(h) / dy
+    zoomx = 0.0
+    zoomy = 0.0
+    if dx > 0.0:
+      zoomx = float(w) / dx
+    if dy > 0.0:
+      zoomy = float(h) / dy
+    if zoomx == 0.0 and zoomy == 0.0:
+      zoomx = 42 
+      zoomy = 42
     zoom = int(min(zoomx, zoomy))
     self.zoom_selector.setText(str(zoom))
     self.glw.zoomfactor = zoom
