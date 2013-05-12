@@ -32,15 +32,6 @@ class MainWin(QtGui.QMainWindow):
 
     self.settings = QtCore.QSettings()
 
-    self.libtree.initialize_libraries(self.settings)
-
-    splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
-    splitter.addWidget(self._left_part())
-    splitter.addWidget(self._right_part())
-    self.setCentralWidget(splitter)
-
-    self.statusBar().showMessage("Ready.")
-
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
     self.add_action(fileMenu, '&Quit', self.close, 'Ctrl+Q')
@@ -51,8 +42,8 @@ class MainWin(QtGui.QMainWindow):
     footprintMenu = menuBar.addMenu('&Footprint')
     self.add_action(footprintMenu, '&Clone', self.libtree.clone_footprint, 'Ctrl+Alt+C')
     self.add_action(footprintMenu, '&Delete', self.libtree.remove_footprint, 'Ctrl+Alt+D')
-    self.add_action(footprintMenu, '&New', self.libtree.new_footprint, 'Ctrl+Alt+N')
-    self.add_action(footprintMenu, '&Move', self.libtree.move_footprint, 'Ctrl+Alt+M')
+    self.ac_new = self.add_action(footprintMenu, '&New', self.libtree.new_footprint, 'Ctrl+Alt+N')
+    self.ac_move = self.add_action(footprintMenu, '&Move', self.libtree.move_footprint, 'Ctrl+Alt+M')
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
     self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
@@ -78,6 +69,13 @@ class MainWin(QtGui.QMainWindow):
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
 
+    self.libtree.initialize_libraries(self.settings)
+
+    splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
+    splitter.addWidget(self._left_part())
+    splitter.addWidget(self._right_part())
+    self.setCentralWidget(splitter)
+
     self.last_time = time.time() - 10.0
     self.first_keypress = False
     self.timer = QtCore.QTimer()
@@ -92,6 +90,8 @@ class MainWin(QtGui.QMainWindow):
     self.gl_w = 0
     self.gl_h = 0
 
+    self.statusBar().showMessage("Ready.")
+
   ### GUI HELPERS
 
   def set_code_textedit_readonly(self, readonly):
@@ -102,6 +102,10 @@ class MainWin(QtGui.QMainWindow):
     else:
       pal.setColor(QtGui.QPalette.Base, Qt.white)
     self.code_textedit.setPalette(pal)
+
+  def set_library_readonly(self, readonly):
+    self.ac_new.setDisabled(readonly)
+    self.ac_move.setDisabled(readonly)
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)

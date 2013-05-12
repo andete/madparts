@@ -125,13 +125,17 @@ class LibraryTree(QtGui.QTreeView):
       self.addAction(action)
       if slot != None: action.triggered.connect(slot)
       else: action.setDisabled(True)
-    _add('&Remove', self.remove_footprint)
+    if self.active_library.readonly:
+      _add('&Remove')
+    else:
+      _add('&Remove', self.remove_footprint)
     _add('&Clone', self.clone_footprint)
     _add('&Move', self.move_footprint)
     _add('&Export previous', self.parent.export_previous)
     _add('E&xport', self.parent.export_footprint)
     _add('&Print')
     _add('&Reload', self.parent.reload_footprint)
+    self.parent.set_library_readonly(self.active_library.readonly)
 
   def _library_selected(self):
     for action in self.actions():
@@ -142,9 +146,15 @@ class LibraryTree(QtGui.QTreeView):
       if slot != None: action.triggered.connect(slot)
       else: action.setDisabled(True)
     _add('&Disconnect', self.disconnect_library)
-    _add('&Import', self.parent.import_footprints)
+    lib = self.coffee_lib[self.selected_library]
+    if lib.readonly or not lib.exists:
+      _add('&Import')
+      _add('&New')
+    else:
+      _add('&Import', self.parent.import_footprints)
+      _add('&New', self.new_footprint)
     _add('&Reload', self.reload_library)
-    _add('&New', self.new_footprint)
+    self.parent.set_library_readonly(lib.readonly or not lib.exists)
 
   def remove_footprint(self):
     directory = self.active_library.directory
@@ -356,6 +366,8 @@ class Library(QtGui.QStandardItem):
     if not self.coffee_lib.exists:
       self.setForeground(QtGui.QBrush(Qt.red))
       return
+    if self.coffee_lib.readonly:
+      self.setForeground(QtGui.QBrush(Qt.gray))
 
     def _add(parent, meta_list):
       if meta_list == []: return

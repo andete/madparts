@@ -17,17 +17,19 @@ def color_scheme_combo(parent, current):
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
-def library_combo(parent, allow_non_existing=False):
+def library_combo(parent, allow_non_existing=False, allow_readonly=False):
   l_combo = QtGui.QComboBox()
   selected = parent.selected_library
   if selected == None:
-    selected = parent.active_library
+    selected = parent.active_library.name
   for lib in parent.coffee_lib.values():
     l_combo.addItem(lib.name, lib.directory)
-    if not lib.exists and not allow_non_existing:
+    if (not lib.exists and not allow_non_existing) or (lib.readonly and not allow_readonly):
       i = l_combo.model().index(l_combo.count()-1, 0) 
       # trick to make disabled
       l_combo.model().setData(i, 0, QtCore.Qt.UserRole-1)
+      # if the prefered selected is our disabled one, don't use it
+      if selected == lib.name: selected = None
     elif selected == None:
       selected = lib.name
     if lib.name == selected:
@@ -103,7 +105,7 @@ class CloneFootprintDialog(QtGui.QDialog):
     existing_fl = QtGui.QFormLayout()
     existing_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
     existing_fl.addRow("id:", QtGui.QLabel(old_meta['id']))
-    existing_fl.addRow("library:", QtGui.QLabel(parent.active_library))
+    existing_fl.addRow("library:", QtGui.QLabel(parent.active_library.name))
     gbox_existing.setLayout(existing_fl)
     vbox.addWidget(gbox_existing) 
     self.name_edit = QtGui.QLineEdit()
@@ -163,7 +165,7 @@ class MoveFootprintDialog(QtGui.QDialog):
     gbox_from = QtGui.QGroupBox("from")
     from_fl = QtGui.QFormLayout()
     from_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
-    from_fl.addRow("library:", QtGui.QLabel(parent.active_library))
+    from_fl.addRow("library:", QtGui.QLabel(parent.active_library.name))
     gbox_from.setLayout(from_fl)
     vbox.addWidget(gbox_from) 
     gbox_to = QtGui.QGroupBox("to")
