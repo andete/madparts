@@ -53,9 +53,11 @@ class MainWin(QtGui.QMainWindow):
     self.display_docu = self.setting('gui/displaydocu') == 'True'
     self.display_restrict = self.setting('gui/displayrestrict') == 'True'
     self.display_stop = self.setting('gui/displaystop') == 'True'
+    self.display_keepout = self.setting('gui/displaykeepout') == 'True'
     self.docu_action = self.add_action(footprintMenu, "&Display Docu", self.docu_changed, checkable=True, checked=self.display_docu)
     self.restrict_action = self.add_action(footprintMenu, "&Display Restrict", self.restrict_changed, checkable=True, checked=self.display_restrict)
     self.stop_action = self.add_action(footprintMenu, "&Display Stop", self.stop_changed, checkable=True, checked=self.display_stop)
+    self.keepout_action = self.add_action(footprintMenu, "&Display Keepout", self.keepout_changed, checkable=True, checked=self.display_keepout)
 
     footprintMenu.addSeparator()
     self.add_action(footprintMenu, '&Force Compile', self.compile, 'Ctrl+F')
@@ -288,6 +290,11 @@ class MainWin(QtGui.QMainWindow):
     self.settings.setValue('gui/displaystop', str(self.display_stop))
     self.compile()
 
+  def keepout_changed(self):
+    self.display_keepout = self.keepout_action.isChecked()
+    self.settings.setValue('gui/displaykeepout', str(self.display_keepout))
+    self.compile()
+
   ### OTHER METHODS
 
   def setting(self, key):
@@ -335,6 +342,8 @@ class MainWin(QtGui.QMainWindow):
       filter_out = []
       if not self.display_docu: filter_out.append('docu')
       if not self.display_restrict: filter_out.append('restrict')
+      if not self.display_stop: filter_out.append('stop')
+      if not self.display_keepout: filter_out.append('keepout')
       self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.explorer.active_footprint.readonly:
         with open(self.explorer.active_footprint_file(), "w+") as f:

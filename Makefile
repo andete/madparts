@@ -16,8 +16,8 @@ sdist:
 	python setup.py sdist
 
 test:
-	@nosetests
-	#@nosetests test/madparts_test.py:test_eagle_import_one
+	@#nosetests
+	@nosetests test/madparts_test.py:test_eagle_export_empty
 
 coverage:
 	@nosetests --with-coverage \

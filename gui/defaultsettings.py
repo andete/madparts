@@ -18,6 +18,7 @@ color_schemes['default'] = {
   'meta':  (1.0, 1.0, 1.0, 1.0),
   'restrict':  (0.0, 1.0, 0.0, 0.3),
   'stop':  (0.0, 1.0, 1.0, 0.3),
+  'keepout':  (1.0, 0.0, 0.5, 0.7),
   'unknown':  (1.0, 0.0, 1.0, 0.7),
   'hole': (1.0, 1.0, 1.0, 0.7),
   }
@@ -40,5 +41,6 @@ default_settings = {
   'gui/displaydocu': True,
   'gui/displayrestrict': False,
   'gui/displaystop': False,
+  'gui/displaykeepout': False,
   'gui/autocompile': True,
 }
