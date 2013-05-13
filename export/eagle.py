@@ -21,6 +21,11 @@ def type_to_layer_number(layer):
     'silk': 21,
     'name': 25,
     'value': 27,
+    'stop': 29,
+    'glue': 35,
+    'keepout': 39,
+    'restrict': 41,
+    'vrestrict': 43,
     'docu': 51,
     }
   return type_to_layer_number_dict[layer]
@@ -274,6 +279,10 @@ class Export:
           'pad': pad,
           'silk': silk,
           'docu': silk,
+          'keepout': silk,
+          'stop': silk,
+          'restrict': silk,
+          'vrestrict': silk,
           'smd': smd,
           }.get(shape['type'], unknown)(shape)
     return name
