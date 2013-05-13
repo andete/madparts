@@ -1,3 +1,7 @@
+# set DATA_DIR for unit tests
+DATA_DIR := .
+export DATA_DIR
+
 all:
 	@./madparts
 
@@ -15,8 +19,15 @@ clean:
 sdist:
 	python setup.py sdist
 
+testinstall:
+	rm -rf /tmp/bla
+	mkdir -p /tmp/bla
+	python setup.py install --root /tmp/bla/ --prefix /usr
+
 test:
-	@#nosetests
+	@nosetests
+
+testone:
 	@nosetests test/madparts_test.py:test_eagle_export_empty
 
 coverage:

@@ -55,27 +55,24 @@ setup(
   url = 'http://madparts.org/',
   packages = [
         'coffee',
-        'coffeescript',
         'export',
-        'grind',
         'gui',
         'inter',
         'main',
-        'shaders',
         'syntax',
         'util',
         ],
   package_data= { 
-        'coffeescript': ['*.js', 'LICENSE', 'README'],
-        'grind': ['*.coffee'],
         'gui': [
-          'freefont.COPYING', 'FreeMonoBold.ttf',
           '../COPYING', '../README.md', # dirty trick ;)
           ],
-        'shaders': ['*.vert', '*.frag'],
         },
   data_files = [
     ('share/madparts/examples', glob.glob('examples/*.coffee')),
+    ('share/madparts/grind', glob.glob('grind/*.coffee')),
+    ('share/madparts/coffeescript', ['coffeescript/LICENSE', 'coffeescript/README'] + glob.glob('coffeescript/*.js')),
+    ('share/madparts/shaders', glob.glob('shaders/*.vert') + glob.glob('shaders/*.frag')),
+    ('share/madparts/gui', ['gui/freefont.COPYING', 'gui/FreeMonoBold.ttf'] ),
     ] + extra_data_files,
   platforms = ["Windows", "Linux", "Mac OS-X"],
   **extra_options

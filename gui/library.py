@@ -10,6 +10,7 @@ import coffee.pycoffee as pycoffee
 import coffee.library
 from util.util import *
 from gui.dialogs import *
+import sys, os
 
 class Explorer(QtGui.QTreeView):
 
@@ -38,9 +39,12 @@ class Explorer(QtGui.QTreeView):
 
     if not 'library' in settings.childGroups():
       if sys.platform == 'darwin':
+        # TODO: retest and modify under darwin
         example_lib = QtCore.QDir('share/madparts/examples').absolutePath()
       else:
-        example_lib = QtCore.QDir('examples').absolutePath()
+        data_dir = os.environ['DATA_DIR']
+        
+        example_lib = QtCore.QDir(os.path.join(data_dir, 'examples')).absolutePath()
       library = coffee.library.Library('Examples', example_lib)
       self.coffee_lib = { 'Examples': library }
       self.save_libraries(settings)

@@ -2,8 +2,6 @@
 # License: GPL
 
 import os.path, re, string, traceback
-import pkg_resources
-import coffeescript, grind
 from inter import inter
 
 import PyV8
@@ -30,7 +28,10 @@ def pyv8_convert(obj, nest=0):
 class Global(PyV8.JSClass):
 
     def require(self, arg):
-      file_content = pkg_resources.resource_string(coffeescript.__name__, "%s.js" % (arg))
+      data_dir = os.environ['DATA_DIR']
+      filename = os.path.join(data_dir, 'coffeescript', "%s.js" % (arg))
+      with open(filename) as f:
+        file_content = f.read()
       return PyV8.JSContext.current.eval(file_content)
 
 js_make_js_from_coffee = None
@@ -80,7 +81,10 @@ def eval_coffee_footprint(coffee):
     prepare_coffee_compiler()
   try:
     js_make_js_ctx.enter()
-    ground = pkg_resources.resource_string(grind.__name__, "ground-%s.coffee" % (format))
+    data_dir = os.environ['DATA_DIR']
+    filename = os.path.join(data_dir, 'grind', "ground-%s.coffee" % (format))
+    with open(filename) as f:
+      ground = f.read()
     ground_js = js_make_js_from_coffee(ground)
     js = js_make_js_from_coffee(coffee + "\nreturn footprint()\n")
     with PyV8.JSContext() as ctxt:

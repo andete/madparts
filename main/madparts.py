@@ -392,15 +392,5 @@ def gui_main():
 OpenGL 2.1 or better is required (%s found)
 (or use software openGL like mesa)""" % (widget.glw.glversion)
     QtGui.QMessageBox.critical(widget, "error", s)
-    return
-  app.exec_()
-  # on windows we can't delete the file; TODO investigate how to work around that
-  if sys.platform != 'win32':
-    os.unlink(widget.glw.font_file)
-
-if __name__ == '__main__':
-    if len(sys.argv) == 1:
-      gui_main()
-    else:
-      import cli
-      sys.exit(cli.cli_main())
+    return 1
+  return app.exec_()
