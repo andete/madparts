@@ -1,4 +1,4 @@
-#format 1.0
+#format 1.1
 #name NUM_IV-9
 #id b20fe725b4644092912fb87bb673facf
 #desc Numitron IV-9 pinout
@@ -31,7 +31,7 @@ footprint = () ->
   ]
   
   label = new Label 'IV-9'
-  label.dy = 1.5
+  label.dy = 1
 
   silk1 = new Line line_width
   silk1.x1 = -2.0

@@ -17,20 +17,22 @@ def color_scheme_combo(parent, current):
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
-def library_combo(parent):
+def library_combo(parent, allow_non_existing=False, allow_readonly=False):
   l_combo = QtGui.QComboBox()
   selected = parent.selected_library
   if selected == None:
-    selected = parent.active_library
-  for x in parent.lib_dir.items():
-    l_combo.addItem(x[0], x)
-    if not parent.lib_exist[x[0]]:
+    selected = parent.active_library.name
+  for lib in parent.coffee_lib.values():
+    l_combo.addItem(lib.name, lib.directory)
+    if (not lib.exists and not allow_non_existing) or (lib.readonly and not allow_readonly):
       i = l_combo.model().index(l_combo.count()-1, 0) 
       # trick to make disabled
       l_combo.model().setData(i, 0, QtCore.Qt.UserRole-1)
+      # if the prefered selected is our disabled one, don't use it
+      if selected == lib.name: selected = None
     elif selected == None:
-      selected = x[0]
-    if x[0] == selected:
+      selected = lib.name
+    if lib.name == selected:
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
@@ -103,7 +105,7 @@ class CloneFootprintDialog(QtGui.QDialog):
     existing_fl = QtGui.QFormLayout()
     existing_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
     existing_fl.addRow("id:", QtGui.QLabel(old_meta['id']))
-    existing_fl.addRow("library:", QtGui.QLabel(parent.active_library))
+    existing_fl.addRow("library:", QtGui.QLabel(parent.active_library.name))
     gbox_existing.setLayout(existing_fl)
     vbox.addWidget(gbox_existing) 
     self.name_edit = QtGui.QLineEdit()
@@ -163,7 +165,7 @@ class MoveFootprintDialog(QtGui.QDialog):
     gbox_from = QtGui.QGroupBox("from")
     from_fl = QtGui.QFormLayout()
     from_fl.addRow("name:", QtGui.QLabel(old_meta['name']))
-    from_fl.addRow("library:", QtGui.QLabel(parent.active_library))
+    from_fl.addRow("library:", QtGui.QLabel(parent.active_library.name))
     gbox_from.setLayout(from_fl)
     vbox.addWidget(gbox_from) 
     gbox_to = QtGui.QGroupBox("to")
@@ -193,7 +195,7 @@ class DisconnectLibraryDialog(QtGui.QDialog):
     self.resize(640,160) # TODO, there must be a better way to do this
     vbox = QtGui.QVBoxLayout()
     fl = QtGui.QFormLayout()
-    self.l_combo = library_combo(parent)
+    self.l_combo = library_combo(parent, True, True)
     fl.addRow("library:", self.l_combo)
     vbox.addLayout(fl)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
@@ -250,7 +252,8 @@ class AddLibraryDialog(QtGui.QDialog):
     result = QtGui.QFileDialog.getExistingDirectory(self, "Select Directory")
     if result == '': return
     self.dir_edit.setText(result)
-    if result in self.parent.lib_dir.values():
+    all_dirs = [lib.directory for lib in self.parent.coffee_lib.values()]
+    if result in all_dirs:
       self.dir_error = 'directory already exists as library'
       self.dir_ok = False
     else:
@@ -262,7 +265,7 @@ class AddLibraryDialog(QtGui.QDialog):
     if name == '':
       self.name_error = 'please provide a name'
       self.name_ok = False
-    elif name in self.parent.lib_dir.keys():
+    elif name in self.parent.coffee_lib.keys():
       self.name_error = 'name is already in use'
       self.name_ok = False
     else:
@@ -379,6 +382,9 @@ class PreferencesDialog(QtGui.QDialog):
     self.glzoomf = QtGui.QLineEdit(str(parent.setting('gl/zoomfactor')))
     self.glzoomf.setValidator(QtGui.QIntValidator(1,250))
     form_layout.addRow("zoom factor", self.glzoomf) 
+    self.auto_compile = QtGui.QCheckBox("Auto Compile")
+    self.auto_compile.setChecked(parent.setting('gui/autocompile')=='True')
+    form_layout.addRow("auto compile", self.auto_compile) 
     self.key_idle = QtGui.QLineEdit(str(parent.setting('gui/keyidle')))
     self.key_idle.setValidator(QtGui.QDoubleValidator(0.0,5.0,2))
     form_layout.addRow("key idle", self.key_idle) 
@@ -399,6 +405,7 @@ class PreferencesDialog(QtGui.QDialog):
     self.gldx.setText(str(default_settings['gl/dx']))
     self.gldy.setText(str(default_settings['gl/dy']))
     self.glzoomf.setText(str(default_settings['gl/zoomfactor']))
+    self.auto_compile.setChecked(default_settings['gui/autocompile'])
     self.key_idle.setText(str(default_settings['gui/keyidle']))
     default_color_scheme = str(default_settings['gui/colorscheme'])
     for i in range(0, self.color_scheme.count()):
@@ -411,6 +418,7 @@ class PreferencesDialog(QtGui.QDialog):
     settings.setValue('gl/dx', self.gldx.text())
     settings.setValue('gl/dy', self.gldy.text())
     settings.setValue('gl/zoomfactor', self.glzoomf.text())
+    settings.setValue('gui/autocompile', str(self.auto_compile.isChecked()))
     settings.setValue('gui/keyidle', self.key_idle.text())
     settings.setValue('gl/colorscheme', self.color_scheme.currentText())
     self.parent.status("Settings updated.")

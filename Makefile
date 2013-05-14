@@ -1,7 +1,10 @@
 PYTHON:=/opt/local/bin/python2.7
+# set DATA_DIR for unit tests
+DATA_DIR := .
+export DATA_DIR
 
 all:
-	@./madparts.py
+	@./madparts
 
 size:
 	@echo 'python:'
@@ -14,7 +17,7 @@ size:
 clean:
 	rm -rf build dist madparts.egg-info
 
-linux:
+sdist:
 	$(PYTHON) setup.py sdist
 
 darwin:
@@ -23,5 +26,19 @@ darwin:
 apprun::
 	./dist/madparts.app/Contents/MacOS/madparts
 
+testinstall:
+	rm -rf /tmp/bla
+	mkdir -p /tmp/bla
+	python setup.py install --root /tmp/bla/ --prefix /usr
 
-.PHONY: all clean size linux
+test:
+	@nosetests
+
+testone:
+	@nosetests test/madparts_test.py:test_eagle_export_empty
+
+coverage:
+	@nosetests --with-coverage \
+	--cover-package=coffee,export,gui,inter,syntax,util
+
+.PHONY: all clean size sdist test

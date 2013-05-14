@@ -21,6 +21,11 @@ def type_to_layer_number(layer):
     'silk': 21,
     'name': 25,
     'value': 27,
+    'stop': 29,
+    'glue': 35,
+    'keepout': 39,
+    'restrict': 41,
+    'vrestrict': 43,
     'docu': 51,
     }
   return type_to_layer_number_dict[layer]
@@ -44,7 +49,7 @@ def layer_number_to_type(layer):
 
 def _load_xml_file(fn):
   with open(fn) as f:
-    return BeautifulSoup(f, "xml")
+    return BeautifulSoup(f, 'xml')
   
 def _save_xml_file(fn, soup):
   with open(fn, 'w+') as f:
@@ -78,6 +83,22 @@ class Export:
   def save(self):
     _save_xml_file(self.fn, self.soup)
 
+  def get_data(self):
+   return str(self.soup)
+
+  # remark that this pretty formatting is NOT what is used in the final
+  # eagle XML as eagle does not get rid of heading and trailing \n and such
+  def get_pretty_data(self):
+   return str(self.soup.prettify())
+
+  def get_pretty_footprint(self, eagle_name):
+    packages = self.soup.eagle.drawing.packages('package')
+    for some_package in packages:
+      if some_package['name'].lower() == eagle_name.lower():
+        return str(some_package.prettify())
+    raise Exception("Footprint not found")
+   
+
   def export_footprint(self, interim):
     # make a deep copy so we can make mods without harm
     interim = copy.deepcopy(interim)
@@ -91,7 +112,7 @@ class Export:
     packages = self.soup.eagle.drawing.packages('package')
     package = None
     for some_package in packages:
-      if some_package['name'] == name:
+      if some_package['name'].lower() == name.lower():
         package = some_package
         package.clear()
         break
@@ -115,7 +136,6 @@ class Export:
         shape2 = shape['shape']
       if shape2 == 'disc':
         pad['shape'] = 'round'
-        print r, drill, drill*1.5
         if f_neq(r, drill*1.5):
           pad['diameter'] = r*2
       elif shape2 == 'octagon':
@@ -125,17 +145,17 @@ class Export:
       elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         if ro == 0: 
-          res['shape'] = 'square'
+          pad['shape'] = 'square'
           if f_neq(shape['dx'], drill*1.5):
-            res['diameter'] = shape['dx']
+            pad['diameter'] = float(shape['dx'])
         elif 'drill_dx' in shape:
           pad['shape'] = 'offset'
           if f_neq(shape['dy'], drill*1.5):
-            pad['diameter'] = shape['dy']
+            pad['diameter'] = float(shape['dy'])
         else:
           pad['shape'] = 'long'
           if f_neq(shape['dy'], drill*1.5):
-            pad['diameter'] = shape['dy']
+            pad['diameter'] = float(shape['dy'])
       package.append(pad)
 
     def smd(shape):
@@ -176,10 +196,11 @@ class Export:
       if s.upper() == "VALUE": 
         s = ">VALUE"
         layer = type_to_layer_number('value')
-      label['x'] = x - len(s)*dy/2
-      label['y'] = y - dy/2
+      label['x'] = x
+      label['y'] = y
       label['size'] = dy
       label['layer'] = layer
+      label['align'] = 'center'
       label.string = s
       package.append(label)
     
@@ -258,9 +279,13 @@ class Export:
           'pad': pad,
           'silk': silk,
           'docu': silk,
+          'keepout': silk,
+          'stop': silk,
+          'restrict': silk,
+          'vrestrict': silk,
           'smd': smd,
           }.get(shape['type'], unknown)(shape)
-        # TODO octagon
+    return name
 
   def add_ats_to_names(self, interim):
     t = {}
@@ -276,7 +301,7 @@ class Export:
         multi_names[k] = 1
     def adapt(x):
       if x['type'] == 'smd' or x['type'] == 'pad':
-        name = re.sub(' ','_', x['name'])
+        name = re.sub(' ','_', str(x['name']))
         if name in multi_names:
           x['name'] = "%s@%d" % (name, multi_names[name])
           multi_names[name] = multi_names[name] + 1
@@ -300,14 +325,14 @@ class Import:
 
   def import_footprint(self, name):
 
-    def package_has_name(tag):
-      if tag.name == 'package' and tag.has_key('name'):
-        n = tag['name']
-        if n == name:
-          return True
-        return False
-
-    package = self.soup.find_all(package_has_name)[0]
+    packages = self.soup.eagle.drawing.packages('package')
+    package = None
+    for p in packages:
+       if p['name'] == name:
+         package = p
+         break
+    if package == None:
+      raise Exception("footprint not found %s " % (name))
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name
@@ -329,8 +354,20 @@ class Import:
       s = text.string
       layer = int(text['layer'])
       size = float(text['size'])
-      y = float(text['y']) + size/2
-      x = float(text['x']) + len(s)*size/2
+      align = 'bottom-left' # eagle default
+      if text.has_key('align'):
+        align = text['align']
+      if align == 'center':
+        x = float(text['x'])
+        y = float(text['y'])
+      elif align == 'bottom-left':
+        x = float(text['x']) + len(s)*size/2
+        y = float(text['y']) + size/2
+      else:
+        # TODO deal with all other cases
+        # eagle supports: bottom-left | bottom-center | bottom-right | center-left | center | center-right | top-left | top-center | top-right
+        x = float(text['x']) + len(s)*size/2
+        y = float(text['y']) + size/2
       res['value'] = s
       if layer == 25 and s.upper() == '>NAME':
         res['value'] = 'NAME'
@@ -354,7 +391,8 @@ class Import:
       if smd.has_key('rot'):
         res['rot'] = int(smd['rot'][1:])
       if smd.has_key('roundness'):
-        res['ro'] = smd['roundness']
+        if smd['roundness'] != '0':
+          res['ro'] = smd['roundness']
       return res
 
     def rect(rect):

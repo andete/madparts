@@ -1,4 +1,4 @@
-#format 1.0
+#format 1.1
 #name TQFP32
 #id e5bd48346acc4d549d678cb059be64ef
 #desc TQFP32 example

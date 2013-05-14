@@ -22,7 +22,7 @@ if sys.platform == 'darwin':
       }
   extra_options = dict(
       setup_requires=['py2app'],
-      app=['madparts.py'],
+      app=['madparts'],
       # Cross-platform applications generally expect sys.argv to
       # be used for opening files.
       options=dict(py2app=OPTIONS),
@@ -32,13 +32,13 @@ elif sys.platform == 'win32':
   extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
       setup_requires=['py2exe'],
-      console=['madparts.py'],
+      console=['madparts'],
       )
 elif sys.platform.startswith('linux'):
    extra_options = dict(
        # Normally unix-like platforms will use "setup.py install"
        # and install the main script as such
-       scripts=['madparts.py'],
+       scripts=['madparts'],
        )
    if not arch in ['x86_64']:
      raise Exception("unsupported arch %s" % (arch))
@@ -55,27 +55,24 @@ setup(
   url = 'http://madparts.org/',
   packages = [
         'coffee',
-        'coffeescript',
         'export',
-        'grind',
         'gui',
         'inter',
-        'shaders',
+        'main',
         'syntax',
         'util',
         ],
   package_data= { 
-        'coffee-script': ['*.js', 'LICENSE', 'README'],
-        'grind': ['*.coffee'],
         'gui': [
-          'freefont.COPYING', 'FreeMonoBold.ttf',
-          '../GPL', '../README.md', # dirty trick ;)
-          '../PyV8.py', '../_PyV8.so',
+          '../COPYING', '../README.md', # dirty trick ;)
           ],
-        'shaders': ['*.vert', '*.frag'],
         },
   data_files = [
     ('share/madparts/examples', glob.glob('examples/*.coffee')),
+    ('share/madparts/grind', glob.glob('grind/*.coffee')),
+    ('share/madparts/coffeescript', ['coffeescript/LICENSE', 'coffeescript/README'] + glob.glob('coffeescript/*.js')),
+    ('share/madparts/shaders', glob.glob('shaders/*.vert') + glob.glob('shaders/*.frag')),
+    ('share/madparts/gui', ['gui/freefont.COPYING', 'gui/FreeMonoBold.ttf'] ),
     ] + extra_data_files,
   platforms = ["Windows", "Linux", "Mac OS-X"],
   **extra_options

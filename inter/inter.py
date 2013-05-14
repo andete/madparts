@@ -162,7 +162,7 @@ def bounding_box(inter):
 
 def size(inter):
   if inter == None or inter == []:
-    return (1,1)
+    return (1, 1, 0, 0, 0, 0)
   (x1,y1,x2,y2) = bounding_box(inter)
   dx = 2*max(abs(x2),abs(x1)) 
   dy = 2*max(abs(y2),abs(y1))
@@ -195,6 +195,7 @@ def _count_num_values(pads, param):
   return (i, res)
 
 def _equidistant(pads, direction):
+  if len(pads) < 2: return False
   expected = abs(pads[1][direction] - pads[0][direction])
   prev = pads[1][direction]
   for item in pads[2:]:
@@ -449,9 +450,24 @@ def _check_quad(orig_pads):
   mods = _make_mods(['x','y', 'rot', 'dx', 'dy'], pad, sort_pads)
   return [pad, special] + mods
 
+def _check_sequential(pads):
+  for (i, pad) in zip(range(0, len(pads)), pads):
+    print i, pad
+    if 'name' in pad:
+      if pad['name'] == str(i):
+         del pad['name']
+      else:
+         return pads
+  return pads
+
 def _find_pad_patterns(pads):
   n = len(pads)
-  print n
+  if n == 1:
+    if 'name' in pads[0]:
+      if pads[0]['name'] == '1':
+        del pads[0]['name']
+    return pads
+
   (x_diff, _z) = _count_num_values(pads, 'x')
   print 'x diff ', x_diff
   (y_diff, _z) = _count_num_values(pads, 'y')
@@ -472,6 +488,7 @@ def _find_pad_patterns(pads):
   # possibly a quad
   if x_diff == (n/4)+2 and y_diff == (n/4)+2:
     return _check_quad(pads)
+
   return pads
 
 def find_pad_patterns(inter):
@@ -487,3 +504,8 @@ def find_pad_patterns(inter):
     smds = _find_pad_patterns(smds)
     inter = smds + no_smds
   return inter
+
+def import_footprint(importer, footprint_name):
+  interim = importer.import_footprint(footprint_name) 
+  interim = sort_by_type(interim)
+  return find_pad_patterns(interim)

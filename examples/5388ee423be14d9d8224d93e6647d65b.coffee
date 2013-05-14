@@ -1,4 +1,4 @@
-#format 1.0
+#format 1.1
 #name PIN 2X3_alt
 #id 5388ee423be14d9d8224d93e6647d65b
 #parent c27da481bc86472abbbf234a65140d26
@@ -11,8 +11,8 @@ footprint = () ->
   pad_r = (d-0.34)/2
   n = 6
 
-  name = new Name (n*d/4+0.5)
-  value = new Value (-n*d/4-0.5)
+  name = new Name (n*d/4+1)
+  value = new Value (-n*d/4-1)
   
   # the basic pad
   pad = new OctagonPad pad_r, drill

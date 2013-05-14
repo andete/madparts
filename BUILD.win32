@@ -24,6 +24,10 @@ pip install numpy
 
 pip install pyside
 
+* python lxml
+
+pip install lxml
+
 * beautifulsoup4
 
 pip install beautifulsoup4

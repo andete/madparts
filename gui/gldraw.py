@@ -9,22 +9,22 @@ import OpenGL.arrays.vbo as vbo
 
 import numpy as np
 import math, sys
-import os.path, pkg_resources, tempfile
+import os, os.path
 
 from util.util import *
 from defaultsettings import color_schemes
 from inter import inter
 
 import glFreeType
-import shaders
 
 def make_shader(name):
   print "compiling %s shaders" % (name)
   p = QGLShaderProgram()
-  vertex = pkg_resources.resource_string(shaders.__name__, "%s.vert" % (name))
-  p.addShaderFromSourceCode(QGLShader.Vertex, vertex)
-  fragment = pkg_resources.resource_string(shaders.__name__, "%s.frag" % (name))
-  p.addShaderFromSourceCode(QGLShader.Fragment, fragment)
+  data_dir = os.environ['DATA_DIR']
+  vertex = os.path.join(data_dir, 'shaders', "%s.vert" % (name))
+  p.addShaderFromSourceFile(QGLShader.Vertex, vertex)
+  fragment = os.path.join(data_dir, 'shaders', "%s.frag" % (name))
+  p.addShaderFromSourceFile(QGLShader.Fragment, fragment)
   p.link()
   print p.log()
   return p
@@ -81,7 +81,7 @@ class GLDraw:
     dxp = dx * self.zoom() # dx in pixels
     dyp = dy * self.zoom() # dy in pixels
     (fdx, fdy) = self.font.ft.getsize(s)
-    scale = min(dxp / fdx, dyp / fdy)
+    scale = 1.6*min(dxp / fdx, dyp / fdy)
     sdx = -scale*fdx/2
     sdy = -scale*fdy/2
     glEnable(GL_TEXTURE_2D) # Enables texture mapping
@@ -94,7 +94,7 @@ class GLDraw:
   def label(self, shape, labels):
     x = fget(shape,'x')
     y = fget(shape,'y')
-    dy = fget(shape,'dy', 1.2)
+    dy = fget(shape,'dy', 1)
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     self._txt(shape, dx, dy, x, y)
     return labels
@@ -137,7 +137,7 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      labels.append(lambda: self._txt(shape, max(rx*2, drill), max(ry*2, drill), x, y, True))
+      labels.append(lambda: self._txt(shape, max(rx*1.5, drill), max(ry*1.5, drill), x, y, True))
     return labels
 
   def circle(self, shape, labels):
@@ -155,7 +155,7 @@ class GLDraw:
     iry = iry - w/2
     self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry)
     if 'name' in shape:
-      labels.append(lambda: self._txt(shape, rx*2, ry*2, x, y, True))
+      labels.append(lambda: self._txt(shape, rx*1.5, ry*1.5, x, y, True))
     return labels
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
@@ -184,7 +184,7 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      labels.append(lambda: self._txt(shape, dx, dy, x, y, True))
+      labels.append(lambda: self._txt(shape, dx/1.5, dy/1.5, x, y, True))
     return labels
 
   def rect(self, shape, labels):
@@ -221,7 +221,7 @@ class GLDraw:
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
-      m = min(dx, dy)
+      m = min(dx, dy)/1.5
       labels.append(lambda: self._txt(shape ,m, m, x, y, True))
     return labels
 
@@ -278,14 +278,8 @@ class JYDGLWidget(QGLWidget):
     self.zoomfactor = start_zoomfactor
     self.zoom_changed = False
     self.auto_zoom = bool(parent.setting('gl/autozoom'))
-    # resource_filename does not work in the .zip file py2app makes :(
-    # self.font_file = pkg_resources.resource_filename(__name__, "FreeMonoBold.ttf")
-    # we work around that by means of a tempfile
-    font_data = pkg_resources.resource_string(__name__, 'FreeMonoBold.ttf')
-    t = tempfile.NamedTemporaryFile(suffix='.ttf',delete=False)
-    t.write(font_data)
-    t.close()
-    self.font_file = t.name
+    data_dir = os.environ['DATA_DIR']
+    self.font_file = os.path.join(data_dir, 'gui', 'FreeMonoBold.ttf')
     self.shapes = []
     self.make_dot_field()
     self.called_by_me = False
@@ -301,6 +295,12 @@ class JYDGLWidget(QGLWidget):
     self.dot_field_vbo = vbo.VBO(self.dot_field_data)
 
   def initializeGL(self):
+    self.glversion = glGetString(GL_VERSION)
+    self.glversion = self.glversion.split()[0] # take numeric part
+    self.glversion = self.glversion.split('.') # split on dots
+    if len(self.glversion) < 2:
+      raise Exception("Error parsing openGL version")
+    self.glversion = float("%s.%s" % (self.glversion[0], self.glversion[1]))
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     #glEnable(GL_TEXTURE_2D) # Enables texture mapping

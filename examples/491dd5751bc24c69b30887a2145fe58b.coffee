@@ -1,4 +1,4 @@
-#format 1.0
+#format 1.1
 #name PLCC28
 #id 491dd5751bc24c69b30887a2145fe58b
 #parent 8ea78b3a6a914a4199ba5498a9019faf
@@ -21,12 +21,8 @@ footprint = () ->
   l = quad [smd], n, e, between
 
   # shift pad names around a bit
-  # note that we have to assign the names
-  # instead of modifying them as the names
-  # are only actually assigned AFTER compilation
-  # might be interesting to alter that?
-  for smd,i in l
-    smd.name = 1+ (i - shift) % 28
+  for smd in l
+    smd.name = 1 + (smd.name - 1 - shift + n) % n
 
   name = new Name 7.7
   value = new Value 0

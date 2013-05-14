@@ -1,4 +1,4 @@
-#format 1.0
+#format 1.1
 #name PIN 1X8
 #id 0467987b220e4ad3a8cc7250d4ac4848
 #parent 708e13cc5f4e43f7833af53070ba5078
@@ -11,8 +11,8 @@ footprint = () ->
   pad_r = (d-0.34)/2
   n = 8
 
-  name = new Name (n*d/2+0.5)
-  value = new Value (-n*d/2-0.5)
+  name = new Name (n*d/2+1)
+  value = new Value (-n*d/2-1)
   
   pad = new RoundPad pad_r, drill
 
