@@ -314,6 +314,12 @@ simple_dispatch = {
  'special_dual': simple_special_dual,
  'special_quad': simple_special_quad,
  'special_mod': simple_special_mod,
+ 'vrestrict_circle': partial(_simple_t_circle, 'vrestrict'),
+ 'vrestrict_line': partial(_simple_t_line, 'vrestrict'),
+ 'vrestrict_rect': partial(_simple_t_rect, 'vrestrict'),
+ 'keepout_circle': partial(_simple_t_circle, 'keepout'),
+ 'keepout_line': partial(_simple_t_line, 'keepout'),
+ 'keepout_rect': partial(_simple_t_rect, 'keepout'),
 }
 
 def generate_coffee(interim):
@@ -324,6 +330,9 @@ def generate_coffee(interim):
    'docu': generate_ints(),
    'restrict': generate_ints(),
    'stop': generate_ints(),
+   'keepout': generate_ints(),
+   'vrestrict': generate_ints(),
+   'glue': generate_ints(),
    'unknown': generate_ints(),
    'special': generate_ints(),
   }

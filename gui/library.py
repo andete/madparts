@@ -179,9 +179,9 @@ class Explorer(QtGui.QTreeView):
         library = root.child(row_index)
         if library.select_first_foot():
           self.active_footprint_id = library.first_foot.id
-          self.active_library = library.name
-    directory = self.coffee_lib[self.active_library].directory
-    fn = self.active_footprint_id + '.coffee'
+          self.active_library = library
+    directory = self.active_library.directory
+    fn = self.active_footprint.id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
        self.parent.code_textedit.setPlainText(f.read())
@@ -204,13 +204,13 @@ class Explorer(QtGui.QTreeView):
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
-    s = "%s/%s cloned to %s/%s." % (self.active_library, old_meta['name'], new_lib, new_name)
-    self.parent.code_textedit.setPlainText(new_code)
-    self.rescan_library(new_lib, new_id)
+    s = "%s/%s cloned to %s/%s." % (self.active_library.name, old_meta['name'], new_lib, new_name)
     self.active_footprint_id = new_id
     self.active_library = new_lib
+    self.rescan_library(new_lib, new_id)
     self.parent.show_footprint_tab()
     self.parent.status(s)
+    self.parent.code_textedit.setPlainText(new_code)
 
   def new_footprint(self):
     dialog = NewFootprintDialog(self)
@@ -235,7 +235,7 @@ class Explorer(QtGui.QTreeView):
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (new_name, new_lib) = dialog.get_data()
     old_name = old_meta['name']
-    my_id = self.active_footprint_id
+    my_id = self.active_footprint.id
     fn = my_id + '.coffee'
     old_lib = self.active_library
     new_code = old_code.replace("#name %s" % (old_name), "#name %s" % (new_name))
@@ -243,16 +243,16 @@ class Explorer(QtGui.QTreeView):
     new_file_name = new_lib_dir.filePath(fn)
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
-    self.parent.code_textedit.setPlainText(new_code)
-    self.parent.status("moved %s/%s to %s/%s." % (old_lib, old_name, new_lib, new_name))
-    if old_lib == new_lib: 
+    self.parent.status("moved %s/%s to %s/%s." % (old_lib.name, old_name, new_lib, new_name))
+    if old_lib.name == new_lib: 
       self.rescan_library(old_lib, my_id) # just to update the name
     else:
-      old_lib_dir = QtCore.QDir(self.cofffee_lib[old_lib].directory)
+      old_lib_dir = QtCore.QDir(old_lib.directory)
       old_lib_dir.remove(fn)
       self.rescan_library(old_lib)
       self.rescan_library(new_lib, my_id)
       self.active_library = new_lib
+    self.parent.code_textedit.setPlainText(new_code)
 
   def add_library(self):
     dialog = AddLibraryDialog(self)
