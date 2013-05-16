@@ -205,12 +205,11 @@ class Explorer(QtGui.QTreeView):
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
     s = "%s/%s cloned to %s/%s." % (self.active_library.name, old_meta['name'], new_lib, new_name)
-    self.active_footprint_id = new_id
-    self.active_library = new_lib
-    self.rescan_library(new_lib, new_id)
+    self.active_library = self.rescan_library(new_lib, new_id)
+    self.active_footprint = self.active_library.meta_by_id(new_id)
+    self.parent.code_textedit.setPlainText(new_code)
     self.parent.show_footprint_tab()
     self.parent.status(s)
-    self.parent.code_textedit.setPlainText(new_code)
 
   def new_footprint(self):
     dialog = NewFootprintDialog(self)
@@ -222,9 +221,8 @@ class Explorer(QtGui.QTreeView):
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
     self.parent.code_textedit.setPlainText(new_code)
-    self.rescan_library(new_lib, new_id)
-    self.active_footprint_id = new_id
-    self.active_library = new_lib
+    self.active_library = self.rescan_library(new_lib, new_id)
+    self.active_footprint = self.active_library.meta_by_id(new_id)
     self.parent.show_footprint_tab()
     self.parent.status("%s/%s created." % (new_lib, new_name))
 
@@ -328,6 +326,9 @@ class Library(QtGui.QStandardItem):
     self.id_items = {}
     self.first_foot_meta = None
     self.scan()
+
+  def meta_by_id(self, id):
+    return self.coffee_lib.meta_by_id[id]
 
   def select(self, meta):
     id = meta.id
