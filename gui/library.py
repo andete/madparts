@@ -243,13 +243,12 @@ class Explorer(QtGui.QTreeView):
       f.write(new_code)
     self.parent.status("moved %s/%s to %s/%s." % (old_lib.name, old_name, new_lib, new_name))
     if old_lib.name == new_lib: 
-      self.rescan_library(old_lib, my_id) # just to update the name
+      self.rescan_library(old_lib.name, my_id) # just to update the name
     else:
       old_lib_dir = QtCore.QDir(old_lib.directory)
       old_lib_dir.remove(fn)
       self.rescan_library(old_lib)
-      self.rescan_library(new_lib, my_id)
-      self.active_library = new_lib
+      self.active_library = self.rescan_library(new_lib, my_id)
     self.parent.code_textedit.setPlainText(new_code)
 
   def add_library(self):
