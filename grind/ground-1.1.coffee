@@ -30,6 +30,12 @@ clone = (obj) ->
 partial = (func, a...) ->
   (b...) -> func a..., b...
 
+clone_modl = (l, k, v) ->
+    l.map ((o) ->
+      o2 = clone o
+      o2[k] = v
+      o2)
+
 # clone and mod an object
 mod1 = (obj, key) -> 
   (val) ->

@@ -93,9 +93,10 @@ def bounding_box(inter):
   def label(shape):
     x = fget(shape,'x')
     y = fget(shape,'y')
-    dy = fget(shape,'dy', 1.2)
-    x1 = x
-    x2 = x
+    dy = fget(shape,'dy', 1)
+    dx = dy * len(shape['value'])
+    x1 = x - dx/2
+    x2 = x + dx/2
     y1 = y - dy/2
     y2 = y + dy/2
     return (x1, y1, x2, y2)
