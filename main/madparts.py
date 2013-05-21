@@ -74,6 +74,7 @@ class MainWin(QtGui.QMainWindow):
     self.explorer.initialize_libraries(self.settings)
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
+
     splitter.addWidget(self._left_part())
     splitter.addWidget(self._right_part())
     self.setCentralWidget(splitter)

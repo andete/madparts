@@ -86,6 +86,7 @@ class Explorer(QtGui.QTreeView):
     (first_foot_lib, first_foot_meta) = self._make_model()
     self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     self.setModel(self.model)
+    # next line crashes
     self.selectionModel().currentRowChanged.connect(self.row_changed)
     self.setRootIsDecorated(False)
     self.expandAll()

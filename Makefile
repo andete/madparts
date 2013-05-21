@@ -1,10 +1,11 @@
 PYTHON:=/opt/local/bin/python2.7
+NOSE:=/opt/local/bin/nosetests-2.7
 # set DATA_DIR for unit tests
 DATA_DIR := .
 export DATA_DIR
 
 all:
-	@./madparts
+	@$(PYTHON) madparts
 
 size:
 	@echo 'python:'
@@ -23,7 +24,7 @@ sdist:
 darwin:
 	$(PYTHON) setup.py py2app
 
-apprun::
+apprun:
 	./dist/madparts.app/Contents/MacOS/madparts
 
 testinstall:
@@ -32,7 +33,7 @@ testinstall:
 	python setup.py install --root /tmp/bla/ --prefix /usr
 
 test:
-	@nosetests
+	@$(NOSE)
 
 testone:
 	@nosetests test/madparts_test.py:test_eagle_export_empty
