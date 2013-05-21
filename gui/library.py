@@ -65,8 +65,12 @@ class Explorer(QtGui.QTreeView):
    if self.active_footprint is None: return None
    return self.active_footprint.filename
 
+  def _selection_model(self):
+    return self.selection_model
+
   def _make_model(self):
     self.model = QtGui.QStandardItemModel()
+    self.selection_model = QtGui.QItemSelectionModel(self.model, self)
     self.model.setColumnCount(2)
     self.model.setHorizontalHeaderLabels(['name','id'])
     parentItem = self.model.invisibleRootItem()
@@ -74,7 +78,7 @@ class Explorer(QtGui.QTreeView):
     first_foot_meta = None
     first_foot_lib = None
     for coffee_lib in self.coffee_lib.values():
-      guilib = Library(self.selectionModel, coffee_lib)
+      guilib = Library(self._selection_model, coffee_lib)
       parentItem.appendRow(guilib)
       if first:
         first_foot_meta = guilib.first_foot_meta
@@ -86,7 +90,8 @@ class Explorer(QtGui.QTreeView):
     (first_foot_lib, first_foot_meta) = self._make_model()
     self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
     self.setModel(self.model)
-    self.selectionModel().currentRowChanged.connect(self.row_changed)
+    self.setSelectionModel(self.selection_model)
+    self._selection_model().currentRowChanged.connect(self.row_changed)
     self.setRootIsDecorated(False)
     self.expandAll()
     self.setItemsExpandable(False)
