@@ -9,7 +9,7 @@ import OpenGL.arrays.vbo as vbo
 
 import numpy as np
 import math, sys
-import os, os.path
+import os, os.path, time
 
 from util.util import *
 from defaultsettings import color_schemes
@@ -328,6 +328,8 @@ class JYDGLWidget(QGLWidget):
       self.resizeGL(self.width(), self.height())
       self.called_by_me = False
 
+    # this call will fail the very first time on OSX
+    # this is OSX radar bug #11974524
     glClear(GL_COLOR_BUFFER_BIT)
     (r, g, b, a) = self.colorscheme['grid']
     glColor4f(r, g, b, a)
