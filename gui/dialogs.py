@@ -17,12 +17,12 @@ def color_scheme_combo(parent, current):
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
-def library_combo(parent, allow_non_existing=False, allow_readonly=False):
+def library_combo(explorer, allow_non_existing=False, allow_readonly=False):
   l_combo = QtGui.QComboBox()
-  selected = parent.selected_library
+  selected = explorer.selected_library
   if selected == None:
-    selected = parent.active_library.name
-  for lib in parent.coffee_lib.values():
+    selected = explorer.active_library.name
+  for lib in explorer.coffee_lib.values():
     l_combo.addItem(lib.name, lib.directory)
     if (not lib.exists and not allow_non_existing) or (lib.readonly and not allow_readonly):
       i = l_combo.model().index(l_combo.count()-1, 0) 
@@ -321,7 +321,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
     self.tree_selection_model.selectionChanged.connect(self.selection_changed)
     vbox.addWidget(tree)
     form_layout2 = QtGui.QFormLayout()
-    self.l_combo = library_combo(parent)
+    self.l_combo = library_combo(parent.explorer)
     form_layout2.addRow("import to:", self.l_combo)
     vbox.addLayout(form_layout2)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel

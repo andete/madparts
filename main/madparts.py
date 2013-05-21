@@ -254,7 +254,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, importer, selected_library) = dialog.get_data()
-    lib_dir = QtCore.QDir(self.explorer.lib[selected_library].directory)
+    lib_dir = QtCore.QDir(self.explorer.coffee_lib[selected_library].directory)
     l = []
     for footprint_name in footprint_names:
       interim = inter.import_footprint(importer, footprint_name) 
@@ -273,7 +273,7 @@ class MainWin(QtGui.QMainWindow):
       new_file_name = lib_dir.filePath("%s.coffee" % (meta['id']))
       with open(new_file_name, 'w+') as f:
         f.write(coffee)
-    self.rescan_library(selected_library)
+    self.explorer.rescan_library(selected_library)
     self.status('Importing done.')
 
   def docu_changed(self):
