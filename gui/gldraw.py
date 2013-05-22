@@ -1,6 +1,8 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+from ctypes import util
+
 from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
