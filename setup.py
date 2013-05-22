@@ -31,6 +31,7 @@ elif sys.platform == 'win32':
   import py2exe
   extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
+      includes=["ctypes", "logging"],
       setup_requires=['py2exe'],
       console=['madparts'],
       )
