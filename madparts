@@ -6,6 +6,13 @@
 import sys, string, os
 
 if __name__ == '__main__':
+    # trick needed to make OpenGL work on win32
+    from ctypes import util
+    try:
+      from OpenGL.platform import win32
+    except AttributeError:
+      pass
+
     # if there is a file called 'Makefile' in the same directory
     # as this script, we're running from the development tree
     dirname = os.path.dirname(os.path.abspath(sys.argv[0]))
