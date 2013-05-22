@@ -5,8 +5,6 @@
 
 import copy
 
-from util.util import *
-
 def cleanup_js(inter):
   def _remove_constructor(item):
     if 'constructor' in item:
