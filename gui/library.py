@@ -8,7 +8,7 @@ from PySide.QtCore import Qt
 
 import coffee.pycoffee as pycoffee
 import coffee.library
-from util.util import *
+from mutil.mutil import *
 from gui.dialogs import *
 import sys, os
 

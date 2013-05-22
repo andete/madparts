@@ -63,7 +63,7 @@ setup(
         'inter',
         'main',
         'syntax',
-        'util',
+        'mutil',
         ],
   package_data= { 
         'gui': [

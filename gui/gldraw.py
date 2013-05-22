@@ -11,7 +11,7 @@ import numpy as np
 import math, sys
 import os, os.path
 
-from util.util import *
+from mutil.mutil import *
 from defaultsettings import color_schemes
 from inter import inter
 
