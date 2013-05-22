@@ -33,7 +33,6 @@ elif sys.platform == 'win32':
   extra_options = dict(
       options=dict(py2exe=dict(
         includes=["ctypes", "logging"],
-        excludes=["OpenGL"],
       )),
       setup_requires=['py2exe'],
       console=['madparts'],
