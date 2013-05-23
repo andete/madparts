@@ -41,6 +41,12 @@ elif sys.platform == 'win32':
           "OpenGL.platform.win32",
           "OpenGL_accelerate.formathandler",
           "OpenGL_accelerate.arraydatatype",
+          "OpenGL_accelerate.errorchecker",
+          "OpenGL_accelerate.latebind",
+          "OpenGL_accelerate.nones_formathandler",
+          "OpenGL_accelerate.numpy_formathandler",
+          "OpenGL_accelerate.vbo",
+          "OpenGL_accelerate.wrapper",
           ]
   }
   extra_data_files = ['msvcp90.dll',]
