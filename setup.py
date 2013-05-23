@@ -32,12 +32,15 @@ elif sys.platform == 'win32':
   OPTIONS = {
     'includes': [
           "OpenGL.arrays.ctypesarrays",
+          "OpenGL.arrays.ctypespointers",
           "OpenGL.arrays.numpymodule",
+          "OpenGL.arrays.numeric",
           "OpenGL.arrays.lists",
           "OpenGL.arrays.numbers",
           "OpenGL.arrays.strings",
           "OpenGL.platform.win32",
           "OpenGL_accelerate.formathandler",
+          "OpenGL_accelerate.arraydatatype",
           ]
   }
   extra_data_files = ['msvcp90.dll',]
