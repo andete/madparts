@@ -29,13 +29,22 @@ if sys.platform == 'darwin':
       )
 elif sys.platform == 'win32':
   import py2exe
+  OPTIONS = {
+    'includes': [
+          "OpenGL.arrays.ctypesarrays",
+          "OpenGL.arrays.numpymodule",
+          "OpenGL.arrays.lists",
+          "OpenGL.arrays.numbers",
+          "OpenGL.arrays.strings",
+          "OpenGL.platform.win32",
+          "OpenGL_accelerate.formathandler",
+          ]
+  }
   extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
-      options=dict(py2exe=dict(
-        includes=["ctypes", "logging"],
-      )),
       setup_requires=['py2exe'],
       console=['madparts'],
+      options=dict(py2exe=OPTIONS)
       )
 elif sys.platform.startswith('linux'):
    extra_options = dict(
