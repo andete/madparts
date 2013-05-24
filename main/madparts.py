@@ -92,6 +92,8 @@ class MainWin(QtGui.QMainWindow):
     self.gl_w = 0
     self.gl_h = 0
 
+    self.is_fresh_file = False
+
     self.statusBar().showMessage("Ready.")
 
   ### GUI HELPERS
@@ -117,7 +119,7 @@ class MainWin(QtGui.QMainWindow):
     self.code_textedit.setAcceptRichText(False)
     if self.explorer.has_footprint():
       with open(self.explorer.active_footprint_file()) as f:
-        self.code_textedit.setPlainText(f.read())
+        self.update_text(f.read())
       self.set_code_textedit_readonly(self.explorer.active_footprint.readonly)
     else:
       self.set_code_textedit_readonly(True)
@@ -194,10 +196,14 @@ class MainWin(QtGui.QMainWindow):
 
   def reload_footprint(self):
     with open(self.explorer.active_footprint_file(), 'r') as f:
-      self.code_textedit.setPlainText(f.read())
+      self.update_text(f.read())
     self.status("%s reloaded." % (self.explorer.active_footprint_file()))
 
-  def editor_text_changed(self):
+  def editor_text_changed(self): 
+    if self.is_fresh_file:
+      self.is_fresh_file = False
+      self.compile()
+      return
     key_idle = self.setting("gui/keyidle")
     if key_idle > 0:
       t = time.time()
@@ -296,6 +302,10 @@ class MainWin(QtGui.QMainWindow):
     self.compile()
 
   ### OTHER METHODS
+
+  def update_text(self, new_text):
+    self.is_fresh_file = True
+    self.code_textedit.setPlainText(new_text)
 
   def setting(self, key):
     return self.settings.value(key, default_settings[key])
