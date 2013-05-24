@@ -29,10 +29,44 @@ if sys.platform == 'darwin':
       )
 elif sys.platform == 'win32':
   import py2exe
+  OPTIONS = {
+    'includes': [
+          "OpenGL.arrays._buffers",
+          "OpenGL.arrays._numeric",
+          "OpenGL.arrays._strings",
+          "OpenGL.arrays.arraydatatype",
+          "OpenGL.arrays.arrayhelpers",
+          "OpenGL.arrays.buffers",
+          "OpenGL.arrays.ctypesarrays",
+          "OpenGL.arrays.ctypesparameters",
+          "OpenGL.arrays.ctypespointers",
+          "OpenGL.arrays.formathandler",
+          "OpenGL.arrays.lists",
+          "OpenGL.arrays.nones",
+          "OpenGL.arrays.numbers",
+          "OpenGL.arrays.numeric",
+          "OpenGL.arrays.numericnames",
+          "OpenGL.arrays.numpymodule",
+          "OpenGL.arrays.strings",
+          "OpenGL.arrays.vbo",
+          "OpenGL.platform.ctypesloader",
+          "OpenGL.platform.win32",
+
+          "OpenGL_accelerate.formathandler",
+          "OpenGL_accelerate.arraydatatype",
+          "OpenGL_accelerate.errorchecker",
+          "OpenGL_accelerate.latebind",
+          "OpenGL_accelerate.nones_formathandler",
+          "OpenGL_accelerate.numpy_formathandler",
+          "OpenGL_accelerate.vbo",
+          "OpenGL_accelerate.wrapper",
+          ]
+  }
   extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
       setup_requires=['py2exe'],
       console=['madparts'],
+      options=dict(py2exe=OPTIONS)
       )
 elif sys.platform.startswith('linux'):
    extra_options = dict(
@@ -51,7 +85,7 @@ setup(
   long_description = long_description,
   author = 'Joost Yervante Damad',
   author_email = 'joost@damad.be',
-  version = '1.0',
+  version = '1.1',
   url = 'http://madparts.org/',
   packages = [
         'coffee',
@@ -60,7 +94,7 @@ setup(
         'inter',
         'main',
         'syntax',
-        'util',
+        'mutil',
         ],
   package_data= { 
         'gui': [

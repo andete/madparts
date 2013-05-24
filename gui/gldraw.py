@@ -1,6 +1,8 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+from ctypes import util
+
 from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
@@ -11,7 +13,7 @@ import numpy as np
 import math, sys
 import os, os.path, time
 
-from util.util import *
+from mutil.mutil import *
 from defaultsettings import color_schemes
 from inter import inter
 
@@ -369,7 +371,7 @@ class JYDGLWidget(QGLWidget):
 
   def set_shapes(self, s):
     self.shapes = s
-    self.updateGL()
+    self.update()
 
   def wheelEvent(self, event):
     if (event.delta() != 0.0):
@@ -378,11 +380,11 @@ class JYDGLWidget(QGLWidget):
           self.zoomfactor = self.zoomfactor - 5
           self.parent.zoom_selector.setText(str(self.zoomfactor))
           self.zoom_changed = True
-          self.updateGL()
+          self.update()
       else:
         if self.zoomfactor < 245:
           self.zoomfactor = self.zoomfactor + 5
           self.parent.zoom_selector.setText(str(self.zoomfactor))
           self.zoom_changed = True
-          self.updateGL()
+          self.update()
     event.ignore()

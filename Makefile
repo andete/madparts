@@ -42,4 +42,7 @@ coverage:
 	@nosetests --with-coverage \
 	--cover-package=coffee,export,gui,inter,syntax,util
 
+win32:
+	@python27 setup.py py2exe
+
 .PHONY: all clean size sdist test

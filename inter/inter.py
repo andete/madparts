@@ -4,7 +4,6 @@
 # functions that operate on the intermediate format
 
 import copy
-#from util.util import *
 
 def cleanup_js(inter):
   def _remove_constructor(item):

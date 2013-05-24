@@ -8,7 +8,7 @@ from PySide.QtCore import Qt
 
 import coffee.pycoffee as pycoffee
 import coffee.library
-from util.util import *
+from mutil.mutil import *
 from gui.dialogs import *
 import sys, os
 
@@ -126,7 +126,7 @@ class Explorer(QtGui.QTreeView):
     self.active_library = self.coffee_lib[lib_name]
     self._footprint_selected()
     with open(fn) as f:
-      self.parent.code_textedit.setPlainText(f.read())
+      self.parent.update_text(f.read())
     self.parent.set_code_textedit_readonly(meta.readonly)
 
   def _footprint_selected(self):
@@ -189,7 +189,7 @@ class Explorer(QtGui.QTreeView):
     fn = self.active_footprint.id + '.coffee'
     ffn = QtCore.QDir(directory).filePath(fn)
     with open(ffn) as f:
-       self.parent.code_textedit.setPlainText(f.read())
+       self.parent.update_text(f.read())
     # else... ?
     # TODO we don't support being completely footless now
 
@@ -212,7 +212,7 @@ class Explorer(QtGui.QTreeView):
     s = "%s/%s cloned to %s/%s." % (self.active_library.name, old_meta['name'], new_lib, new_name)
     self.active_library = self.rescan_library(new_lib, new_id)
     self.active_footprint = self.active_library.meta_by_id(new_id)
-    self.parent.code_textedit.setPlainText(new_code)
+    self.parent.update_text(new_code)
     self.parent.show_footprint_tab()
     self.parent.status(s)
 
@@ -225,7 +225,7 @@ class Explorer(QtGui.QTreeView):
     new_file_name = lib_dir.filePath("%s.coffee" % (new_id))
     with open(new_file_name, 'w+') as f:
       f.write(new_code)
-    self.parent.code_textedit.setPlainText(new_code)
+    self.parent.update_text(new_code)
     self.active_library = self.rescan_library(new_lib, new_id)
     self.active_footprint = self.active_library.meta_by_id(new_id)
     self.parent.show_footprint_tab()
@@ -254,7 +254,7 @@ class Explorer(QtGui.QTreeView):
       old_lib_dir.remove(fn)
       self.rescan_library(old_lib)
       self.active_library = self.rescan_library(new_lib, my_id)
-    self.parent.code_textedit.setPlainText(new_code)
+    self.parent.update_text(new_code)
 
   def add_library(self):
     dialog = AddLibraryDialog(self)
@@ -288,7 +288,7 @@ class Explorer(QtGui.QTreeView):
         self.active_library = library.coffee_lib
         fn = self.active_footprint.filename
         with open(fn) as f:
-          self.parent.code_textedit.setPlainText(f.read())
+          self.parent.update_text(f.read())
         return
 
   def rescan_library(self, name, select_id = None):
