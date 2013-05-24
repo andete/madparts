@@ -1,5 +1,11 @@
 madparts (1.1-1) unstable; urgency=low
 
+  * new package for actual 1.1
+
+ -- Joost Yervante Damad <joost@damad.be>  Fri, 24 May 2013 12:05:30 +0200
+
+madparts (1.1-0.1) unstable; urgency=low
+
   * source package automatically created by stdeb 0.6.0+git
 
  -- Joost Yervante Damad <joost@damad.be>  Fri, 12 Apr 2013 11:34:34 +0200
