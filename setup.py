@@ -85,7 +85,7 @@ setup(
   long_description = long_description,
   author = 'Joost Yervante Damad',
   author_email = 'joost@damad.be',
-  version = '1.0',
+  version = '1.1',
   url = 'http://madparts.org/',
   packages = [
         'coffee',
