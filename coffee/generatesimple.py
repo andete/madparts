@@ -112,7 +112,7 @@ def _simple_pad_disc_octagon(g, constructor, x, vl, ll):
 %s = new %s %s, %s
 """ % (varname, constructor, x['r'], x['drill'])
   a = _add_if(x, a, varname, 'drill_dx')
-  a = _add_if(x, a, varname, 'name')
+  a = _add_if(x, a, varname, 'name', True)
   a = _add_if(x, a, varname, 'x')
   a = _add_if(x, a, varname, 'y')
   a = _add_if(x, a, varname, 'rot')
