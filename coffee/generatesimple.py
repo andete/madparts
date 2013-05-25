@@ -277,7 +277,7 @@ def simple_special_mod(g, x, vl, ll):
     del x2['real_shape']
   a = ""
   for (k,v) in x2.items():
-    if type(v) == type(""):
+    if type(v) == type("") or k == 'name':
       a = a + "l[%s].%s = '%s'\n" % (i, k, v)
     else:
       a = a + "l[%s].%s = %s\n" % (i, k, v)
