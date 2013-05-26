@@ -18,7 +18,7 @@ def valid(varname, g):
 
 def new_coffee_meta(meta):
   a = """\
-#format 1.1
+#format 1.2
 #name %s
 #id %s
 """ % (meta['name'], meta['id'])
@@ -29,7 +29,7 @@ def new_coffee_meta(meta):
 
 def _add_if(x, a, varname, key, quote = False):
   if key in x:
-    if type(x[key]) == type(1.1):
+    if type(x[key]) == type(42.1):
       if f_eq(x[key], 0.0):
         return a
     if type(x[key]) == type(1):

@@ -8,7 +8,7 @@ import PyV8
 import _PyV8
 from PyV8 import JSError
 
-supported_formats = ['1.0', '1.1']
+supported_formats = ['1.0', '1.1', '1.2']
 
 # taken from PyV8, but simplified to avoid self-referencing structures
 # in a rather primitive way (limiting nesting depth to 5)
@@ -116,12 +116,12 @@ def clone_coffee_meta(coffee, old_meta, new_id, new_name):
     return not re.match('^#\w+',l) or re.match('^#desc \w+', l)
   no_meta_l = [l for l in coffee.splitlines() if not_meta_except_desc(l)]
   no_meta_coffee = '\n'.join(no_meta_l)
-  new_meta = "#format 1.1\n#name %s\n#id %s\n#parent %s\n" % (new_name, new_id, old_meta['id'])
+  new_meta = "#format 1.2\n#name %s\n#id %s\n#parent %s\n" % (new_name, new_id, old_meta['id'])
   return new_meta + no_meta_coffee
 
 def new_coffee(new_id, new_name):
   return """\
-#format 1.1
+#format 1.2
 #name %s
 #id %s
 #desc TODO
