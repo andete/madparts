@@ -241,7 +241,7 @@ mirror_x = (item) ->
  
 
 # adjust a shape in the y direction
-adjust_y = (o, dy) ->
+adjust1_y = (o, dy) ->
   if o.shape == 'line'
     o.y1 += dy
     o.y2 += dy
@@ -251,8 +251,14 @@ adjust_y = (o, dy) ->
     o.y += dy
   o
 
+adjust_y = (o, dy) ->
+  if o instanceof Array
+    o.map ((o2) -> adjust1_y o2, dy)
+  else
+    adjust1_y o, dy
+
 # adjust a shape in the x direction
-adjust_x = (o, dx) ->
+adjust1_x = (o, dx) ->
   if o.shape == 'line'
     o.x1 += dx
     o.x2 += dx
@@ -261,6 +267,12 @@ adjust_x = (o, dx) ->
       o.x = 0
     o.x += dx
   o
+
+adjust_x = (o, dx) ->
+  if o instanceof Array
+    o.map ((o2) -> adjust1_x o2, dx)
+  else
+    adjust1_x o, dx
 
 ### SECTION 5: creating ranges of items ###
 
