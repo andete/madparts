@@ -215,7 +215,7 @@ rotate180pad = (item) -> rotate90pad (rotate90pad item)
 rotate270 = (item) -> rotate90 (rotate180 item)
 rotate270pad = (item) -> rotate90pad (rotate180pad item)
 
-mirror_y = (item) ->
+mirror1_y = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
   if item.shape == 'line'
@@ -226,6 +226,12 @@ mirror_y = (item) ->
       item.x = 0
     item.x = -item.x
   item
+
+mirror_y = (item) ->
+  if item instanceof Array
+    item.map mirror1_y
+  else
+    mirror1_y item
 
 mirror_x = (item) ->
   if item.type == 'smd' or item.type == 'pad'
