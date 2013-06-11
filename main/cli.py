@@ -69,11 +69,11 @@ def list_library(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' ls')
   parser.add_argument('library', help='library file', nargs='?', default='.')
   args = parser.parse_args(remaining)
-  try:
-    detect.make_importer(args.library).list()
-  except Exception as ex:
-    print >> sys.stderr, str(ex)
-    return 1
+  #try:
+  detect.make_importer(args.library).list()
+  #except Exception as ex:
+  #  print >> sys.stderr, str(ex)
+  #  return 1
   return 0
 
 def cli_main():

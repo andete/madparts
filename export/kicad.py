@@ -1,10 +1,15 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+import os.path
+import glob
+
 import sexpdata
 from sexpdata import Symbol as S
 
 def detect(fn):
+  if os.path.isdir(fn) and '.pretty' in fn:
+    return True
   try:
     l = sexpdata.load(open(fn, 'r'))
     return l[0] == S('module')
@@ -97,4 +102,10 @@ class Import:
     self.fn = fn
 
   def list(self):
-    print "TODO" 
+    if os.path.isdir(self.fn) and '.pretty' in self.fn:
+      files = glob.glob(self.fn + '/*.kicad_mod')
+    else:
+      files = [self.fn]
+    for f in files:
+      l = sexpdata.load(open(f, 'r'))
+      print l[1].value()
