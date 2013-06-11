@@ -13,7 +13,7 @@ def detect(fn):
   elif eagle.detect(fn):
     return EAGLE
   elif kicad.detect(fn):
-    return kicad
+    return KICAD
   else:
     raise Exception("Unknown file format")
 

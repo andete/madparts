@@ -4,6 +4,13 @@
 import sexpdata
 from sexpdata import Symbol as S
 
+def detect(fn):
+  try:
+    l = sexpdata.load(open(fn, 'r'))
+    return l[0] == S('module')
+  except:
+    return False
+
 class Export:
 
   def __init__(self, fn):
@@ -83,4 +90,11 @@ class Export:
     with open(self.fn, 'w+') as f:
       sexpdata.dump(l, f)
     return name
-       
+
+class Import:
+
+  def __init__(self, fn):
+    self.fn = fn
+
+  def list(self):
+    print "TODO" 
