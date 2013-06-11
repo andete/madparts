@@ -26,11 +26,10 @@ def export_footprint(remaining):
   name = meta['name']
   print name, 'compiled.'
   try:
-    version = export.eagle.check_xml_file(args.library)
+    exporter = detect.make_exporter(args.library)
   except Exception as ex:
     print >> sys.stderr, str(ex)
     return 1
-  exporter = export.eagle.Export(args.library)
   exporter.export_footprint(interim)
   exporter.save()
   print "Exported to "+args.library+"."
@@ -69,11 +68,11 @@ def list_library(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' ls')
   parser.add_argument('library', help='library file', nargs='?', default='.')
   args = parser.parse_args(remaining)
-  #try:
-  detect.make_importer(args.library).list()
-  #except Exception as ex:
-  #  print >> sys.stderr, str(ex)
-  #  return 1
+  try:
+    detect.make_importer(args.library).list()
+  except Exception as ex:
+    print >> sys.stderr, str(ex)
+    return 1
   return 0
 
 def cli_main():

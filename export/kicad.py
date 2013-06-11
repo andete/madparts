@@ -7,6 +7,9 @@ import glob
 import sexpdata
 from sexpdata import Symbol as S
 
+from mutil.mutil import *
+from inter import inter
+
 def detect(fn):
   if os.path.isdir(fn) and '.pretty' in fn:
     return True
@@ -14,6 +17,8 @@ def detect(fn):
     l = sexpdata.load(open(fn, 'r'))
     return l[0] == S('module')
   except:
+    # allow new .kicad_mod files!
+    if '.kicad_mod' in fn: return True
     return False
 
 class Export:
@@ -22,15 +27,16 @@ class Export:
     self.fn = fn
 
   def export_footprint(self, interim):
+    meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
     idx = eget(meta, 'id', 'Id not found')
-    desc = oget(meta, 'desc', '')
+    descr = oget(meta, 'desc', '')
     parent_idx = oget(meta, 'parent', None)
     l = [
       S('module'),
       S(name),
       [S('layer'), S('F.Cu')],
-      [S('desc'), desc],
+      [S('descr'), descr],
     ]
     
     def pad(shape, smd=False):
@@ -45,17 +51,17 @@ class Export:
       r = fget(shape, 'r')
       if shape2 == 'disc':
         l.append(S('circle'))
-        l.append([S('size'), r, r, fget(shape, 'rot')])
+        l.append([S('size'), r, r])
       elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         if ro == 0:
           l.append(S('rect'))
         else:
           l.append(S('oval'))
-        l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy'), fget(shape, 'rot')])
+        l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy')])
       else:
         raise Exception("%s shaped pad not supported in kicad" % (shape2))
-      l.append([S('at'), fget(shape, 'x'), fget(shape, 'y'), iget(shape, 'ro')])
+      l.append([S('at'), fget(shape, 'x'), fget(shape, 'y'), iget(shape, 'rot')])
       if smd:
         l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')])
       else:
@@ -87,14 +93,18 @@ class Export:
           }.get(shape['type'], unknown)(shape)
         if l2 != None:
          l.append(l2)
+    self.data = l
+    self.name = name
+    return name
+
+  def save(self):
     if os.path.isdir(self.fn) and '.pretty' in self.fn:
-      name2 = name.replace(' ', '_')
-      fn = os.path.join(self.fn, name2 + '.kicad_mod')
+      name = self.name.replace(' ', '_')
+      fn = os.path.join(self.fn, name + '.kicad_mod')
     else:
       fn = self.fn
     with open(fn, 'w+') as f:
-      sexpdata.dump(l, f)
-    return name
+      sexpdata.dump(self.data, f)
 
 class Import:
 

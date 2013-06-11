@@ -452,11 +452,12 @@ class SExpBase(object):
 
 class Symbol(SExpBase):
 
+    # modified for madparts: don't quote '.'
     _lisp_quoted_specials = [
         ('\\', '\\\\'),    # must come first to avoid doubly quoting "\"
         ("'", r"\'"), ("`", r"\`"), ('"', r'\"'),
         ('(', r'\('), (')', r'\)'), ('[', r'\['), (']', r'\]'),
-        (' ', r'\ '), ('.', r'\.'), (',', r'\,'), ('?', r'\?'),
+        (' ', r'\ '), (',', r'\,'), ('?', r'\?'),
         (';', r'\;'), ('#', r'\#'),
     ]
 
