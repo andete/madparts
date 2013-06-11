@@ -20,11 +20,6 @@ class Export:
 
   def __init__(self, fn):
     self.fn = fn
-    # maybe need to load the file, depending on
-    # the type of file, if it is a .kicad_mod file
-    # it contains only one footprint and can just be
-    # written from scratch
-    # this is what will be supported as a first step
 
   def export_footprint(self, interim):
     name = eget(meta, 'name', 'Name not found')
@@ -92,7 +87,12 @@ class Export:
           }.get(shape['type'], unknown)(shape)
         if l2 != None:
          l.append(l2)
-    with open(self.fn, 'w+') as f:
+    if os.path.isdir(self.fn) and '.pretty' in self.fn:
+      name2 = name.replace(' ', '_')
+      fn = os.path.join(self.fn, name2 + '.kicad_mod')
+    else:
+      fn = self.fn
+    with open(fn, 'w+') as f:
       sexpdata.dump(l, f)
     return name
 
