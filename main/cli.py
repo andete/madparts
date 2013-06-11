@@ -9,7 +9,7 @@ import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
 from inter import inter
 import coffee.library
-import export.eagle
+import export.detect as detect
 
 def export_footprint(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' export')
@@ -75,16 +75,11 @@ def list_library(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' ls')
   parser.add_argument('library', help='library file', nargs='?', default='.')
   args = parser.parse_args(remaining)
-  if os.path.isdir(args.library):
-    return _list_directory(args.library)
-  try:
-    version = export.eagle.check_xml_file(args.library)
-  except Exception as ex:
-    print >> sys.stderr, str(ex)
-    return 1
-  importer = export.eagle.Import(args.library)
-  names = map(lambda (a,_): a, importer.list_names())
-  for name in names: print name
+  #try:
+  detect.make_importer(args.library).list()
+  #except Exception as ex:
+  #  print >> sys.stderr, str(ex)
+  #  return 1
   return 0
 
 def cli_main():
