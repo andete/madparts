@@ -70,6 +70,12 @@ def check_xml_file(fn):
   v = _check_xml(soup)
   return "Eagle CAD %s library" % (v)
 
+def detect(fn):
+  try:
+    check_xml_file(fn)
+    return True
+  except:
+    return False
 
 ### EXPORT
 
@@ -322,6 +328,10 @@ class Import:
       if p.description != None: return p.description.string
       else: return None
     return [(p['name'], desc(p)) for p in packages]
+
+  def list(self):
+    names = map(lambda (a,_): a, self.list_names())
+    for name in names: print name
 
   def import_footprint(self, name):
 

@@ -27,33 +27,30 @@ class Export:
     ]
     
     def pad(shape, smd=False):
-      # TODO deal with rotation correctly
-      # pad['rot'] = "R%d" % (fget(shape, 'rot'))
       l = [S('pad'), S(shape['name'])]
       if smd:
         l.append(S('smd'))
       else:
         l.append(S('thru_hole'))
-      if 
       shape2 = 'disc' # disc is the default
       if 'shape' in shape:
         shape2 = shape['shape']
       r = fget(shape, 'r')
       if shape2 == 'disc':
-        l.append(S('circle')
-        l.append([S('size'), r, r])
+        l.append(S('circle'))
+        l.append([S('size'), r, r, fget(shape, 'rot')])
       elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         if ro == 0:
           l.append(S('rect'))
         else:
           l.append(S('oval'))
-        l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy')])
+        l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy'), fget(shape, 'rot')])
       else:
         raise Exception("%s shaped pad not supported in kicad" % (shape2))
       l.append([S('at'), fget(shape, 'x'), fget(shape, 'y'), iget(shape, 'ro')])
       if smd:
-        l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')]
+        l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')])
       else:
         l.append([S('layers'), S('*.Cu'), S('*.Mask')]) # F.SilkS ?
       if not smd:
