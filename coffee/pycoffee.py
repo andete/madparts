@@ -130,9 +130,22 @@ footprint = () ->
   []
 """ % (new_name, new_id)
 
+def preprocess_coffee(code):
+  def repl(m):
+    t = m.group(2)
+    i = float(m.group(1))
+    if t == 'mi' or t == 'mil':
+      return str(i*0.0254)
+    elif t == 'in':
+      return str(i*25.4)
+    else:
+      return m.group(0)
+  return re.sub('([-+]?[0-9]*\.?[0-9]+)([im][ni]l?)', repl, code)
+
 def compile_coffee(code):
   try:
-    interim = eval_coffee_footprint(code)
+    preprocessed = preprocess_coffee(code)
+    interim = eval_coffee_footprint(preprocessed)
     if interim != None:
       interim = inter.cleanup_js(interim)
       interim = inter.add_names(interim)
