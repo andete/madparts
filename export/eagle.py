@@ -195,11 +195,11 @@ class Export:
       x = fget(shape,'x')
       y = fget(shape,'y')
       dy = fget(shape,'dy', 1)
-      s = shape['value']
-      if s.upper() == "NAME": 
+      s = shape['value'].upper()
+      if s == "NAME": 
         s = ">NAME"
         layer = type_to_layer_number('name')
-      if s.upper() == "VALUE": 
+      if s == "VALUE": 
         s = ">VALUE"
         layer = type_to_layer_number('value')
       label['x'] = x
@@ -210,14 +210,13 @@ class Export:
       label.string = s
       package.append(label)
     
+    # a disc is just a circle with a clever radius and width
     def disc(shape, layer):
       r = fget(shape, 'r')
       rx = fget(shape, 'rx', r)
       ry = fget(shape, 'ry', r)
       x = fget(shape,'x')
       y = fget(shape,'y')
-      # a disc is just a circle with a
-      # clever radius and width
       disc = self.soup.new_tag('circle')
       disc['x'] = x
       disc['y'] = y

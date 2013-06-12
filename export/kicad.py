@@ -10,13 +10,26 @@ from sexpdata import Symbol as S
 from mutil.mutil import *
 from inter import inter
 
+def type_to_layer_number(layer):
+  type_to_layer_number_dict = {
+    'smd': 'F.Cu', # these two are normally
+    'pad': 'F.Cu', # not used like this
+    'silk': 'F.SilkS',
+    'name': 'F.SilkS',
+    'value': 'Cmts.User',
+    'stop': 'F.Mask',
+    'glue': 'F.Adhes',
+    'docu': 'Cmts.User',
+    }
+  return type_to_layer_number_dict[layer]
+
 def detect(fn):
   if os.path.isdir(fn) and '.pretty' in fn:
     return True
   try:
     l = sexpdata.load(open(fn, 'r'))
     return l[0] == S('module')
-  except:
+  except IOError:
     # allow new .kicad_mod files!
     if '.kicad_mod' in fn: return True
     return False
@@ -73,11 +86,93 @@ class Export:
         l.append(l2)
       return l
     
+    #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))
+    def line(shape, layer):
+      l = [S('fp_line')] 
+      l.append([S('start'), fget(shape, 'x1'), fget(shape, 'y1')])
+      l.append([S('end'), fget(shape, 'x2'), fget(shape, 'y2')])
+      l.append([S('layer'), S(layer)])
+      l.append([S('width'), fget(shape, 'w')])
+      return l
+
+    # (fp_circle (center 5.08 0) (end 6.35 -1.27) (layer F.SilkS) (width 0.15))
+    def circle(shape, layer):
+      l = [S('fp_circle')] 
+      x = fget(shape, 'x')
+      y = fget(shape, 'y')
+      l.append([S('center'), x, y])
+      r = fget(shape, 'r')
+      l.append([S('end'), x+(r/sqrt(2)), y+(r/sqrt(2))])
+      l.append([S('layer'), S(layer)])
+      l.append([S('width'), fget(shape, 'w')])
+      return l
+
+    # a disc is just a circle with a clever radius and width
+    def disc(shape, layer):
+      l = [S('fp_circle')] 
+      x = fget(shape, 'x')
+      y = fget(shape, 'y')
+      l.append([S('center'), x, y])
+      r = fget(shape, 'r')
+      rad = r/2
+      l.append([S('end'), x+(rad/sqrt(2)), y+(rad/sqrt(2))])
+      l.append([S('layer'), S(layer)])
+      l.append([S('width'), rad])
+      return l
+
+    # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
+    def arc(shape, layer):
+      l = [S('fp_arc')] 
+      l.append([S('start'), fget(shape, 'x1'), fget(shape, 'y1')])
+      l.append([S('end'), fget(shape, 'x2'), fget(shape, 'y2')])
+      l.append([S('angle'), fget(shape, 'a')])
+      l.append([S('layer'), S(layer)])
+      l.append([S('w'), fget(shape, 'w')])
+      return l
+
+
+    # (pad "" smd rect (at 1.27 0) (size 0.39878 0.8001) (layers F.SilkS))
+    def rect(shape, layer):
+      l = [S('fp_arc'), ''. S('smd'), S('rect')] 
+      l.append([S('at'), fget(shape, 'x'), fget(shape, 'y'), iget(shape, 'rot')])
+      l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy')])
+      l.append([S('layers'), S(layer)])
+      return l
+
+    # (fp_text reference MYCONN3 (at 0 -2.54) (layer F.SilkS)
+    #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
+    # )
+    # (fp_text value SMD (at 0 2.54) (layer F.SilkS) hide
+    #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
+    # )
+    def label(shape, layer):
+      s = shape['value'].upper()
+      t = 'reference'
+      if s == VALUE: t = 'value'
+      l = [S('fp_text'), S(t), S(shape['value'])]
+      l.append([S('at'), fget(shape, 'x'), fget(shape, 'y')])
+      l.append([S('layer'), S(layer)])
+      if s == 'VALUE':
+        l.append(S('hide'))
+      dy = fget(shape, 'dy', 1)
+      th = fget(shape, 'w', 0.25)
+      l.append([S('effects'), 
+                [S('font'), [S('size'), dy, dy], [S('thickness'), w]]])
+      return l
+
     def silk(shape):
-      pass
+      if not 'shape' in shape: return None
+      layer = type_to_layer_number(shape['type'])
+      s = shape['shape']
+      if s == 'line': return line(shape, layer)
+      elif s == 'arc': return arc(shape, layer)
+      elif s == 'circle': return circle(shape, layer)
+      elif s == 'disc': return disc(shape, layer)
+      elif s == 'label': return label(shape, layer)
+      elif s == 'rect': return rect(shape, layer)
 
     def unknown(shape):
-      pass
+      return None
 
     for shape in interim:
       if 'type' in shape:
@@ -85,10 +180,11 @@ class Export:
           'pad': pad,
           'silk': silk,
           'docu': silk,
-          'keepout': silk,
+          'keepout': unknown,
           'stop': silk,
-          'restrict': silk,
-          'vrestrict': silk,
+          'glue': silk,
+          'restrict': unknown,
+          'vrestrict': unknown,
           'smd': lambda s: pad(s, smd=True),
           }.get(shape['type'], unknown)(shape)
         if l2 != None:
