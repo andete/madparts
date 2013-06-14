@@ -28,7 +28,7 @@ test:
 	@nosetests
 
 testone:
-	@nosetests test/madparts_test.py:test_eagle_export_empty
+	@nosetests -s test/madparts_test.py:test_kicad_export_empty
 
 coverage:
 	@nosetests --with-coverage \
