@@ -37,9 +37,12 @@ def library_combo(explorer, allow_non_existing=False, allow_readonly=False):
   return l_combo
 
 def select_library(obj):
-  result = QtGui.QFileDialog.getOpenFileName(
-    obj,
-    "Select Library", filter="Eagle CAD Library (*.lbr);;XML file (*.xml)")
+  qf = QtGui.QFileDialog(obj, 'Select Library')
+  qf.setFileMode(QtGui.QFileDialog.Directory) # files or directories
+  qf.setAcceptMode(QtGui.QFileDialog.AcceptOpen) # want existing files
+  qf.setFilter("Eagle CAD Library (*.lbr *.xml);;KiCad library (*.pretty)")
+  print qf.exec_()
+  result = qf.selectedFiles()
   filename = result[0]
   if (filename == ''): return
   try:
