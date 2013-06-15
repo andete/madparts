@@ -3,25 +3,28 @@
 
 import eagle, kicad, madparts, kicad_old
 
-MADPARTS = 0
-EAGLE = 1
-KICAD = 2
-KICAD_OLD = 3
+MADPARTS = "madparts"
+EAGLE = "eagle"
+KICAD = "kicad"
+KICAD_OLD = "kicad-old"
 
 def detect(fn):
-  if madparts.detect(fn):
-    return MADPARTS
-  elif eagle.detect(fn):
-    return EAGLE
-  elif kicad.detect(fn):
-    return KICAD
-  elif kicad_old.detect(fn):
-    return KICAD_OLD
-  else:
-    raise Exception("Unknown file format")
+  v =  madparts.detect(fn)
+  if v is not None:
+    return (MADPARTS, v)
+  v = eagle.detect(fn)
+  if v is not None:
+    return (EAGLE, v)
+  v = kicad.detect(fn)
+  if v is not None:
+    return (KICAD, v)
+  v = kicad_old.detect(fn)
+  if v is not None:
+    return (KICAD_OLD, v)
+  raise Exception("Unknown file format")
 
 def make_exporter(fn):
-  t = detect(fn)
+  (t,_) = detect(fn)
   if t == EAGLE:
     return eagle.Export(fn)
   elif t == KICAD:
@@ -32,7 +35,7 @@ def make_exporter(fn):
     raise Exception("Invalid export format")
 
 def make_importer(fn):  
-  t = detect(fn)
+  (t,_) = detect(fn)
   if t == EAGLE:
     return eagle.Import(fn)
   elif t == KICAD:

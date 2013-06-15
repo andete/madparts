@@ -29,14 +29,17 @@ def type_to_layer_number(layer):
 
 def detect(fn):
   if os.path.isdir(fn) and '.pretty' in fn:
-    return True
+    return "3"
   try:
     l = sexpdata.load(open(fn, 'r'))
-    return l[0] == S('module')
+    if (l[0] == S('module')): return "3"
+    return None
   except IOError:
     # allow new .kicad_mod files!
-    if '.kicad_mod' in fn: return True
-    return False
+    if '.kicad_mod' in fn: return "3"
+    return None
+  except:
+    return None
 
 class Export:
 

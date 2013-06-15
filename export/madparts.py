@@ -7,8 +7,9 @@ import glob
 import coffee.library
 
 def detect(fn):
-  if not os.path.isdir(fn): return False
-  return len(glob.glob(fn + '/*.coffee')) > 0
+  if not os.path.isdir(fn): return None
+  if len(glob.glob(fn + '/*.coffee')) > 0: return "1.0"
+  return None
 
 class Import:
 

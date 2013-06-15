@@ -2,12 +2,14 @@
 # License: GPL
 
 import uuid
+import os.path
+import re
 
 from PySide import QtGui, QtCore
 
 from defaultsettings import default_settings, color_schemes
 
-import export.eagle
+import export.detect
 
 def color_scheme_combo(parent, current):
   l_combo = QtGui.QComboBox()
@@ -36,21 +38,30 @@ def library_combo(explorer, allow_non_existing=False, allow_readonly=False):
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
+class FDFileDialog(QtGui.QFileDialog):
+  def __init__(self, parent, txt):
+    super(FDFileDialog, self).__init__(parent, txt)
+    self.currentChanged.connect(self.current_changed)
+
+  def current_changed(self, path):
+    if os.path.isdir(path) and ".pretty" in path:
+      self.setFileMode(QtGui.QFileDialog.Directory)
+    else:
+      self.setFileMode(QtGui.QFileDialog.ExistingFile)
+
 def select_library(obj):
-  qf = QtGui.QFileDialog(obj, 'Select Library')
-  qf.setFileMode(QtGui.QFileDialog.Directory) # files or directories
-  qf.setAcceptMode(QtGui.QFileDialog.AcceptOpen) # want existing files
-  qf.setFilter("Eagle CAD Library (*.lbr *.xml);;KiCad library (*.pretty)")
-  print qf.exec_()
+  qf = FDFileDialog(obj, 'Select Library')
+  qf.setFilter("CAD Library (*.lbr *.xml *.pretty *.mod)")
+  if qf.exec_() == 0: return None
   result = qf.selectedFiles()
   filename = result[0]
   if (filename == ''): return
-  try:
-    version = export.eagle.check_xml_file(filename)
-    return ('eagle', version, filename)
-  except Exception as ex:
-    QtGui.QMessageBox.critical(obj, "error", str(ex))
-    return None
+  #try:
+  (t, version) = export.detect.detect(filename)
+  return (t, version, filename)
+  #except Exception as ex:
+  #  QtGui.QMessageBox.critical(obj, "error", str(ex))
+  #  return None
 
 class LibrarySelectDialog(QtGui.QDialog):
 
@@ -89,7 +100,7 @@ class LibrarySelectDialog(QtGui.QDialog):
     if result == None: return
     (self.filetype, version, self.filename) = result
     self.lib_filename.setText(self.filename)
-    self.lib_type.setText(version)
+    self.lib_type.setText(self.filetype + " " + version)
     self.button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(False)
     self.button_box.button(QtGui.QDialogButtonBox.Ok).setFocus()
 

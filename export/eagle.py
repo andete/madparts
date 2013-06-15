@@ -72,10 +72,10 @@ def check_xml_file(fn):
 
 def detect(fn):
   try:
-    check_xml_file(fn)
-    return True
+    soup = _load_xml_file(fn)
+    return str(_check_xml(soup))
   except:
-    return False
+    return None
 
 ### EXPORT
 

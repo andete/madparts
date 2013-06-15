@@ -4,15 +4,18 @@
 import os.path
 
 def detect(fn):
-  if os.path.isdir(fn): return False
+  if os.path.isdir(fn): return None
   try:
     with open(fn, 'r') as f:
       l = f.readlines()
       l0 = l[0]
       l2 = l0.split()
-      return l2[0] == 'PCBNEW-LibModule-V1'
+      print l2
+      if (l2[0] == 'PCBNEW-LibModule-V1'): return "1"
+      elif (l2[0] == 'PCBNEW-LibModule-V2'): return "2"
+      return None
   except:
-    return False
+    return None
 
 class Import:
 
