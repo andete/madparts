@@ -23,8 +23,7 @@ def detect(fn):
     return (KICAD_OLD, v)
   raise Exception("Unknown file format")
 
-def make_exporter(fn):
-  (t,_) = detect(fn)
+def make_exporter_for(t, fn):
   if t == EAGLE:
     return eagle.Export(fn)
   elif t == KICAD:
@@ -33,6 +32,13 @@ def make_exporter(fn):
     return kicad_old.Export(fn)
   else:
     raise Exception("Invalid export format")
+
+
+
+def make_exporter(fn):
+  (t,_) = detect(fn)
+  return make_exporter_for(t)
+
 
 def make_importer(fn):  
   (t,_) = detect(fn)

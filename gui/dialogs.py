@@ -98,9 +98,9 @@ class LibrarySelectDialog(QtGui.QDialog):
   def get_file(self):
     result = select_library(self)
     if result == None: return
-    (self.filetype, version, self.filename) = result
+    (self.filetype, self.version, self.filename) = result
     self.lib_filename.setText(self.filename)
-    self.lib_type.setText(self.filetype + " " + version)
+    self.lib_type.setText(self.filetype + " " + self.version)
     self.button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(False)
     self.button_box.button(QtGui.QDialogButtonBox.Ok).setFocus()
 

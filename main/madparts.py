@@ -235,6 +235,7 @@ class MainWin(QtGui.QMainWindow):
      if dialog.exec_() != QtGui.QDialog.Accepted: return
      self.export_library_filename = dialog.filename
      self.export_library_filetype = dialog.filetype
+     self.export_library_version = dialog.version
      self._export_footprint()
 
   def show_footprint_tab(self):
@@ -376,19 +377,14 @@ class MainWin(QtGui.QMainWindow):
       QtGui.QMessageBox.warning(self, "warning", s)
       self.status(s) 
       return
-    if self.export_library_filetype != 'eagle':
-      s = "Only eagle CAD export is currently supported"
-      QtGui.QMessageBox.critical(self, "error", s)
-      self.status(s)
-      return
     try:
-      exporter = export.eagle.Export(self.export_library_filename)
+      exporter = export.detect.make_exporter_for(self.export_library_filetype, self.export_library_filename)
       exporter.export_footprint(self.executed_footprint)
       exporter.save()
       self.status("Exported to "+self.export_library_filename+".")
     except Exception as ex:
+      QtGui.QMessageBox.warning(self, "warning", str(ex))
       self.status(str(ex))
-      raise
 
 def gui_main():
   QtCore.QCoreApplication.setOrganizationName("madparts")
