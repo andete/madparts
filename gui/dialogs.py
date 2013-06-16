@@ -51,7 +51,7 @@ class FDFileDialog(QtGui.QFileDialog):
 
 def select_library(obj):
   qf = FDFileDialog(obj, 'Select Library')
-  qf.setFilter("CAD Library (*.lbr *.xml *.pretty *.mod)")
+  qf.setFilter("CAD Library (*.lbr *.xml *.pretty *.mod *.kicad_mod)")
   if qf.exec_() == 0: return None
   result = qf.selectedFiles()
   filename = result[0]
