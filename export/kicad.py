@@ -14,8 +14,8 @@ from inter import inter
 def S(v):
   return Symbol(str(v))
 
-def type_to_layer_number(layer):
-  type_to_layer_number_dict = {
+def type_to_layer_name(layer):
+  return {
     'smd': 'F.Cu', # these two are normally
     'pad': 'F.Cu', # not used like this
     'silk': 'F.SilkS',
@@ -24,8 +24,16 @@ def type_to_layer_number(layer):
     'stop': 'F.Mask',
     'glue': 'F.Adhes',
     'docu': 'Dwgs.User',
-    }
-  return type_to_layer_number_dict[layer]
+    }.get(layer)
+
+def layer_name_to_type(name):
+   return {
+    'F.SilkS': 'silk',
+    'Dwgs.User': 'docu',
+    'F.Mask': 'stop',
+    'F.Adhes': 'glue',
+   }.get(name)
+
 
 def detect(fn):
   if os.path.isdir(fn) and '.pretty' in fn:
@@ -169,7 +177,7 @@ class Export:
 
     def silk(shape):
       if not 'shape' in shape: return None
-      layer = type_to_layer_number(shape['type'])
+      layer = type_to_layer_name(shape['type'])
       s = shape['shape']
       if s == 'line': return line(shape, layer)
       elif s == 'arc': return arc(shape, layer)
@@ -234,31 +242,98 @@ class Import:
         break
     if s is None:
       raise Exception("Footprint %s not found" % (name))
-    interim = {}
-    def descr(inter):
+    meta = {}
+    meta['type'] = 'meta'
+    meta['name'] = name
+    meta['id'] = uuid.uuid4().hex
+    meta['desc'] = None
+    l = [meta]
+
+    def get_sub(x, name):
+      for e in x:
+        if e[0] == 'name':
+          return e[1:]
+      return None
+
+    def has_sub(x, name):
+      for e in x:
+        if e[0] == 'name': return True
+      return False
+
+    def descr(x):
+      meta['desc'] = x[1]
+
+    def pad(x):
       pass
-    def pad(inter):
+
+    #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))
+    def fp_line(x):
+      [x1, y1] = get_sub(x, 'start')
+      [x2, y2] = get_sub(x, 'end')
+      layer = layer_name_to_type(get_sub(x, 'layer'))
+      width = get_sub(x, 'width')
+      shape = { 
+        'shape': 'line',
+        'x1': x1, 'y1': y1, 
+        'x2': x2, 'y2': y2, 
+        'type': layer, 'w': width
+      }
+      return shape
+
+    # (fp_circle (center 5.08 0) (end 6.35 -1.27) (layer F.SilkS) (width 0.15))
+    def fp_circle(x):
+      shape = { 'shape': 'circle' }
+      [x, y] = get_sub(x, 'center')
+      shape['x'] = x
+      shape['y'] = y
+      shape['width'] = get_sub(x, 'width')
+      [ex, ey] = get_sub(x, 'end')
+      dx = abs(x - ex)
+      dy = abs(y - ey)
+      if f_eq(dx, dy):
+        shape['r'] = dx*math.sqrt(2)
+        if f_eq(shape['width'], shape['r']):
+          shape['type'] = 'disc'
+          shape['r'] = shape['r'] * 2
+          del shape['width']
+      else:
+        shape['rx'] = dx*math.sqrt(2)
+        shape['ry'] = dy*math.sqrt(2)
+      shape['type'] = layer_name_to_type(get_sub(x, 'layer'))
+      return shape
+
+    # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
+    def fp_arc(x):
+      [x1, y1] = get_sub(x, 'start')
+      [x2, y2] = get_sub(x, 'end')
+      [a] = get_sub(x, 'angle')
+      shape = { 'shape': 'arc'}
+      shape['type'] = layer_name_to_type(get_sub(x, 'layer'))
+      shape['a'] = a
+      shape['x1'] = x1
+      shape['y1'] = y1
+      shape['x2'] = x2
+      shape['y2'] = y2
+      return shape
+
+    def fp_text(x):
+      shape = { 'shape': 'label' }
+      # BUSY if has_sub(x, 'reference')
       pass
-    def fp_line(inter):
+
+    def unknown(x):
       pass
-    def fp_circle(inter):
-      pass
-    def fp_arc(inter):
-      pass
-    def fp_text(inter):
-      pass
-    def unknown(inter):
-      pass
+
     for x in s[3:]:
-      {
+      l.append({
         'descr': descr,
         'pad': pad,
         'fp_line': fp_line,
         'fp_circle': fp_circle,
         'fp_arc': fp_arc,
         'fp_text': fp_text,
-      }.get(x[0], unknown)(interim)
-    return interim
+      }.get(x[0], unknown)(x))
+    return l
 
     
     

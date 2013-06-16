@@ -146,13 +146,22 @@ class Circle
     @y = 0
 
 class Line
-   constructor: (@w) ->
+  constructor: (@w) ->
      @type = 'silk'
      @shape = 'line'
      @x1 = 0
      @y1 = 0
      @x2 = 0
      @y2 = 0
+
+class Arc
+  constructor: (@w) ->
+    @type = 'silk'
+    @shape = 'arc'
+    @x1 = 0
+    @y1 = 0
+    @x2 = 0
+    @y2 = 0
 
 class Name
   constructor: (@y) ->
