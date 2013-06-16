@@ -216,12 +216,49 @@ class Import:
 
   def __init__(self, fn):
     self.fn = fn
+    if os.path.isdir(self.fn) and '.pretty' in self.fn:
+      self.files = glob.glob(self.fn + '/*.kicad_mod')
+    else:
+      self.files = [self.fn]
 
   def list(self):
-    if os.path.isdir(self.fn) and '.pretty' in self.fn:
-      files = glob.glob(self.fn + '/*.kicad_mod')
-    else:
-      files = [self.fn]
-    for f in files:
+    for f in self.files:
       l = sexpdata.load(open(f, 'r'))
       print l[1].value()
+
+  def import_footprint(self, name):
+    s = None
+    for f in self.files:
+      s = sexpdata.load(open(f, 'r'))
+      if s[1].value() == name:
+        break
+    if s is None:
+      raise Exception("Footprint %s not found" % (name))
+    interim = {}
+    def descr(inter):
+      pass
+    def pad(inter):
+      pass
+    def fp_line(inter):
+      pass
+    def fp_circle(inter):
+      pass
+    def fp_arc(inter):
+      pass
+    def fp_text(inter):
+      pass
+    def unknown(inter):
+      pass
+    for x in s[3:]:
+      {
+        'descr': descr,
+        'pad': pad,
+        'fp_line': fp_line,
+        'fp_circle': fp_circle,
+        'fp_arc': fp_arc,
+        'fp_text': fp_text,
+      }.get(x[0], unknown)(interim)
+    return interim
+
+    
+    
