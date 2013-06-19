@@ -263,8 +263,40 @@ class Import:
     def descr(x):
       meta['desc'] = x[1]
 
+    # (pad 1 smd rect (size 1.1 1.0) (at -0.85 -0.0 0) (layers F.Cu F.Paste F.Mask))
+    # (pad 5 thru_hole circle (size 0.75 0.75) (at 1.79 3.155 0) (layers *.Cu *.Mask) (drill 1.0))
     def pad(x):
-      pass
+      shape = {'name': x[1] }
+      smd = x[2] == 'smd'
+      if smd:
+        shape['type'] = 'smd'
+      else:
+        shape['type'] = 'pad'
+      s = x[3]
+      [x1, y1] = get_sub(x, 'at')
+      shape['x'] = x1
+      shape['y'] = y1
+      [dx, dy] = get_sub(x, 'size')
+      if s == 'circle':
+        shape['shape'] = 'disc'
+        shape['r'] = dx
+      elif s == 'rect':
+        shape['shape'] = 'rect'
+        shape['dx'] = dx
+        shape['dy'] = dy
+      elif s == 'oval':
+        shape['shape'] = 'rect'
+        shape['dx'] = dx
+        shape['dy'] = dy
+        shape['ro'] = 100
+      if not smd:
+        drill = get_sub(x, 'drill')
+        shape['drill'] = drill[1]
+        if has_sub(drill, 'offset'):
+          [drill_dx, drill_dy] = get_sub(drill, 'offset')
+          shape['drill_dx'] = drill_dx
+          shape['drill_dy'] = drill_dy
+      return shape
 
     #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))
     def fp_line(x):
