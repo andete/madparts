@@ -316,10 +316,28 @@ class Import:
       shape['y2'] = y2
       return shape
 
+    # (fp_text reference MYCONN3 (at 0 -2.54) (layer F.SilkS)
+    #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
+    # )
+    # (fp_text value SMD (at 0 2.54) (layer F.SilkS) hide
+    #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
+    # )
     def fp_text(x):
       shape = { 'shape': 'label' }
-      # BUSY if has_sub(x, 'reference')
-      pass
+      if has_sub(x, 'reference'):
+         shape['value'] = x[2]
+      elif has_sub(x, 'value'):
+         shape['value'] = x[2]
+      [x, y] = get_sub(x, 'at')
+      y = -y
+      font = get_sub(x, 'effects')
+      [dx, dy] = get_sub(font, 'size')
+      w = get_sub(font, 'thickness')
+      shape['x'] = x
+      shape['y'] = y
+      shape['w'] = w
+      shape['dy'] = dy
+      return shape
 
     def unknown(x):
       pass
