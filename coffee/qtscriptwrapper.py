@@ -1,5 +1,8 @@
 #!/usr/bin/python2
 
+# (c) 2013 Alex Schultz <alex@strangeautomata.com>
+# License: GPL
+
 import os
 import os.path
 from PySide import QtCore

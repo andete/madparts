@@ -1,4 +1,5 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013 Alex Schultz <alex@strangeautomata.com>
 # License: GPL
 
 import os.path, re, string, traceback
