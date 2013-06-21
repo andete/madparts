@@ -44,12 +44,6 @@ from https://pypi.python.org/pypi/PyOpenGL-accelerate/3.0.2
 
 take PyOpenGL-accelerate-3.0.2.win32-py2.7.exe
 
-* pyv8
-
-from http://code.google.com/p/pyv8/downloads/list
-
-take PyV8-1.0-preview-r443.win32-py2.7.exe
-
 * python imaging
 
 from http://www.lfd.uci.edu/~gohlke/pythonlibs/
