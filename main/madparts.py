@@ -170,6 +170,8 @@ class MainWin(QtGui.QMainWindow):
     a = """
 <p align="center"><b>madparts</b><br/>the functional footprint editor</p>
 <p align="center">(c) 2013 Joost Yervante Damad &lt;joost@damad.be&gt;</p>
+<p align="center">Additional Contributors:</p>
+<p align="center">Alex Schultz &lt;alex@strangeautomata.com&gt;</p>
 <p align="center"><a href="http://madparts.org">http://madparts.org</a></p>
 """
     QtGui.QMessageBox.about(self, "about madparts", a)
