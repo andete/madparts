@@ -1,9 +1,10 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import os.path
 import glob
 import math
+import os.path
+import uuid
 
 import sexpdata
 from sexpdata import Symbol
@@ -375,14 +376,16 @@ class Import:
       pass
 
     for x in s[3:]:
-      l.append({
+      res = {
         'descr': descr,
         'pad': pad,
         'fp_line': fp_line,
         'fp_circle': fp_circle,
         'fp_arc': fp_arc,
         'fp_text': fp_text,
-      }.get(x[0], unknown)(x))
+      }.get(x[0], unknown)(x)
+      if res != None:
+        l.append(res)
     return l
 
     

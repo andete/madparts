@@ -507,5 +507,6 @@ def find_pad_patterns(inter):
 
 def import_footprint(importer, footprint_name):
   interim = importer.import_footprint(footprint_name) 
+  print interim
   interim = sort_by_type(interim)
   return find_pad_patterns(interim)

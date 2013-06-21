@@ -449,7 +449,8 @@ empty_coffee = """\
 #name TEST_EMPTY
 #id 708e13cc5f4e43f7833af53070ba5078
 #desc coffee test
-footprint = () -> []
+footprint = () ->
+  combine []
 """
 
 def test_eagle_export_empty():
@@ -477,4 +478,11 @@ def test_kicad_export_empty():
   coffee = empty_coffee
   kicad = "(module TEST_EMPTY (layer F.Cu) (descr \"coffee test\"))"
   _export_kicad(coffee, 'TEST_EMPTY', kicad)
-  
+
+def test_kicad_import_empty():
+  expected_coffee = empty_coffee
+  importer = export.kicad.Import("test/kicad_empty.kicad_mod")
+  interim = inter.import_footprint(importer, 'TEST_EMPTY') 
+  assert interim != None
+  coffee = generatesimple.generate_coffee(interim)
+  _assert_equal_no_meta(expected_coffee, coffee)
