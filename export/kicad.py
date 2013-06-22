@@ -356,7 +356,7 @@ class Import:
     #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
     # )
     def fp_text(x):
-      shape = { 'shape': 'label' }
+      shape = { 'shape': 'label', 'type': 'silk' }
       if has_sub(x, 'reference'):
          shape['value'] = x[2]
       elif has_sub(x, 'value'):
@@ -372,9 +372,6 @@ class Import:
       shape['dy'] = dy
       return shape
 
-    def unknown(x):
-      pass
-
     for x in s[3:]:
       res = {
         'descr': descr,
@@ -383,7 +380,7 @@ class Import:
         'fp_circle': fp_circle,
         'fp_arc': fp_arc,
         'fp_text': fp_text,
-      }.get(x[0], unknown)(x)
+      }.get(x[0], lambda a: None)(x)
       if res != None:
         l.append(res)
     return l
