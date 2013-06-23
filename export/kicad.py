@@ -50,6 +50,15 @@ def detect(fn):
   except:
     return None
 
+# If the value of sexpression symbol is numeric (i.e. a footprint with a purely numeric name)
+# then the parser outputs an int rather than symbol object. In order to handle this properly
+# we need to be able to handle either case when we're expecting a string.
+def read_string_from_sexp_element(d):
+  if ("value" not in dir(d)):
+    return str(d)
+  else:
+    return d.value()
+
 class Export:
 
   def __init__(self, fn):
@@ -234,7 +243,7 @@ class Import:
     l = []
     for f in self.files:
       s = sexpdata.load(open(f, 'r'))
-      name = l[1].value()
+      name = read_string_from_sexp_element(s[1])
       fp = self._import_footprint(s)
       desc = None
       for x in fp:
@@ -248,13 +257,13 @@ class Import:
   def list(self):
     for f in self.files:
       l = sexpdata.load(open(f, 'r'))
-      print l[1].value()
+      print read_string_from_sexp_element(l[1])
 
   def import_footprint(self, name):
     s = None
     for f in self.files:
       s = sexpdata.load(open(f, 'r'))
-      if s[1].value() == name:
+      if read_string_from_sexp_element(s[1]) == name:
         break
     if s is None:
       raise Exception("Footprint %s not found" % (name))
@@ -263,7 +272,7 @@ class Import:
   def _import_footprint(self, s):
     meta = {}
     meta['type'] = 'meta'
-    meta['name'] = name
+    meta['name'] = read_string_from_sexp_element(s[1])
     meta['id'] = uuid.uuid4().hex
     meta['desc'] = None
     l = [meta]
