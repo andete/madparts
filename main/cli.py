@@ -41,11 +41,10 @@ def import_footprint(remaining):
   parser.add_argument('footprint', help='footprint name')
   args = parser.parse_args(remaining)
   try:
-    version = export.eagle.check_xml_file(args.library)
+    importer = detect.make_importer(args.library)
   except Exception as ex:
     print >> sys.stderr, str(ex)
     return 1
-  importer = export.eagle.Import(args.library)
   names = map(lambda (a,_): a, importer.list_names())
   if not args.footprint in names:
     print >> sys.stderr, "Footprint %s not found in %s." % (args.footprint, args.library)

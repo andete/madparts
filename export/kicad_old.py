@@ -3,6 +3,8 @@
 
 import os.path
 import shlex
+import uuid
+import mutil.mutil as mutil
 
 def detect(fn):
   if os.path.isdir(fn): return None
@@ -83,7 +85,8 @@ class Import:
       ex = float(s[3])
       ey = float(s[4])
       dx = abs(x - ex)
-      if f_eq(dx, dy):
+      dy = abs(y - ey)
+      if mutil.f_eq(dx, dy):
         shape['r'] = dx*math.sqrt(2)
         if f_eq(shape['width'], shape['r']):
           shape['type'] = 'disc'
@@ -172,6 +175,11 @@ class Import:
         else:
           shape['type'] = 'pad'
 
+      # Po <x> <y>
+      def position(s):
+        shape['x'] = float(s[1])
+        shape['y'] = float(s[2])
+
       while i < len(lines):
         s = shlex.split(lines[i])
         k = s[0].lower()
@@ -181,20 +189,17 @@ class Import:
           {
             'sh': handle_shape,
             'dr': drill,
-           
-          }.get(j, lambda a: None)(s)
+            'at': attributes,
+            'po': position,
+          }.get(k, lambda a: None)(s)
           i = i + 1
     
-    # Po <x> <y>
-    def position(s):
-      shape['x'] = float(s[1])
-      shape['y'] = float(s[2])
- 
+    i = 0
     while i < len(lines):
       s = shlex.split(lines[i])
       k = s[0].lower()
       if k == '$endmodule':
-        return mod
+        break
       elif k == '$pad':
         (i, pad) = import_pad(lines, i)
         l.append(pad)
@@ -208,13 +213,16 @@ class Import:
           'ds': line,
           'dc': circle,
           'da': arc,
-          'sh': handle_shape,
-          'at': attributes,
-          'po': position,
         }.get(k, lambda a: None)(s)
         if res != None:
           l.append(res)
         i = i + 1
+    if not metric:
+      # convert to metric from tenths of mils
+      for x in l:
+        for k in x.keys():
+          if type(x[k]) == type(3.14):
+            x[k] = x[k] / 0.00254
     return l
 
   def import_footprint(self, name):
@@ -233,6 +241,22 @@ class Import:
       s = shlex.split(line)
       if s[0] == '$MODULE':
         print s[1]
+
+  def list_names(self):
+    l = []
+    with open(self.fn, 'r') as f:
+      lines = f.readlines()
+      for line in lines:
+        s = shlex.split(line)
+        k = s[0].lower()
+        if k == '$module':
+          name = s[1]
+          desc = None
+        elif k == 'cd':
+          desc = s[1]
+        elif k == '$endmodule':
+          l.append((name, desc))
+    return l
 
 class Export:
 

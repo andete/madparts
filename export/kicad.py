@@ -230,6 +230,21 @@ class Import:
     else:
       self.files = [self.fn]
 
+  def list_names(self):
+    l = []
+    for f in self.files:
+      s = sexpdata.load(open(f, 'r'))
+      name = l[1].value()
+      fp = self._import_footprint(s)
+      desc = None
+      for x in fp:
+         if x['type'] == 'meta':
+           if 'desc' in x:
+             desc = x['desc']
+             break
+      l.append((name, desc))
+      return l
+
   def list(self):
     for f in self.files:
       l = sexpdata.load(open(f, 'r'))
@@ -243,6 +258,9 @@ class Import:
         break
     if s is None:
       raise Exception("Footprint %s not found" % (name))
+    return self._import_footprint(s)
+
+  def _import_footprint(self, s):
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name

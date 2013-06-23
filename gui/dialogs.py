@@ -9,7 +9,7 @@ from PySide import QtGui, QtCore
 
 from defaultsettings import default_settings, color_schemes
 
-import export.detect
+import export.detect as detect
 
 def color_scheme_combo(parent, current):
   l_combo = QtGui.QComboBox()
@@ -57,7 +57,7 @@ def select_library(obj):
   filename = result[0]
   if (filename == ''): return
   #try:
-  (t, version) = export.detect.detect(filename)
+  (t, version) = detect.detect(filename)
   return (t, version, filename)
   #except Exception as ex:
   #  QtGui.QMessageBox.critical(obj, "error", str(ex))
@@ -363,7 +363,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
 
   def populate_model(self):
     self.root.removeRows(0, self.root.rowCount())
-    self.importer = export.eagle.Import(self.filename)
+    self.importer = detect.make_importer(self.filename)
     name_desc_list = self.importer.list_names()
     name_desc_list = sorted(name_desc_list, lambda (n1,d1),(n2,d2): cmp(n1,n2))
     for (name, desc) in name_desc_list:
