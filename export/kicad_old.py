@@ -36,24 +36,19 @@ class Import:
   def __init__(self, fn):
     self.fn = fn
 
-  def import_module(self, name, lines):
+  def import_module(self, name, lines, metric):
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name
     meta['id'] = uuid.uuid4().hex
     meta['desc'] = None
     l = [meta]
-    metric = False
 
     def cd(s, d): 
       if meta['desc'] == None:
         meta['desc'] = d
       else:
         meta['desc'] = meta['desc'] + "\n" + d
-      return None
-
-    def units(s):
-      metric = s[1] == 'mm'
       return None
 
     def label(s, is_value):
@@ -207,7 +202,6 @@ class Import:
       else:
         res = {
           'cd': lambda a: cd(a, lines[i][3:]),
-          'units': units,
           't0': lambda a: label(a, False),
           't1': lambda a: label(a, True),
           'ds': line,
@@ -226,12 +220,15 @@ class Import:
     return l
 
   def import_footprint(self, name):
+    metric = False
     with open(self.fn, 'r') as f:
       lines = f.readlines()
     for i in range(0, len(lines)):
       s = shlex.split(lines[i])
+      if s[0] == 'Units' and s[1] == 'mm':
+        metric = True
       if s[0] == '$MODULE' and s[1] == name:
-        return self.import_module(name, lines[i+1:])
+        return self.import_module(name, lines[i+1:], metric)
     raise Exception("footprint not found %s" % (name))
 
   def list(self):
