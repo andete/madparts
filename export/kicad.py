@@ -50,14 +50,14 @@ def detect(fn):
   except:
     return None
 
-# If the value of sexpression symbol is numeric (i.e. a footprint with a purely numeric name)
-# then the parser outputs an int rather than symbol object. In order to handle this properly
-# we need to be able to handle either case when we're expecting a string.
-def read_string_from_sexp_element(d):
-  if ("value" not in dir(d)):
-    return str(d)
-  else:
+def _convert_sexp_symbol(d):
+  if ("value" in dir(d)):
     return d.value()
+  else:
+    return d
+
+def _convert_sexp_symbol_to_string(d):
+  return str(_convert_sexp_symbol(d))
 
 class Export:
 
@@ -103,7 +103,7 @@ class Export:
       if smd:
         l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')])
       else:
-        l.append([S('layers'), S('*.Cu'), S('*.Mask')]) # F.SilkS ?
+        l.append([S('layers'), S('*.Cu'), S('*.Mask')])
       if not smd:
         l2 = [S('drill'), fget(shape, 'drill')]
         if 'drill_dx' in shape or 'drill_dy' in shape:
@@ -158,6 +158,7 @@ class Export:
 
     # (pad "" smd rect (at 1.27 0) (size 0.39878 0.8001) (layers F.SilkS))
     def rect(shape, layer):
+      # TODO: Don't do this with a pad. Use a polygon
       l = [S('pad'), "", S('smd'), S('rect')] 
       l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y'), iget(shape, 'rot')])
       l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy')])
@@ -172,10 +173,14 @@ class Export:
     # )
     def label(shape, layer):
       s = shape['value'].upper()
-      t = 'reference'
+      t = 'user'
       if s == 'VALUE': t = 'value'
+      if s == 'NAME': t = 'reference'
       l = [S('fp_text'), S(t), S(shape['value'])]
-      l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y')])
+      if (('rot' in shape) and (fget(shape, 'rot') != 0.0)):
+        l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y'), fget(shape, 'rot')])
+      else:
+        l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y')])
       l.append([S('layer'), S(layer)])
       if s == 'VALUE':
         l.append(S('hide'))
@@ -243,7 +248,7 @@ class Import:
     l = []
     for f in self.files:
       s = sexpdata.load(open(f, 'r'))
-      name = read_string_from_sexp_element(s[1])
+      name = _convert_sexp_symbol_to_string(s[1])
       fp = self._import_footprint(s)
       desc = None
       for x in fp:
@@ -257,13 +262,13 @@ class Import:
   def list(self):
     for f in self.files:
       l = sexpdata.load(open(f, 'r'))
-      print read_string_from_sexp_element(l[1])
+      print _convert_sexp_symbol_to_string(l[1])
 
   def import_footprint(self, name):
     s = None
     for f in self.files:
       s = sexpdata.load(open(f, 'r'))
-      if read_string_from_sexp_element(s[1]) == name:
+      if _convert_sexp_symbol_to_string(s[1]) == name:
         break
     if s is None:
       raise Exception("Footprint %s not found" % (name))
@@ -272,21 +277,65 @@ class Import:
   def _import_footprint(self, s):
     meta = {}
     meta['type'] = 'meta'
-    meta['name'] = read_string_from_sexp_element(s[1])
+    meta['name'] = _convert_sexp_symbol_to_string(s[1])
     meta['id'] = uuid.uuid4().hex
     meta['desc'] = None
     l = [meta]
 
     def get_sub(x, name):
+      print "X: "
+      print x
       for e in x:
-        if e[0] == 'name':
-          return e[1:]
+        if ("__len__" not in dir(e)):
+          continue # Ignore objects without length
+        if (len(e) == 0):
+          continue # Ignore empty
+        if _convert_sexp_symbol_to_string(e[0]) == name:
+          return list(map(_convert_sexp_symbol, e[1:]))
       return None
 
     def has_sub(x, name):
       for e in x:
-        if e[0] == 'name': return True
+        if ("__len__" not in dir(e)):
+          continue # Ignore objects without length
+        if (len(e) == 0):
+          continue # Ignore empty
+        if _convert_sexp_symbol_to_string(e[0]) == name:
+          return True
       return False
+      
+    def get_single_element_sub(x, name, default=None):
+      sub = get_sub(x, name)
+      if (sub != None):
+        if (len(sub) != 1):
+          raise Exception("Unexpected multi-element '%s' sub: %s" % (name, str(sub)))
+        return sub[0]
+      return default
+      
+    def get_layer_sub(x, default=None):
+      layer = get_single_element_sub(x, 'layer')
+      if (layer != None):
+        return layer_name_to_type(layer)
+      return default
+    
+    def get_layers_sub(x, default=None):
+      layers = get_sub(x, 'layers')
+      if (layers != None):
+        return list(map(layer_name_to_type, layers))
+      return default
+
+    def get_at_sub(x):
+      sub = get_sub(x, 'at')
+      if (sub is None):
+        raise Exception("Expected 'at' element in %s" % (str(x)))
+      if (len(sub) == 2):
+        [x1, y1] = sub
+        rot = 0
+      elif (len(sub) == 3):
+        [x1, y1, rot] = sub
+      else:
+        raise Exception("Invalid 'at' element in %s" % (str(x)))      
+      return (x1, y1, rot)
 
     def descr(x):
       meta['desc'] = x[1]
@@ -294,20 +343,22 @@ class Import:
     # (pad 1 smd rect (size 1.1 1.0) (at -0.85 -0.0 0) (layers F.Cu F.Paste F.Mask))
     # (pad 5 thru_hole circle (size 0.75 0.75) (at 1.79 3.155 0) (layers *.Cu *.Mask) (drill 1.0))
     def pad(x):
-      shape = {'name': x[1] }
-      smd = x[2] == 'smd'
+      shape = {'name': _convert_sexp_symbol_to_string(x[1]) }
+      smd = (_convert_sexp_symbol_to_string(x[2]) == 'smd')
       if smd:
         shape['type'] = 'smd'
       else:
         shape['type'] = 'pad'
-      s = x[3]
-      [x1, y1] = get_sub(x, 'at')
+      s = _convert_sexp_symbol_to_string(x[3])
+      [x1, y1, rot] = get_at_sub(x)
       shape['x'] = x1
-      shape['y'] = y1
+      shape['y'] = -y1
+      # TODO: Add rotated pad support
+      shape['rot'] = rot
       [dx, dy] = get_sub(x, 'size')
       if s == 'circle':
         shape['shape'] = 'disc'
-        shape['r'] = dx
+        shape['r'] = dx/2
       elif s == 'rect':
         shape['shape'] = 'rect'
         shape['dx'] = dx
@@ -317,25 +368,27 @@ class Import:
         shape['dx'] = dx
         shape['dy'] = dy
         shape['ro'] = 100
+      else:
+        raise Exception("Pad with unknown shape %s" % (str(s)))
       if not smd:
         drill = get_sub(x, 'drill')
-        shape['drill'] = drill[1]
+        shape['drill'] = drill[0]
         if has_sub(drill, 'offset'):
           [drill_dx, drill_dy] = get_sub(drill, 'offset')
           shape['drill_dx'] = drill_dx
-          shape['drill_dy'] = drill_dy
+          shape['drill_dy'] = -drill_dy
       return shape
 
     #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))
     def fp_line(x):
       [x1, y1] = get_sub(x, 'start')
       [x2, y2] = get_sub(x, 'end')
-      layer = layer_name_to_type(get_sub(x, 'layer'))
-      width = get_sub(x, 'width')
+      layer = get_layer_sub(x, 'silk')
+      width = get_single_element_sub(x, 'width')
       shape = { 
         'shape': 'line',
-        'x1': x1, 'y1': y1, 
-        'x2': x2, 'y2': y2, 
+        'x1': x1, 'y1': -y1, 
+        'x2': x2, 'y2': -y2, 
         'type': layer, 'w': width
       }
       return shape
@@ -343,13 +396,13 @@ class Import:
     # (fp_circle (center 5.08 0) (end 6.35 -1.27) (layer F.SilkS) (width 0.15))
     def fp_circle(x):
       shape = { 'shape': 'circle' }
-      [x, y] = get_sub(x, 'center')
-      shape['x'] = x
-      shape['y'] = y
-      shape['width'] = get_sub(x, 'width')
+      [x1, y1] = get_sub(x, 'center')
+      shape['x'] = x1
+      shape['y'] = -y1
+      shape['width'] = get_single_element_sub(x, 'width')
       [ex, ey] = get_sub(x, 'end')
-      dx = abs(x - ex)
-      dy = abs(y - ey)
+      dx = abs(x1 - ex)
+      dy = abs(y1 - ey)
       if f_eq(dx, dy):
         shape['r'] = dx*math.sqrt(2)
         if f_eq(shape['width'], shape['r']):
@@ -359,7 +412,7 @@ class Import:
       else:
         shape['rx'] = dx*math.sqrt(2)
         shape['ry'] = dy*math.sqrt(2)
-      shape['type'] = layer_name_to_type(get_sub(x, 'layer'))
+      shape['type'] = get_layer_sub(x, 'silk')
       return shape
 
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
@@ -367,13 +420,15 @@ class Import:
       [x1, y1] = get_sub(x, 'start')
       [x2, y2] = get_sub(x, 'end')
       [a] = get_sub(x, 'angle')
+      width = get_single_element_sub(x, 'width')
       shape = { 'shape': 'arc'}
-      shape['type'] = layer_name_to_type(get_sub(x, 'layer'))
+      shape['type'] = get_layer_sub(x, 'silk')
       shape['a'] = a
       shape['x1'] = x1
-      shape['y1'] = y1
+      shape['y1'] = -y1
       shape['x2'] = x2
-      shape['y2'] = y2
+      shape['y2'] = -y2
+      shape['w'] = width
       return shape
 
     # (fp_text reference MYCONN3 (at 0 -2.54) (layer F.SilkS)
@@ -383,23 +438,34 @@ class Import:
     #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
     # )
     def fp_text(x):
-      shape = { 'shape': 'label', 'type': 'silk' }
-      if has_sub(x, 'reference'):
-         shape['value'] = x[2]
-      elif has_sub(x, 'value'):
-         shape['value'] = x[2]
-      [x, y] = get_sub(x, 'at')
-      y = -y
-      font = get_sub(x, 'effects')
+      shape = { 'shape': 'label', 'type': 'silk', 'value': '' }
+      shape['value'] = _convert_sexp_symbol_to_string(x[2])
+      shape['type'] = get_layer_sub(x, 'silk')
+      
+      if (_convert_sexp_symbol_to_string(x[1]) == "reference"):
+        shape['value'] = 'NAME' # Override "NAME" field text
+      elif (_convert_sexp_symbol_to_string(x[1]) == "value"):
+        shape['value'] = 'VALUE' # Override "VALUE" field text
+      else:
+        # Don't let 'user' fields have 'NAME' or 'VALUE' as text
+        if ((shape['value'] == 'NAME') or (shape['value'] == 'VALUE')):
+          shape['value'] = "_%s_" % (shape['value'])
+      
+      [x1, y1, rot] = get_at_sub(x)
+      font = get_sub(get_sub(x, 'effects'), 'font')
       [dx, dy] = get_sub(font, 'size')
       w = get_sub(font, 'thickness')
-      shape['x'] = x
-      shape['y'] = y
+      shape['x'] = x1
+      shape['y'] = -y1
       shape['w'] = w
       shape['dy'] = dy
+      # TODO: Add rotated text support
+      shape['rot'] = rot
       return shape
 
     for x in s[3:]:
+      print "ELEMENT:"
+      print x
       res = {
         'descr': descr,
         'pad': pad,
@@ -407,7 +473,7 @@ class Import:
         'fp_circle': fp_circle,
         'fp_arc': fp_arc,
         'fp_text': fp_text,
-      }.get(x[0], lambda a: None)(x)
+      }.get(_convert_sexp_symbol_to_string(x[0]), lambda a: None)(x)
       if res != None:
         l.append(res)
     return l
