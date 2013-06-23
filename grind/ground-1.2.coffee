@@ -108,6 +108,11 @@ class SquarePad extends Pad
     @dx = dia
     @dy = dia
 
+class RectPad extends Pad
+  constructor: (@dx, @dy, @drill) ->
+    super
+    @shape = 'rect'
+    
 class LongPad extends Pad
   constructor: (dia, @drill) ->
     super

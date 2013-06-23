@@ -4,6 +4,8 @@
 import os.path
 import shlex
 import uuid
+import math
+
 import mutil.mutil as mutil
 
 def detect(fn):
@@ -41,13 +43,13 @@ class Import:
     meta['id'] = uuid.uuid4().hex
     meta['desc'] = None
     l = [meta]
-    metric = True
+    metric = False
 
-    def cd(s): 
+    def cd(s, d): 
       if meta['desc'] == None:
-        meta['desc'] = s[1]
+        meta['desc'] = d
       else:
-        meta['desc'] = meta['desc'] + "\n" + s[1]
+        meta['desc'] = meta['desc'] + "\n" + d
       return None
 
     def units(s):
@@ -84,17 +86,14 @@ class Import:
       shape['y'] = y
       ex = float(s[3])
       ey = float(s[4])
+      shape['w'] = float(s[5])
       dx = abs(x - ex)
       dy = abs(y - ey)
-      if mutil.f_eq(dx, dy):
-        shape['r'] = dx*math.sqrt(2)
-        if f_eq(shape['width'], shape['r']):
-          shape['type'] = 'disc'
-          shape['r'] = shape['r'] * 2
-          del shape['width']
-      else:
-        shape['rx'] = dx*math.sqrt(2)
-        shape['ry'] = dy*math.sqrt(2)
+      shape['r'] = math.sqrt(dx*dx + dy*dy)
+      if mutil.f_eq(shape['w'], shape['r']):
+        shape['shape'] = 'disc'
+        shape['r'] = shape['r'] * 2
+        del shape['w']
       shape['type'] = num_to_type(s[6])
       return shape
 
@@ -156,7 +155,7 @@ class Import:
         sh = s[2]
         if sh == 'C':
           shape['shape'] = 'disc'
-          shape['r'] = dx
+          shape['r'] = dx/2
         elif sh == 'O':
           shape['shape'] = 'rect'
           shape['ro'] = 100
@@ -178,12 +177,13 @@ class Import:
       # Po <x> <y>
       def position(s):
         shape['x'] = float(s[1])
-        shape['y'] = float(s[2])
+        shape['y'] = -float(s[2])
 
       while i < len(lines):
         s = shlex.split(lines[i])
         k = s[0].lower()
         if k == "$endpad":
+          print shape
           return (i+1, shape)
         else:
           {
@@ -206,7 +206,7 @@ class Import:
       # TODO Polygon
       else:
         res = {
-          'cd': cd,
+          'cd': lambda a: cd(a, lines[i][3:]),
           'units': units,
           't0': lambda a: label(a, False),
           't1': lambda a: label(a, True),
@@ -222,7 +222,7 @@ class Import:
       for x in l:
         for k in x.keys():
           if type(x[k]) == type(3.14):
-            x[k] = x[k] / 0.00254
+            x[k] = x[k] * 0.00254
     return l
 
   def import_footprint(self, name):

@@ -89,8 +89,8 @@ def simple_pad_rect(g, x, vl, ll):
 """ % (varname, dy, drill)
   else:
     a = """\
-%s = new Pad
-"""
+%s = new RectPad %s, %s, %s
+""" % (varname, dx, dy, drill)
     a = _add_if(x, a, varname, 'ro')
 
   a = _add_if(x, a, varname, 'name', True)
@@ -131,9 +131,11 @@ def _simple_circle(prefix, g, x):
 %s = new Circle %s
 %s.x = %s
 %s.y = %s
-%s.r = %s
 """ % (varname, x['w'], varname, x['x'],
-       varname, x['y'], varname, x['r'])
+       varname, x['y'])
+  a = _add_if(x, a, varname, 'r')
+  a = _add_if(x, a, varname, 'rx')
+  a = _add_if(x, a, varname, 'ry')
   return (varname, a)
 
 def simple_silk_circle(g, x, vl, ll):
