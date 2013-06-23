@@ -8,13 +8,19 @@ from functools import partial
 
 from mutil.mutil import *
 
-def valid(varname, g):
+def valid(varname, g, vl):
   def make_valid(c):
     if not c in (string.ascii_letters + string.digits):
       return "_%s_" % (g.next())
     else:
       return c
-  return ''.join([make_valid(x) for x in varname])
+  varname = ''.join([make_valid(x) for x in varname])
+  retname = varname
+  i = 2
+  while (retname in vl):
+    retname = "%s_%d"  % (varname, i)
+    i += 1
+  return retname
 
 def new_coffee_meta(meta):
   a = """\
@@ -46,7 +52,7 @@ def _simple_rect(prefix, constructor, x, g, vl, ll):
     name = x['name']
   else:
     name = str(g.next())
-  varname = valid("%s%s" % (prefix, name), g)
+  varname = valid("%s%s" % (prefix, name), g, vl)
   a = """\
 %s = new %s
 """ % (varname, constructor)
@@ -66,7 +72,7 @@ def simple_smd_rect(g, x, vl, ll):
 
 def simple_pad_rect(g, x, vl, ll):
   name = str(g.next())
-  varname = valid("pad%s" % (name), g)
+  varname = valid("pad%s" % (name), g, vl)
   dx = x['dx']
   dy = x['dy']
   drill = x['drill']
@@ -107,7 +113,7 @@ def _simple_t_rect(t, g, x, vl, ll):
 
 def _simple_pad_disc_octagon(g, constructor, x, vl, ll):
   name = str(g.next())
-  varname = valid("pad%s" % (name), g)
+  varname = valid("pad%s" % (name), g, vl)
   a = """\
 %s = new %s %s, %s
 """ % (varname, constructor, x['r'], x['drill'])
