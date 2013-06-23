@@ -79,7 +79,8 @@ class GLDraw:
       self.set_color(shape['type'])
     else:
       self.set_color('silk')
-    l = len(s)
+    if (len(s) == 0):
+      return # Do nothing if there's no text
     dxp = dx * self.zoom() # dx in pixels
     dyp = dy * self.zoom() # dy in pixels
     (fdx, fdy) = self.font.ft.getsize(s)
