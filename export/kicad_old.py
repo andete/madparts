@@ -51,11 +51,13 @@ class Import:
         meta['desc'] = meta['desc'] + "\n" + d
       return None
 
-    def label(s, is_value):
+    def label(s, labeltype='user'):
       shape = { 'shape': 'label', 'type': 'silk' }
       shape['value'] = s[11]
-      if (is_value):
+      if (labeltype == 'value'):
         shape['value'] = 'VALUE'
+      if (labeltype == 'reference'):
+        shape['value'] = 'NAME'
       shape['x'] = float(s[1])
       shape['y'] = -float(s[2])
       shape['dy'] = float(s[3])
@@ -202,8 +204,9 @@ class Import:
       else:
         res = {
           'cd': lambda a: cd(a, lines[i][3:]),
-          't0': lambda a: label(a, False),
-          't1': lambda a: label(a, True),
+          't0': lambda a: label(a, 'reference'),
+          't1': lambda a: label(a, 'value'),
+          't2': lambda a: label(a, 'user'),
           'ds': line,
           'dc': circle,
           'da': arc,
