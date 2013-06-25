@@ -33,15 +33,15 @@ def _inverse(color_scheme):
 color_schemes['inverse'] = _inverse(color_schemes['default'])
 
 default_settings = {
-  'gl/dx': 200,
-  'gl/dy': 200,
-  'gl/zoomfactor': 50,
+  'gl/dx': '200',
+  'gl/dy': '200',
+  'gl/zoomfactor': '50',
   'gl/colorscheme': 'default',
-  'gui/keyidle': 1500,
-  'gl/autozoom': True,
-  'gui/displaydocu': True,
-  'gui/displayrestrict': False,
-  'gui/displaystop': False,
-  'gui/displaykeepout': False,
-  'gui/autocompile': True,
+  'gui/keyidle': '1500',
+  'gl/autozoom': 'True',
+  'gui/displaydocu': 'True',
+  'gui/displayrestrict': 'False',
+  'gui/displaystop': 'False',
+  'gui/displaykeepout': 'False',
+  'gui/autocompile': 'True',
 }
