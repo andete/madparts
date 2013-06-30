@@ -250,20 +250,32 @@ class GLDraw:
     x2 = fget(shape, 'x2')
     y2 = fget(shape, 'y2')
     w = fget(shape, 'w')
-    curve = fget(shape, 'curve')
+    curve = fget(shape, 'curve', 0.0)*math.pi/180.0
     r = w/2
 
     dx = x2-x1
     dy = y2-y1
     l = math.sqrt(dx*dx + dy*dy)
-    px = dy * r / l # trigoniometrics
-    py = dx * r / l # trigoniometrics
-    glBegin(GL_QUADS)
-    glVertex3f(x1-px, y1+py, 0)
-    glVertex3f(x1+px, y1-py, 0)
-    glVertex3f(x2+px, y2-py, 0)
-    glVertex3f(x2-px, y2+py, 0)
-    glEnd()
+    if curve == 0.0:
+      px = dy * r / l # trigoniometrics
+      py = dx * r / l # trigoniometrics
+      glBegin(GL_QUADS)
+      glVertex3f(x1-px, y1+py, 0)
+      glVertex3f(x1+px, y1-py, 0)
+      glVertex3f(x2+px, y2-py, 0)
+      glVertex3f(x2-px, y2+py, 0)
+      glEnd()
+    else:
+      rc = l / (2 * math.sin(curve/2))
+      a = math.sqrt((rc * rc) - (l*l/4))
+      (ndx, ndy) = (dx / l, dy / l) # unit vector
+      (pdx, pdy) = (-ndy, ndx) # unit vector perpendicular
+      # center point of arc
+      x0 = (x1+x2)/2 - a*pdx 
+      y0 = (y1+y2)/2 - a*pdy
+      # now still needed: pair of angles!
+      # TODO
+      pass
     self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
     self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)
     return labels
