@@ -168,6 +168,13 @@ class GLDraw:
     self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry, a1, a2)
     if 'name' in shape:
       labels.append(lambda: self._txt(shape, rx*1.5, ry*1.5, x, y, True))
+    if abs(a1 - a2) > 0.25:
+      x1 = r * math.cos(a1*math.pi/180)
+      y1 = r * math.sin(a1*math.pi/180)
+      x2 = r * math.cos(a2*math.pi/180)
+      y2 = r * math.sin(a2*math.pi/180)
+      self._disc(x1, y1, w/2, w/2, 0.0, 0.0, 0.0)
+      self._disc(x2, y2, w/2, w/2, 0.0, 0.0, 0.0)
     return labels
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
