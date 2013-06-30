@@ -44,17 +44,21 @@ class GLDraw:
     self.circle_inner_loc = self.circle_shader.uniformLocation("inner")
     self.circle_drill_loc = self.circle_shader.uniformLocation("drill")
     self.circle_drill_offset_loc = self.circle_shader.uniformLocation("drill_offset")
+    self.circle_angles_loc = self.circle_shader.uniformLocation("angles")
+
     self.rect_shader = make_shader("rect")
     self.rect_size_loc = self.rect_shader.uniformLocation("size")
     self.rect_move_loc = self.rect_shader.uniformLocation("move")
     self.rect_round_loc = self.rect_shader.uniformLocation("round")
     self.rect_drill_loc = self.rect_shader.uniformLocation("drill")
     self.rect_drill_offset_loc = self.rect_shader.uniformLocation("drill_offset")
+
     self.octagon_shader = make_shader("octagon")
     self.octagon_size_loc = self.octagon_shader.uniformLocation("size")
     self.octagon_move_loc = self.octagon_shader.uniformLocation("move")
     self.octagon_drill_loc = self.octagon_shader.uniformLocation("drill")
     self.octagon_drill_offset_loc = self.octagon_shader.uniformLocation("drill_offset")
+
     self.hole_shader = make_shader("hole")
     self.hole_move_loc = self.hole_shader.uniformLocation("move")
     self.hole_radius_loc = self.hole_shader.uniformLocation("radius")
@@ -102,7 +106,7 @@ class GLDraw:
     self._txt(shape, dx, dy, x, y)
     return labels
 
-  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
+  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0, a1 = 0.0, a2 = 360.0):
     self.circle_shader.bind()
     self.circle_shader.setUniformValue(self.circle_move_loc, x, y)
     self.square_data_vbo.bind()
@@ -112,6 +116,9 @@ class GLDraw:
     self.circle_shader.setUniformValue(self.circle_inner_loc, irx, iry)
     self.circle_shader.setUniformValue(self.circle_drill_loc, drill, 0.0)
     self.circle_shader.setUniformValue(self.circle_drill_offset_loc, drill_dx, drill_dy)
+    a1 = (a1 % 361) * math.pi / 180.0
+    a2 = (a2 % 361) * math.pi / 180.0
+    self.circle_shader.setUniformValue(self.circle_angles_loc, a1, a2)
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release() 
 
@@ -156,7 +163,9 @@ class GLDraw:
     iry = fget(shape, 'iry', ry)
     ry = ry + w/2
     iry = iry - w/2
-    self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry)
+    a1 = fget(shape, 'a1', 0.0)
+    a2 = fget(shape, 'a2', 360.0)
+    self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry, a1, a2)
     if 'name' in shape:
       labels.append(lambda: self._txt(shape, rx*1.5, ry*1.5, x, y, True))
     return labels
@@ -228,12 +237,13 @@ class GLDraw:
       labels.append(lambda: self._txt(shape ,m, m, x, y, True))
     return labels
 
-  def line(self, shape, labels):
+  def vertex(self, shape, labels):
     x1 = fget(shape, 'x1')
     y1 = fget(shape, 'y1')
     x2 = fget(shape, 'x2')
     y2 = fget(shape, 'y2')
     w = fget(shape, 'w')
+    curve = fget(shape, 'curve')
     r = w/2
 
     dx = x2-x1
@@ -251,6 +261,14 @@ class GLDraw:
     self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)
     return labels
  
+  def polygon(self, shape, labels):
+    w = fget(shape, 'w')
+    vert= shape['v']
+    for x in vert:
+      x['w'] = w
+      labels = self.vertex(x, labels)
+    return labels
+
   def skip(self, shape, labels):
     return labels
    
@@ -263,9 +281,11 @@ class GLDraw:
           'circle': self.circle,
           'disc': self.disc,
           'label': self.label,
-          'line': self.line,
+          'line': self.vertex,
+          'vertex': self.vertex,
           'octagon': self.octagon,
           'rect': self.rect,
+          'polygon': self.polygon,
         }
         labels = dispatch.get(shape['shape'], self.skip)(shape, labels)
     for draw_label in labels:

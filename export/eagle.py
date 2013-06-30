@@ -265,6 +265,14 @@ class Export:
       elif s == 'label': label(shape, layer)
       elif s == 'rect': rect(shape, layer)
 
+    def polygon(shape):
+      """ <polygon width="0.2" layer="21">
+<vertex x="26.039284375" y="1.3445" curve="9.499997"/>
+<vertex x="26.342959375" y="1.5009"/>
+<vertex x="25.608765625" y="2.3838625"/>
+</polygon>"""
+      pass
+
     def unknown(shape):
       pass
 

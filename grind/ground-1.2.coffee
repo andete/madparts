@@ -149,24 +149,52 @@ class Circle
     @r = 0
     @x = 0
     @y = 0
+    
+class Vertex
+  constructor: (@x1, @y1, @x2, @y2, @curve=0) ->
+    @shape = 'vertex'
 
-class Line
+class Line extends Vertex
   constructor: (@w) ->
-     @type = 'silk'
-     @shape = 'line'
-     @x1 = 0
-     @y1 = 0
-     @x2 = 0
-     @y2 = 0
-
-class Arc
-  constructor: (@w) ->
+    super
     @type = 'silk'
-    @shape = 'arc'
     @x1 = 0
     @y1 = 0
     @x2 = 0
     @y2 = 0
+    @curve = 0
+
+class Arc extends Vertex
+  constructor: (@w) ->
+    super
+    @type = 'silk'
+    @x1 = 0
+    @y1 = 0
+    @x2 = 0
+    @y2 = 0
+    @curve = 0
+
+class Polygon
+  constructor: (@w) ->
+    @type = 'silk'
+    @shape = 'polygon'
+    @v = []
+    
+    @start = (x1, y1) ->
+      @lastx = x1
+      @lasty = y1
+    
+    @add = (x1, y1, curve=0) ->
+      vertex = new Vertex @lastx,@lasty, x1, y1, curve
+      @v = @v.concat([vertex])
+      @lastx = x1
+      @lasty = y1
+
+    @end = (curve=0) ->
+      x1 = @v[0].x1
+      y1 = @v[0].y1
+      vertex = new Vertex @lastx,@lasty, x1, y1, curve
+      @v = @v.concat([vertex])
 
 class Name
   constructor: (@y) ->
