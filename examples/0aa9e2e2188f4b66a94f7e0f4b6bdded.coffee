@@ -5,11 +5,11 @@
 
 footprint = () ->
   p = new Polygon 0.1
-  p.start(-1, 1)
-  p.add(0, 1)
-  p.add(1, 0, 90)
-  p.add(1, -1)
-  p.add(-1,-1)
+  p.start -1, 1
+  p.add 0, 1
+  p.add 1, 0, 90
+  p.add 1, -1
+  p.add -1,-1
   p.end()
 
   c = new Circle 0.1
