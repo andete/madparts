@@ -3,19 +3,17 @@
 
 from ctypes import util
 
-from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
 from OpenGL.GL import *
 import OpenGL.arrays.vbo as vbo
 
 import numpy as np
-import math, sys
+import math
 import os, os.path
 
 from mutil.mutil import *
 from defaultsettings import color_schemes
-from inter import inter
 
 import glFreeType
 

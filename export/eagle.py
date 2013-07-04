@@ -1,9 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import StringIO, uuid, re, copy
-
-from xml.sax.saxutils import escape
+import uuid, re, copy
 
 from bs4 import BeautifulSoup, Tag
 

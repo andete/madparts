@@ -3,8 +3,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import numpy as np
-import math, time, traceback, re, os, os.path, sys
+import time, traceback, os.path
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
@@ -14,7 +13,6 @@ import gui.gldraw, gui.library
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
-import coffee.library
 
 from inter import inter
 

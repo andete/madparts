@@ -2,11 +2,10 @@
 # (c) 2013 Alex Schultz <alex@strangeautomata.com>
 # License: GPL
 
-import os.path, re, string, traceback
+import os.path, re, traceback
 from inter import inter
 
 from qtscriptwrapper import JsEngine
-from qtscriptwrapper import scriptValueToPyObject
 from qtscriptwrapper import JsEngineException
 
 supported_formats = ['1.0', '1.1', '1.2']
@@ -93,6 +92,8 @@ def eval_coffee_meta(coffee):
     return acc
   return reduce(_collect, meta_list, { 'type': 'meta'})
 
+# TODO: verify that this method is actually correct
+# it seems to be broken
 def clone_coffee_meta(coffee, old_meta, new_id, new_name):
   cl = coffee.splitlines()
   def not_meta_except_desc(s):

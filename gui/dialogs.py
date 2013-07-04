@@ -3,7 +3,6 @@
 
 import uuid
 import os.path
-import re
 
 from PySide import QtGui, QtCore
 
@@ -412,7 +411,6 @@ class PreferencesDialog(QtGui.QDialog):
     button_box.accepted.connect(self.settings_accepted)
     button_box.rejected.connect(self.reject)
     vbox.addWidget(button_box)
-    settings_widget = QtGui.QWidget()
     self.setLayout(vbox)
 
   def settings_restore_defaults(self):

@@ -3,12 +3,11 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import argparse, sys, traceback, os.path, glob
+import argparse, sys, traceback
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
 from inter import inter
-import coffee.library
 import export.detect as detect
 
 def export_footprint(remaining):

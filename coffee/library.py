@@ -2,7 +2,6 @@
 # License: GPL
 
 import os, os.path, glob
-from collections import defaultdict
 
 import coffee.pycoffee as pycoffee
 
