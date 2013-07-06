@@ -50,11 +50,18 @@ void main() {
         if (a2 < 0.0) {
           a1 = 2*pi - a1;
         }
-        float min_a = min(angles2.x, angles2.y);
-        float max_a = max(angles2.x, angles2.y);
-        if (min_a <= a1 && a1 <= max_a) {
-          gl_FragColor = gl_Color;
-        }
+        if (angles2.x <= angles2.y) {
+          // points with angle between a2.x and a2.y
+          if (angles2.x <= a1 && a1 <= angles2.y) {
+            gl_FragColor = gl_Color;
+          }
+        } else {
+          // points with angles between a2.x and 360
+          // or 0 and a2.y
+          if (a1 >= angles2.x || a1 <= angles2.y) {
+            gl_FragColor = gl_Color;
+          }
+        }   
       } 
     }
   }
