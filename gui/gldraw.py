@@ -271,10 +271,12 @@ class GLDraw:
       dy = y2-y1
       print "dx:",dx, "dy:", dy, "l:", l
       # radius of arc
+      # this will only work for arcs
+      # up to 180 degrees!
       # sin(angle/2) = (l/2) / rc =>
-      angle_for_sin = angle
-      if angle_for_sin > 180:
-        angle_for_sin = -(360-angle)
+      angle_for_sin = abs(angle)
+      if angle_for_sin > math.pi:
+        angle_for_sin = -(2*math.pi-angle)
       rc = l / (2 * math.sin(angle_for_sin/2))
       print "rc:", rc
       # a = sqrt(rc^2 - (l/2)^2) 
@@ -290,12 +292,16 @@ class GLDraw:
       # point in between (x1,y1) and (x2,y2) shifted negatively among (pdx,pdy)
       (x3,y3) = ((x1+x2)/2, (y1+y2)/2) 
       print "x3:",x3,"y3:",y3
+      fx = a*pdx
+      fy = a*pdy
       if rc > 0:
-        x0 = x3 - a*pdx 
-        y0 = y3 - a*pdy
-      else:
-        x0 = x3 + a*pdx 
-        y0 = y3 + a*pdy
+        fx = -fx
+        fy = -fy
+      if angle > 0:
+        fx = -fx
+        fy = -fy
+      x0 = x3 + fx
+      y0 = y3 + fy
       print "x0:",x0,"y0:",y0
       (d1,d2) = (y1-y0, y2-y0)
       (e1,e2) = (x1-x0, x2-x0)
@@ -311,8 +317,8 @@ class GLDraw:
         a2 = 2*math.pi - a2
       a1 = a1 * 180 / math.pi
       a2 = a2 * 180 / math.pi
-      if abs(a2 - a1) - curve > -0.01:
-        (a1,a2) = (a2,a1)
+      if angle < 0:
+        (a1, a2) = (a2, a1)
       print "a1:",a1,"a2:",a2,"curve:",curve
       self._disc(x0, y0, rc+r, rc+r, 0.0, 0.0, 0.0, rc-r, rc-r, a1, a2)
     self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
