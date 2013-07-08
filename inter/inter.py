@@ -100,7 +100,7 @@ def bounding_box(inter):
     y2 = y + dy/2
     return (x1, y1, x2, y2)
     
-  def line(shape):
+  def vertex(shape):
     x1 = fget(shape, 'x1')
     y1 = fget(shape, 'y1')
     x2 = fget(shape, 'x2')
@@ -111,6 +111,23 @@ def bounding_box(inter):
     y1a = min(y1, y2) - w/2
     y2a = max(y1, y2) + w/2
     return (x1a, y1a, x2a, y2a)
+
+  def polygon(shape):
+    w = fget(shape, 'w')
+    vert= shape['v']
+    if vert == []: return None
+    fst = vert[0]
+    fst['w'] = w
+    (x1,y1,x2,y2) = vertex(fst)
+    for x in vert[1:]:
+      x['w'] = w
+      (x1a,y1a,x2a,y2a) = vertex(x)
+      x1 = min(x1, x1a)
+      y1 = min(y1, y1a)
+      x2 = max(x2, x2a)
+      y2 = max(y2, y2a)
+    return (x1, y1, x2, y2)
+    
 
   def octagon(shape):
     r = fget(shape, 'r', 0.0)
@@ -146,18 +163,22 @@ def bounding_box(inter):
     'circle': circle,
     'disc': disc,
     'label': label,
-    'line': line,
+    'line': vertex,
+    'vertex': vertex,
+    'polygon': polygon,
     'octagon': octagon,
     'rect': rect,
   }
   if inter == None or inter == []: return (-1,-1,1,1)
   for x in inter:
     if 'shape' in x:
-       (xx1, xy1, xx2, xy2) = dispatch.get(x['shape'], unknown)(x)
-       x1 = min(x1, xx1)
-       y1 = min(y1, xy1)
-       x2 = max(x2, xx2)
-       y2 = max(y2, xy2)
+       res = dispatch.get(x['shape'], unknown)(x)
+       if res != None:
+         (xx1, xy1, xx2, xy2) = res
+         x1 = min(x1, xx1)
+         y1 = min(y1, xy1)
+         x2 = max(x2, xx2)
+         y2 = max(y2, xy2)
   return (x1,y1,x2,y2)
 
 def size(inter):
