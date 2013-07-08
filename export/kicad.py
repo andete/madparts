@@ -146,6 +146,10 @@ class Export:
       return l
 
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
+    # TODO rework:
+    # start == center point
+    # end == start point of arc
+    # angle == angled part in that direction
     def arc(shape, layer):
       l = [S('fp_arc')] 
       l.append([S('start'), fget(shape, 'x1'), -fget(shape, 'y1')])
