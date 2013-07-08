@@ -265,25 +265,11 @@ class GLDraw:
       glVertex3f(x2-px, y2+py, 0)
       glEnd()
     else:
-      # sort points by increasing angle
-      z1 = math.sqrt(x1*x1+y1*y1)
-      z2 = math.sqrt(x2*x2+y2*y2)
-      z1s = math.asin(y1/z1)
-      z1c = math.acos(x1/z1)
-      if z1s < 0.0:
-        z1c = 2*math.pi - z1c
-      z2s = math.asin(y2/z2)
-      z2c = math.acos(x2/z2)
-      if z2s < 0.0:
-        z2c = 2*math.py - z2c
-      print "z1c:",z1c,"z2c:",z2c
-      if z2c < z1c:
-        (x1,y1,x2,y2) = (x2,y2,x1,y1)
       print "x1:",x1,"y1:",y1
       print "x2:",x2,"y2:",y2
       dx = x2-x1
       dy = y2-y1
-      print "angle:",angle
+      print "angle:",angle*180/math.pi
       print "dx:",dx, "dy:", dy, "l:", l
       # radius of arc
       # sin(angle/2) = (l/2) / rc =>
@@ -300,17 +286,27 @@ class GLDraw:
       print "pdx:",pdx,"pdy:",pdy
       # center point of arc 
       # point in between (x1,y1) and (x2,y2) shifted negatively among (pdx,pdy)
-      x0 = (x1+x2)/2 + a*pdx 
-      y0 = (y1+y2)/2 + a*pdy
+      (x3,y3) = ((x1+x2)/2, (y1+y2)/2) 
+      print "x3:",x3,"y3:",y3
+      x0 = x3 - a*pdx 
+      y0 = y3 - a*pdy
       print "x0:",x0,"y0:",y0
-      d = y1 - y0
-      print "d:",d
-      # sin(a1) = d/rc
-      a1 = math.asin(d/rc)*180/math.pi
-      if a1 < 0:
-        a1 = a1 + 360
-      a2 = a1 + curve
-      print "a1:",a1,"a2:",a2
+      (d1,d2) = (y1-y0, y2-y0)
+      e1 = math.sqrt(rc*rc - d1*d1)
+      e2 = math.sqrt(rc*rc - d2*d2)
+      a1s = math.asin(d1/rc)
+      a1 = math.acos(e1/rc)
+      a2s = math.asin(d2/rc)
+      a2 = math.acos(e2/rc)
+      if a1s < 0:
+        a1 = 2*math.pi - a1
+      if a2s < 0:
+        a2 = 2*math.pi - a2
+      a1 = (a1 * 180 / math.pi) % 360
+      a2 = (a2 * 180 / math.pi) % 360
+      if a2 - a1 < 0:
+        (a1,a2) = (a2,a1)
+      print "a1:",a1,"a2:",a2,"curve:",curve
       self._disc(x0, y0, rc+r, rc+r, 0.0, 0.0, 0.0, rc-r, rc-r, a1, a2)
     self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
     self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)
