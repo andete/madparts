@@ -9,6 +9,7 @@ from qtscriptwrapper import JsEngine
 from qtscriptwrapper import JsEngineException
 
 supported_formats = ['1.0', '1.1', '1.2']
+current_format = supported_formats[-1]
 
 js_make_js_from_coffee = None
 js_make_js_ctx = None
@@ -92,27 +93,25 @@ def eval_coffee_meta(coffee):
     return acc
   return reduce(_collect, meta_list, { 'type': 'meta'})
 
-# TODO: verify that this method is actually correct
-# it seems to be broken
 def clone_coffee_meta(coffee, old_meta, new_id, new_name):
   cl = coffee.splitlines()
   def not_meta_except_desc(s):
     return not re.match('^#\w+',l) or re.match('^#desc \w+', l)
   no_meta_l = [l for l in coffee.splitlines() if not_meta_except_desc(l)]
   no_meta_coffee = '\n'.join(no_meta_l)
-  new_meta = "#format 1.2\n#name %s\n#id %s\n#parent %s\n" % (new_name, new_id, old_meta['id'])
+  new_meta = "#format %s\n#name %s\n#id %s\n#parent %s\n" % (current_format, new_name, new_id, old_meta['id'])
   return new_meta + no_meta_coffee
 
 def new_coffee(new_id, new_name):
   return """\
-#format 1.2
+#format %s
 #name %s
 #id %s
 #desc TODO
 
 footprint = () ->
   []
-""" % (new_name, new_id)
+""" % (current_format, new_name, new_id)
 
 def preprocess_coffee(code):
   def repl(m):
