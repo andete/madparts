@@ -269,12 +269,14 @@ class GLDraw:
       print "x2:",x2,"y2:",y2
       dx = x2-x1
       dy = y2-y1
-      print "angle:",angle*180/math.pi
       print "dx:",dx, "dy:", dy, "l:", l
       # radius of arc
       # sin(angle/2) = (l/2) / rc =>
-      rc = l / (2 * math.sin(angle/2))
-      print "rc:",rc
+      angle_for_sin = angle
+      if angle_for_sin > 180:
+        angle_for_sin = -(360-angle)
+      rc = l / (2 * math.sin(angle_for_sin/2))
+      print "rc:", rc
       # a = sqrt(rc^2 - (l/2)^2) 
       a = math.sqrt((rc * rc) - (l*l/4))
       print "a:", a
@@ -288,12 +290,17 @@ class GLDraw:
       # point in between (x1,y1) and (x2,y2) shifted negatively among (pdx,pdy)
       (x3,y3) = ((x1+x2)/2, (y1+y2)/2) 
       print "x3:",x3,"y3:",y3
-      x0 = x3 - a*pdx 
-      y0 = y3 - a*pdy
+      if rc > 0:
+        x0 = x3 - a*pdx 
+        y0 = y3 - a*pdy
+      else:
+        x0 = x3 + a*pdx 
+        y0 = y3 + a*pdy
       print "x0:",x0,"y0:",y0
       (d1,d2) = (y1-y0, y2-y0)
-      e1 = math.sqrt(rc*rc - d1*d1)
-      e2 = math.sqrt(rc*rc - d2*d2)
+      (e1,e2) = (x1-x0, x2-x0)
+      print "d1:",d1,"d2:",d2
+      print "e1:",e1,"e2:",e2
       a1s = math.asin(d1/rc)
       a1 = math.acos(e1/rc)
       a2s = math.asin(d2/rc)
@@ -302,9 +309,9 @@ class GLDraw:
         a1 = 2*math.pi - a1
       if a2s < 0:
         a2 = 2*math.pi - a2
-      a1 = (a1 * 180 / math.pi) % 360
-      a2 = (a2 * 180 / math.pi) % 360
-      if a2 - a1 < 0:
+      a1 = a1 * 180 / math.pi
+      a2 = a2 * 180 / math.pi
+      if abs(a2 - a1) - curve > -0.01:
         (a1,a2) = (a2,a1)
       print "a1:",a1,"a2:",a2,"curve:",curve
       self._disc(x0, y0, rc+r, rc+r, 0.0, 0.0, 0.0, rc-r, rc-r, a1, a2)

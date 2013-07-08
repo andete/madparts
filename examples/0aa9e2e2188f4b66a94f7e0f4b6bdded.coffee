@@ -7,10 +7,10 @@ footprint = () ->
   p = new Polygon 0.1
   p.type = 'test'
   p.start 0, 1
-  p.add 1, 0, 90
-  p.add 0, -1, 0
-  p.add -1,0, 0
-  p.add 0,1, 0
+  p.add 1, 0, 180
+  p.add 0, -1, 180
+  p.add -1,0, 25
+  p.add 0,1, 25
 
   a  = 45
   c = new Circle 0.1
