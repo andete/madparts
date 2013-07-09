@@ -265,8 +265,8 @@ class GLDraw:
       glVertex3f(x2-px, y2+py, 0)
       glEnd()
     else:
-      print "x1:",x1,"y1:",y1
-      print "x2:",x2,"y2:",y2
+      #print "x1:",x1,"y1:",y1
+      #print "x2:",x2,"y2:",y2
       dx = x2-x1
       dy = y2-y1
       print "dx:",dx, "dy:", dy, "l:", l
@@ -278,20 +278,20 @@ class GLDraw:
       if angle_for_sin > math.pi:
         angle_for_sin = -(2*math.pi-angle)
       rc = l / (2 * math.sin(angle_for_sin/2))
-      print "rc:", rc
+      #print "rc:", rc
       # a = sqrt(rc^2 - (l/2)^2) 
       a = math.sqrt((rc * rc) - (l*l/4))
-      print "a:", a
+      #print "a:", a
       # unit vector pointing from (x1,y1) to (x2,y2)
       (ndx, ndy) = (dx / l, dy / l)
-      print "ndx:",ndx,"ndy:",ndy
+      #print "ndx:",ndx,"ndy:",ndy
       # perpendicular unit vector
       (pdx, pdy) = (-ndy, ndx)
-      print "pdx:",pdx,"pdy:",pdy
+      #print "pdx:",pdx,"pdy:",pdy
       # center point of arc 
       # point in between (x1,y1) and (x2,y2) shifted negatively among (pdx,pdy)
       (x3,y3) = ((x1+x2)/2, (y1+y2)/2) 
-      print "x3:",x3,"y3:",y3
+      #print "x3:",x3,"y3:",y3
       fx = a*pdx
       fy = a*pdy
       if rc > 0:
@@ -302,11 +302,11 @@ class GLDraw:
         fy = -fy
       x0 = x3 + fx
       y0 = y3 + fy
-      print "x0:",x0,"y0:",y0
+      #print "x0:",x0,"y0:",y0
       (d1,d2) = (y1-y0, y2-y0)
       (e1,e2) = (x1-x0, x2-x0)
-      print "d1:",d1,"d2:",d2
-      print "e1:",e1,"e2:",e2
+      #print "d1:",d1,"d2:",d2
+      #print "e1:",e1,"e2:",e2
       a1s = math.asin(d1/rc)
       a1 = math.acos(e1/rc)
       a2s = math.asin(d2/rc)
@@ -319,7 +319,7 @@ class GLDraw:
       a2 = a2 * 180 / math.pi
       if angle < 0:
         (a1, a2) = (a2, a1)
-      print "a1:",a1,"a2:",a2,"curve:",curve
+      #print "a1:",a1,"a2:",a2,"curve:",curve
       self._disc(x0, y0, rc+r, rc+r, 0.0, 0.0, 0.0, rc-r, rc-r, a1, a2)
     self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
     self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)

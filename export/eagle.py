@@ -257,7 +257,7 @@ class Export:
       if not 'shape' in shape: return
       layer = type_to_layer_number(shape['type'])
       s = shape['shape']
-      if s == 'line': line(shape, layer)
+      if s == 'line' or s == 'vertex': line(shape, layer)
       elif s == 'circle': circle(shape, layer)
       elif s == 'disc': disc(shape, layer)
       elif s == 'label': label(shape, layer)

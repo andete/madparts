@@ -58,14 +58,15 @@ modl = (l, kv...) ->
 # a... treats a as a argument list
 combine = (a) -> [].concat a...
 
+reverse = (x) -> x.reverse()
+
 make_sure_is_array = (unit) ->
   if not (unit instanceof Array)
     [unit]
   else
     unit
 
-generate_names = (l) ->
-  i = 0
+generate_names = (l, i=0) ->
   for smd in l
     if smd['type'] in ['smd', 'pad']
       smd.name = (i+1)

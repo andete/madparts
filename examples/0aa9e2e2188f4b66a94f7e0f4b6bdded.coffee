@@ -17,6 +17,8 @@ footprint = () ->
   p2.start 1, 0
   p2.add 3, 2, 40
   p2.add 4,0, -45
+  p2.add 3,-2,-40
+  p2.add 1,0, 40
 
   a  = 45
   c = new Circle 0.1
