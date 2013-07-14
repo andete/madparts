@@ -232,7 +232,7 @@ rotate90pad = (item) ->
 rotate90 = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate90pad item
-  if item.shape == 'line'
+  if item.shape == 'line' or item.shape == 'vertex'
     ox1 = item.x1
     oy1 = item.y1
     ox2 = item.x2
@@ -261,7 +261,7 @@ rotate270pad = (item) -> rotate90pad (rotate180pad item)
 mirror1_y = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
-  if item.shape == 'line'
+  if item.shape == 'line' or item.shape == 'vertex'
     item.x1 = -item.x1
     item.x2 = -item.x2
   else
@@ -279,7 +279,7 @@ mirror_y = (item) ->
 mirror_x = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
-  if item.shape == 'line'
+  if item.shape == 'line' or item.shape == 'vertex'
     item.y1 = -item.y1
     item.y2 = -item.y2
   else
@@ -291,7 +291,7 @@ mirror_x = (item) ->
 
 # adjust a shape in the y direction
 adjust1_y = (dy, o) ->
-  if o.shape == 'line'
+  if o.shape == 'line' or o.shape == 'vertex'
     o.y1 += dy
     o.y2 += dy
   else
@@ -308,7 +308,7 @@ adjust_y = (o, dy) ->
 
 # adjust a shape in the x direction
 adjust1_x = (dx, o) ->
-  if o.shape == 'line'
+  if o.shape == 'line' or o.shape == 'vertex'
     o.x1 += dx
     o.x2 += dx
   else
