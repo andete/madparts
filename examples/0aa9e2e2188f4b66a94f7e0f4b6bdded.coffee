@@ -36,10 +36,17 @@ footprint = () ->
   p4.end 0
   adjust p4, 0.1, 0.2
 
-  a  = 45
+  angle  = 45
   c = new Circle 0.1
   c.r = 2
-  c.a1 = a
-  c.a2 = a+180
+  c.a1 = angle
+  c.a2 = angle+180
 
-  [p, c, p2, p3, p4]
+  a = new Arc 0.1
+  a.x1 = 2
+  a.x2 = 1
+  a.y1 = -1
+  a.y2 = -0.5
+  a.curve = 30
+
+  [p, c, p2, p3, p4, a]
