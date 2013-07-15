@@ -232,7 +232,6 @@ class Export:
       y = fget(shape,'y')
       w = fget(shape,'w')
       if 'a1' in shape or 'a2' in 'shape':
-        print 'circle->wire'
         wire = self.soup.new_tag('wire')
         a1 = fget(shape, 'a1')
         a2 = fget(shape, 'a2')
@@ -463,12 +462,14 @@ class Import:
     def wire(wire):
       res = {}
       res['type'] = layer_number_to_type(int(wire['layer']))
-      res['shape'] = 'line'
+      res['shape'] = 'vertex'
       res['x1'] = float(wire['x1'])
       res['y1'] = float(wire['y1'])
       res['x2'] = float(wire['x2'])
       res['y2'] = float(wire['y2'])
       res['w'] = float(wire['width'])
+      if wire.has_key('curve'):
+        res['curve'] = float(wire['curve'])
       return res
 
     def circle(circle):
@@ -527,7 +528,10 @@ class Import:
         res['shape'] = 'octagon'
         res['r'] = dia/2
       return res
-      
+     
+    def polygon(x):
+      # TODO
+      return None
 
     def unknown(x):
       res = {}
@@ -546,6 +550,7 @@ class Import:
           'text': text,
           'wire': wire,
           'rectangle': rect,
+          'polygon': polygon,
           }.get(x.name, unknown)(x)
         if result != None: l.append(result)
     return l
