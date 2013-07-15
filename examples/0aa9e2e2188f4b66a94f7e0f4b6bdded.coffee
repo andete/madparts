@@ -5,7 +5,7 @@
 
 footprint = () ->
   p = new Polygon 0.1
-  p.type = 'test'
+  p.type = 'docu'
   p.start 0, 1
   p.add -1, 0, 180
   p.add 0, -1, 180

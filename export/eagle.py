@@ -1,7 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import uuid, re, copy
+import uuid, re, copy, math
 
 from bs4 import BeautifulSoup, Tag
 
@@ -224,25 +224,43 @@ class Export:
       package.append(disc)
   
     def circle(shape, layer):
+      print shape
       r = fget(shape, 'r')
       rx = fget(shape, 'rx', r)
       ry = fget(shape, 'ry', r)
       x = fget(shape,'x')
       y = fget(shape,'y')
       w = fget(shape,'w')
-      circle = self.soup.new_tag('circle')
-      circle['x'] = x
-      circle['y'] = y
-      circle['radius'] = r
-      circle['width'] = w
-      circle['layer'] = layer
-      package.append(circle)
+      if 'a1' in shape or 'a2' in 'shape':
+        print 'circle->wire'
+        wire = self.soup.new_tag('wire')
+        a1 = fget(shape, 'a1')
+        a2 = fget(shape, 'a2')
+        wire['width'] = w
+        wire['curve'] = (a2 - a1)
+        a1 = a1 * math.pi / 180
+        a2 = a2 * math.pi / 180
+        wire['x1'] = x + r * math.cos(a1)
+        wire['y1'] = y + r * math.sin(a1)
+        wire['x2'] = x + r * math.cos(a2)
+        wire['y2'] = y + r * math.sin(a2)
+        wire['layer'] = layer
+        package.append(wire)
+      else:
+        circle = self.soup.new_tag('circle')
+        circle['x'] = x
+        circle['y'] = y
+        circle['radius'] = r
+        circle['width'] = w
+        circle['layer'] = layer
+        package.append(circle)
 
     def line(shape, layer):
       x1 = fget(shape, 'x1')
       y1 = fget(shape, 'y1')
       x2 = fget(shape, 'x2')
       y2 = fget(shape, 'y2')
+      curve = fget(shape, 'curve')
       w = fget(shape, 'w')
       line = self.soup.new_tag('wire')
       line['x1'] = x1
@@ -251,8 +269,31 @@ class Export:
       line['y2'] = y2
       line['width'] = w
       line['layer'] = layer
+      line['curve'] = curve
       package.append(line)
   
+    # eagle polygon format is somewhat wierd
+    # each vertex is actually a starting point towards the next
+    # where the last one is a starting point around towards the first
+    #  <polygon width="0.127" layer="21">
+    #  <vertex x="-1" y="-1"/>
+    #  <vertex x="-1" y="1"/>
+    #  <vertex x="0" y="1" curve="-90"/>
+    #  <vertex x="1" y="0" curve="-90"/>
+    #  <vertex x="0" y="-1"/>
+    #  </polygon>
+    def polygon(shape, layer):
+      p = self.soup.new_tag('polygon')
+      p['width'] = fget(shape, 'w')
+      p['layer'] = layer
+      for v in shape['v']:
+        vert = self.soup.new_tag('vertex')
+        vert['x'] = fget(v, 'x1')
+        vert['y'] = fget(v, 'y1')
+        vert['curve'] = fget(v, 'curve')
+        p.append(vert)
+      package.append(p)
+
     def silk(shape):
       if not 'shape' in shape: return
       layer = type_to_layer_number(shape['type'])
@@ -262,14 +303,7 @@ class Export:
       elif s == 'disc': disc(shape, layer)
       elif s == 'label': label(shape, layer)
       elif s == 'rect': rect(shape, layer)
-
-    def polygon(shape):
-      """ <polygon width="0.2" layer="21">
-<vertex x="26.039284375" y="1.3445" curve="9.499997"/>
-<vertex x="26.342959375" y="1.5009"/>
-<vertex x="25.608765625" y="2.3838625"/>
-</polygon>"""
-      pass
+      elif s == 'polygon': polygon(shape, layer)
 
     def unknown(shape):
       pass
