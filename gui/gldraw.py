@@ -269,7 +269,7 @@ class GLDraw:
       #print "x2:",x2,"y2:",y2
       dx = x2-x1
       dy = y2-y1
-      print "dx:",dx, "dy:", dy, "l:", l
+      # print "dx:",dx, "dy:", dy, "l:", l
       # radius of arc
       # this will only work for arcs
       # up to 180 degrees!

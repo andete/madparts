@@ -191,7 +191,7 @@ class Polygon
       @lastx = x1
       @lasty = y1
 
-    @end = (curve=0) ->
+    @end = (curve) ->
       x1 = @v[0].x1
       y1 = @v[0].y1
       vertex = new Vertex @lastx,@lasty, x1, y1, curve
@@ -228,11 +228,10 @@ rotate90pad = (item) ->
     item.rot += 360
   item
 
-# adjust item to be rotated 90 degrees anti-clockwise around (0,0)
-rotate90 = (item) ->
+rotate90_1 = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate90pad item
-  if item.shape == 'line' or item.shape == 'vertex'
+  else if item.shape == 'line' or item.shape == 'vertex'
     ox1 = item.x1
     oy1 = item.y1
     ox2 = item.x2
@@ -241,6 +240,8 @@ rotate90 = (item) ->
     item.y1 = ox1
     item.x2 = -oy2
     item.y2 = ox2
+  else if item.shape == 'polygon'
+    item.v.map rotate90_1
   else
     if not item.x?
       item.x = 0
@@ -252,6 +253,13 @@ rotate90 = (item) ->
     item.y = ox
   item
 
+# adjust item to be rotated 90 degrees anti-clockwise around (0,0)
+rotate90 = (item) ->
+  if item instanceof Array
+    item.map rotate90_1
+  else
+    rotate90_1 item
+
 rotate180 = (item) -> rotate90 (rotate90 item)
 rotate180pad = (item) -> rotate90pad (rotate90pad item)
 
@@ -261,9 +269,12 @@ rotate270pad = (item) -> rotate90pad (rotate180pad item)
 mirror1_y = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
-  if item.shape == 'line' or item.shape == 'vertex'
+  else if item.shape == 'line' or item.shape == 'vertex'
     item.x1 = -item.x1
     item.x2 = -item.x2
+    item.curve = -item.curve
+  else if item.shape == 'polygon'
+    item.v.map mirror1_y
   else
     if not item.x?
       item.x = 0
@@ -276,24 +287,34 @@ mirror_y = (item) ->
   else
     mirror1_y item
 
-mirror_x = (item) ->
+mirror1_x = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
-  if item.shape == 'line' or item.shape == 'vertex'
+  else if item.shape == 'line' or item.shape == 'vertex'
     item.y1 = -item.y1
     item.y2 = -item.y2
+    item.curve = -item.curve
+  else if item.shape == 'polygon'
+    item.v.map mirror1_x
   else
     if not item.y?
       item.y = 0
     item.y = -item.y
   item
  
+mirror_x = (item) ->
+  if item instanceof Array
+    item.map mirror1_x
+  else
+    mirror1_x item
 
 # adjust a shape in the y direction
 adjust1_y = (dy, o) ->
   if o.shape == 'line' or o.shape == 'vertex'
     o.y1 += dy
     o.y2 += dy
+  else if o.shape == 'polygon'
+    o.v.map (partial adjust1_y, dy)
   else
     if not o.y?
       o.y = 0
@@ -311,6 +332,8 @@ adjust1_x = (dx, o) ->
   if o.shape == 'line' or o.shape == 'vertex'
     o.x1 += dx
     o.x2 += dx
+  else if o.shape == 'polygon'
+   o.v.map (partial adjust1_x, dx)
   else
     if not o.x?
       o.x = 0
@@ -322,6 +345,9 @@ adjust_x = (o, dx) ->
     o.map (partial adjust1_x, dx)
   else
     adjust1_x dx, o
+
+adjust = (o, dx, dy) ->
+  adjust_y (adjust_x o, dx), dy
 
 ### SECTION 5: creating ranges of items ###
 
