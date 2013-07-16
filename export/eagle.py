@@ -412,7 +412,7 @@ class Import:
         x = float(text['x']) + len(s)*size/2
         y = float(text['y']) + size/2
       else:
-        # TODO deal with all other cases
+        # TODO deal with all other cases; assuming center
         # eagle supports: bottom-left | bottom-center | bottom-right | center-left | center | center-right | top-left | top-center | top-right
         x = float(text['x']) + len(s)*size/2
         y = float(text['y']) + size/2
@@ -476,11 +476,16 @@ class Import:
       res = {}
       res['type'] = layer_number_to_type(int(circle['layer']))
       res['shape'] = 'circle'
-      w =float(circle['width'])
-      res['w'] = w
-      res['r'] = float(circle['radius']) + w/2
+      w = float(circle['width'])
+      r = float(circle['radius'])
       res['x'] = float(circle['x'])
       res['y'] = float(circle['y'])
+      if w == r:
+        res['shape'] = 'disc'
+        res['r'] = r * 2
+      else:
+        res['w'] = w
+        res['r'] = r
       return res
 
     def description(desc):
