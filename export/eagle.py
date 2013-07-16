@@ -468,6 +468,8 @@ class Import:
       res['x2'] = float(wire['x2'])
       res['y2'] = float(wire['y2'])
       res['w'] = float(wire['width'])
+      # assymetry here: an Arc exported will come back as
+      # a curved vertex
       if wire.has_key('curve'):
         res['curve'] = float(wire['curve'])
       return res
@@ -535,8 +537,19 @@ class Import:
       return res
      
     def polygon(x):
-      # TODO
-      return None
+      res = {}
+      res['w'] = float(x['width'])
+      res['type'] = layer_number_to_type(int(x['layer']))
+      res['shape'] = 'polygon'
+      res['v'] = []
+      for e in x.contents:
+        vert = {}
+        vert['x'] = float(e['x'])
+        vert['y'] = float(e['y'])
+        if e.has_key('curve'):
+          vert['curve'] = float(e['curve'])
+        res['v'].append(vert)
+      return res
 
     def unknown(x):
       res = {}
