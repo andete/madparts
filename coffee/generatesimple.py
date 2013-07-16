@@ -67,10 +67,10 @@ def _simple_rect(prefix, constructor, x, g, vl, ll):
   ll.append(a)
   return varname
 
-def simple_smd_rect(g, x, vl, ll):
+def simple_smd_rect(t, g, x, vl, ll):
   _simple_rect('smd', 'Smd', x, g, vl, ll)
 
-def simple_pad_rect(g, x, vl, ll):
+def simple_pad_rect(t, g, x, vl, ll):
   name = str(g.next())
   varname = valid("pad%s" % (name), g, vl)
   dx = x['dx']
@@ -125,10 +125,10 @@ def _simple_pad_disc_octagon(g, constructor, x, vl, ll):
   vl.append(varname)
   ll.append(a)
 
-def simple_pad_disc(g, x, vl, ll):
+def simple_pad_disc(t, g, x, vl, ll):
   _simple_pad_disc_octagon(g, 'RoundPad', x, vl, ll)
 
-def simple_pad_octagon(g, x, vl, ll):
+def simple_pad_octagon(t, g, x, vl, ll):
   _simple_pad_disc_octagon(g, 'OctagonPad', x, vl, ll)
 
 def _simple_circle(prefix, g, x):
@@ -144,14 +144,10 @@ def _simple_circle(prefix, g, x):
   a = _add_if(x, a, varname, 'ry')
   return (varname, a)
 
-def simple_silk_circle(g, x, vl, ll):
-  (varname, a) = _simple_circle('silk', g, x)
-  vl.append(varname)
-  ll.append(a)
-
-def _simple_t_circle(t, g, x, vl, ll):
+def simple_circle(t, g, x, vl, ll):
   (varname, a) = _simple_circle(t, g, x)
-  a = a + ("%s.type = '%s'\n" % (varname, t))
+  if t != 'silk':
+    a = a + ("%s.type = '%s'\n" % (varname, t))
   vl.append(varname)
   ll.append(a)
 
@@ -168,12 +164,7 @@ def _simple_line(prefix, g, x):
        varname, x['y2'])
   return (varname, a)
 
-def simple_silk_line(g, x, vl, ll):
-  (varname, a) = _simple_line('silk', g, x)
-  vl.append(varname)
-  ll.append(a)
-
-def simple_silk_rect(g, x, vl, ll):
+def simple_rect(g, x, vl, ll):
   varname = "silk%s" % (g.next())
   a = """\
 %s = new Rect
@@ -182,12 +173,15 @@ def simple_silk_rect(g, x, vl, ll):
   a = _add_if(x, a, varname, 'y')
   a = _add_if(x, a, varname, 'dx')
   a = _add_if(x, a, varname, 'dy')
+  if t != 'silk':
+    a = a + ("%s.type = '%s'\n" % (varname, t))
   vl.append(varname)
   ll.append(a)
 
-def _simple_t_line(t, g, x, vl, ll):
+def simple_line(t, g, x, vl, ll):
   (varname, a) = _simple_line(t, g, x)
-  a = a + ("%s.type = '%s'\n" % (varname, t))
+  if t != 'silk':
+    a = a + ("%s.type = '%s'\n" % (varname, t))
   vl.append(varname)
   ll.append(a)
 
@@ -200,8 +194,7 @@ def _simple_name_value(prefix, constructor, g, x, vl, ll):
 %s = new %s %s
 """ % (varname, constructor, y)
   a = _add_if(x, a, varname, 'x')
-  vl.append(varname)
-  ll.append(a)
+  return (varname, a)
 
 def _simple_silk_label(g, x, vl, ll):
   varname = "label%s" % (g.next())
@@ -212,21 +205,24 @@ def _simple_silk_label(g, x, vl, ll):
 %s.dy = %s
 """ % (varname, x['value'], varname, x['x'], varname, x['y'],
        varname, x['dy'])
-  vl.append(varname)
-  ll.append(a)
+  return (varname, a)
 
-def simple_silk_label(g, x, vl, ll):
+def simple_label(t, g, x, vl, ll):
   v = x['value']
   if not 'x' in x:
    x['x'] = 0.0
   if v == 'NAME':
-    _simple_name_value('name', 'Name', g, x, vl, ll)
+    (varname, a) = _simple_name_value('name', 'Name', g, x, vl, ll)
   elif v == 'VALUE':
-    _simple_name_value('value', 'Value', g, x, vl, ll)
+    (varname, a) = _simple_name_value('value', 'Value', g, x, vl, ll)
   else:
-    _simple_silk_label(g, x, vl, ll)
+    (varname, a) = _simple_silk_label(g, x, vl, ll)
+  if t != 'silk':
+    a = a + "%s.type = '%s'\n" % (varname, t)
+  vl.append(varname)
+  ll.append(a)
 
-def simple_special_single(g, x, vl, ll):
+def simple_special_single(t, g, x, vl, ll):
   direction = x['direction']
   if direction == 'x':
     f = 'rot_single'
@@ -243,7 +239,7 @@ l = %s [%s], %s, %s
   vl.append('l')
   ll.append(a)
 
-def simple_special_dual(g, x, vl, ll):
+def simple_special_dual(t, g, x, vl, ll):
   direction_is_x = x['direction'] == 'x'
   alt = x['alt']
   f = 'dual'
@@ -261,7 +257,7 @@ l = %s [%s], %s, %s, %s
   vl.append('l')
   ll.append(a)
 
-def simple_special_quad(g, x, vl, ll):
+def simple_special_quad(t, g, x, vl, ll):
   # varname selection here is not perfect; should depend on actual naming
   var = "%s1" % (x['ref'])
   num = x['num']
@@ -274,7 +270,7 @@ l = quad [%s], %s, %s, %s
   vl.append('l')
   ll.append(a)
     
-def simple_special_mod(g, x, vl, ll):
+def simple_special_mod(t, g, x, vl, ll):
   x2 = copy.deepcopy(x)
   i = x2['index']
   del x2['index']
@@ -291,7 +287,7 @@ def simple_special_mod(g, x, vl, ll):
       a = a + "l[%s].%s = %s\n" % (i, k, v)
   ll.append(a)
 
-def simple_unknown(g, x, vl, ll):
+def simple_unknown(t, g, x, vl, ll):
   varname = "unknown%s" % (g.next())
   a = "%s = new Object\n" % (varname)
   for k in x.keys():
@@ -300,34 +296,26 @@ def simple_unknown(g, x, vl, ll):
   ll.append(a)
 
 # add as needed...
-simple_dispatch = {
+
+basic_dispatch = {
+  'circle': simple_circle,
+  'line': simple_line,
+  'vertex': simple_line,
+  'label': simple_label,
+  'rect': simple_rect,
+}
+
+special_dispatch = {
  'smd_rect': simple_smd_rect,
+
  'pad_rect': simple_pad_rect,
  'pad_disc': simple_pad_disc,
  'pad_octagon': simple_pad_octagon,
- 'silk_circle': simple_silk_circle,
- 'silk_line': simple_silk_line,
- 'silk_label': simple_silk_label,
- 'silk_rect': simple_silk_rect,
- 'docu_circle': partial(_simple_t_circle, 'docu'),
- 'docu_line': partial(_simple_t_line, 'docu'),
- 'docu_rect': partial(_simple_t_rect, 'docu'),
- 'restrict_circle': partial(_simple_t_circle, 'restrict'),
- 'restrict_line': partial(_simple_t_line, 'restrict'),
- 'restrict_rect': partial(_simple_t_rect, 'restrict'),
- 'stop_circle': partial(_simple_t_circle, 'stop'),
- 'stop_line': partial(_simple_t_line, 'stop'),
- 'stop_rect': partial(_simple_t_rect, 'stop'),
+
  'special_single': simple_special_single,
  'special_dual': simple_special_dual,
  'special_quad': simple_special_quad,
  'special_mod': simple_special_mod,
- 'vrestrict_circle': partial(_simple_t_circle, 'vrestrict'),
- 'vrestrict_line': partial(_simple_t_line, 'vrestrict'),
- 'vrestrict_rect': partial(_simple_t_rect, 'vrestrict'),
- 'keepout_circle': partial(_simple_t_circle, 'keepout'),
- 'keepout_line': partial(_simple_t_line, 'keepout'),
- 'keepout_rect': partial(_simple_t_rect, 'keepout'),
 }
 
 def generate_coffee(interim):
@@ -354,7 +342,10 @@ def generate_coffee(interim):
       shape = x['shape']
       key = "%s_%s" % (t, shape)
       g = generators[t]
-      simple_dispatch.get(key, simple_unknown)(g, x, varnames, lines)
+      if key in special_dispatch:
+        special_dispatch.get(key)(t, g, x, varnames, lines)
+      else:
+        basic_dispatch.get(key, simple_unknown)(t, g, x, varnames, lines)
   varnames.sort()
   combine = 'combine ['+ (','.join(varnames)) + ']\n'
   lines_joined = ''.join(lines)
