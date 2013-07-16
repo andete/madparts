@@ -544,11 +544,15 @@ class Import:
       res['v'] = []
       for e in x.contents:
         vert = {}
-        vert['x'] = float(e['x'])
-        vert['y'] = float(e['y'])
+        vert['x1'] = float(e['x'])
+        vert['y1'] = float(e['y'])
         if e.has_key('curve'):
           vert['curve'] = float(e['curve'])
         res['v'].append(vert)
+      l = len(res['v'])
+      for i in range(0, l):
+        res['v'][i]['x2'] = res['v'][i-l+1]['x1']
+        res['v'][i]['y2'] = res['v'][i-l+1]['y1']
       return res
 
     def unknown(x):
