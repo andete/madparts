@@ -112,12 +112,25 @@ class Export:
       return l
     
     #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))
-    def line(shape, layer):
-      l = [S('fp_line')] 
-      l.append([S('start'), fget(shape, 'x1'), -fget(shape, 'y1')])
-      l.append([S('end'), fget(shape, 'x2'), -fget(shape, 'y2')])
-      l.append([S('layer'), S(layer)])
-      l.append([S('width'), fget(shape, 'w')])
+    # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
+    def vertex(shape, layer):
+      if not 'curve' in shape:
+        l = [S('fp_line')] 
+        l.append([S('start'), fget(shape, 'x1'), -fget(shape, 'y1')])
+        l.append([S('end'), fget(shape, 'x2'), -fget(shape, 'y2')])
+        l.append([S('layer'), S(layer)])
+        l.append([S('width'), fget(shape, 'w')])
+      else:
+        l = [S('fp_arc')] 
+        # TODO
+        # start == center point
+        # end == start point of arc
+        # angle == angled part in that direction
+        l.append([S('start'), fget(shape, 'x1'), -fget(shape, 'y1')])
+        l.append([S('end'), fget(shape, 'x2'), -fget(shape, 'y2')])
+        l.append([S('angle'), fget(shape, 'curve')])
+        l.append([S('layer'), S(layer)])
+        l.append([S('width'), fget(shape, 'w')])
       return l
 
     # (fp_circle (center 5.08 0) (end 6.35 -1.27) (layer F.SilkS) (width 0.15))
@@ -130,6 +143,7 @@ class Export:
       l.append([S('end'), x+(r/math.sqrt(2)), y+(r/math.sqrt(2))])
       l.append([S('layer'), S(layer)])
       l.append([S('width'), fget(shape, 'w')])
+      # TODO: a1, a2 -> arc
       return l
 
     # a disc is just a circle with a clever radius and width
@@ -144,21 +158,6 @@ class Export:
       l.append([S('layer'), S(layer)])
       l.append([S('width'), rad])
       return l
-
-    # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
-    # TODO rework:
-    # start == center point
-    # end == start point of arc
-    # angle == angled part in that direction
-    def arc(shape, layer):
-      l = [S('fp_arc')] 
-      l.append([S('start'), fget(shape, 'x1'), -fget(shape, 'y1')])
-      l.append([S('end'), fget(shape, 'x2'), -fget(shape, 'y2')])
-      l.append([S('angle'), fget(shape, 'a')])
-      l.append([S('layer'), S(layer)])
-      l.append([S('w'), fget(shape, 'w')])
-      return l
-
 
     # (pad "" smd rect (at 1.27 0) (size 0.39878 0.8001) (layers F.SilkS))
     def rect(shape, layer):
@@ -198,8 +197,8 @@ class Export:
       if not 'shape' in shape: return None
       layer = type_to_layer_name(shape['type'])
       s = shape['shape']
-      if s == 'line': return line(shape, layer)
-      elif s == 'arc': return arc(shape, layer)
+      if s == 'line': return vertex(shape, layer)
+      if s == 'vertex': return vertex(shape, layer)
       elif s == 'circle': return circle(shape, layer)
       elif s == 'disc': return disc(shape, layer)
       elif s == 'label': return label(shape, layer)

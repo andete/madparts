@@ -163,7 +163,6 @@ class Line extends Vertex
     @y1 = 0
     @x2 = 0
     @y2 = 0
-    @curve = 0
 
 class Arc extends Vertex
   constructor: (@w) ->
