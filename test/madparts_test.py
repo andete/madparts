@@ -38,7 +38,7 @@ def _export_eagle_package(code, expected_name, expected):
   data = exporter.get_pretty_footprint(eagle_name)
   # print data
   assert_multi_line_equal(expected, data)
-  #print code, expected
+  # print code, expected
   return data
 
 def _assert_equal_no_meta(expected, actual):
@@ -60,7 +60,7 @@ def _import_eagle_package(eagle_package_xml, import_name, expected):
     importer = export.eagle.Import(eagle_lib)
     interim = inter.import_footprint(importer, import_name) 
     coffee = generatesimple.generate_coffee(interim)
-    print coffee
+    # print coffee
     _assert_equal_no_meta(expected, coffee)
   finally:
     os.unlink(eagle_lib)
@@ -418,6 +418,48 @@ def test_eagle_export_one():
       d2 = copy.deepcopy(d)
       yield _eagle_do, d2, mod
 
+reimported_coffee_polygon = """\
+footprint = () ->
+  silk1 = new Line 0.2
+  silk1.x1 = 1.41421356237
+  silk1.y1 = 1.41421356237
+  silk1.x2 = -1.41421356237
+  silk1.y2 = -1.41421356237
+  silk1.curve = 180.0
+  silk2 = new Polygon 0.1
+  silk2.start 1.0, -4.0
+  silk2.add -1.0, -4.0
+  silk2.add -1.0, -3.0
+  silk2.add -0.0, -2.0, -90.0
+  silk2.end -70.0
+  silk3 = new Polygon 0.05
+  silk3.start 1.1, 1.2
+  silk3.add 1.1, 0.2
+  silk3.add 0.1, 1.2
+  silk3.end 0.0
+  silk4 = new Line 0.075
+  silk4.x1 = 2.0
+  silk4.y1 = -1.0
+  silk4.x2 = 1.0
+  silk4.y2 = -0.5
+  silk4.curve = 30.0
+  docu1 = new Polygon 0.1
+  docu1.start 0.0, 1.0
+  docu1.add -1.0, 0.0, 180.0
+  docu1.add 0.0, -1.0, 180.0
+  docu1.add 1.0, 0.0, -10.0
+  docu1.end -10.0
+  docu1.type = 'docu'
+  docu2 = new Polygon 0.05
+  docu2.start 1.0, 0.0
+  docu2.add 3.0, 2.0, 40.0
+  docu2.add 4.0, 0.0, -45.0
+  docu2.add 3.0, -2.0, -40.0
+  docu2.end 40.0
+  docu2.type = 'docu'
+  combine [docu1,docu2,silk1,silk2,silk3,silk4]
+"""
+
 eagle_polygon = """\
 <package name="Polygon">
  <description>
@@ -486,8 +528,7 @@ def test_eagle_import_one():
       yield _eagle_do, d2, mod
 
 def test_eagle_import_polygon():
-  with open('examples/0aa9e2e2188f4b66a94f7e0f4b6bdded.coffee') as f:
-    expected_code = f.read()
+  expected_code = reimported_coffee_polygon
   _import_eagle_package(eagle_polygon, 'Polygon', expected_code)
 
 empty_coffee = """\

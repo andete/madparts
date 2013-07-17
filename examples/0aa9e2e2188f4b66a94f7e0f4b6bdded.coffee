@@ -26,7 +26,7 @@ footprint = () ->
   p3.add 0, 1
   p3.add 1, 0, -90
   p3.end -70
-  rotate90 p3, -1
+  rotate90 p3
   adjust_y p3, -3
 
   p4 = new Polygon 0.05

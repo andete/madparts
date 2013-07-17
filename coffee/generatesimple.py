@@ -203,17 +203,19 @@ def simple_polygon(t, g, x, vl, ll):
   l = len(vert)
   if l > 0:
     a = a + ("%s.start %s, %s\n" % (varname, vert[0]['x1'], vert[0]['y1']))
-    for v in vert[1:l-1]:
+    for v in vert[0:l-1]:
       c = ""
       if 'curve' in v:
         if v['curve'] != 0:
           c = ", %s" % (v['curve'])
-      a = a + ("%s.add %s, %s%s\n" % (varname, v['x1'], v['y1'], c))
-    c = ""
+      a = a + ("%s.add %s, %s%s\n" % (varname, v['x2'], v['y2'], c))
+    c = "0.0"
     if 'curve' in vert[-1]:
       if vert[-1]['curve'] != 0:
         c = "%s" % (vert[-1]['curve'])
     a = a + ("%s.end %s\n" % (varname, c))
+  if t != 'silk':
+    a = a + ("%s.type = '%s'\n" % (varname, t))
   vl.append(varname)
   ll.append(a)
 
