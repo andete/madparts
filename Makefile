@@ -30,6 +30,9 @@ test:
 testone:
 	@nosetests -s test/madparts_test.py:test_eagle_import_polygon
 
+list:
+	@nosetests --collect-only -v
+
 coverage:
 	@nosetests --with-coverage \
 	--cover-package=coffee,export,gui,inter,syntax,util
