@@ -19,6 +19,8 @@ from inter import inter
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
 
+import export.detect
+
 class MainWin(QtGui.QMainWindow):
 
   def __init__(self):

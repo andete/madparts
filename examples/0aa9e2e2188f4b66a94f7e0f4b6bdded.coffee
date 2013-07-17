@@ -12,7 +12,7 @@ footprint = () ->
   p.add 1, 0, -10
   p.end -10
 
-  p2 = new Polygon 0.1
+  p2 = new Polygon 0.05
   p2.type = 'docu'
   p2.start 1, 0
   p2.add 3, 2, 40
@@ -29,7 +29,7 @@ footprint = () ->
   rotate90 p3, -1
   adjust_y p3, -3
 
-  p4 = new Polygon 0.1
+  p4 = new Polygon 0.05
   p4.start 1,1
   p4.add 1,0
   p4.add 0,1
@@ -37,15 +37,15 @@ footprint = () ->
   adjust p4, 0.1, 0.2
 
   angle  = 45
-  c = new Circle 0.1
+  c = new Circle 0.2
   c.r = 2
   c.a1 = angle
   c.a2 = angle+180
 
-  a = new Arc 0.1
+  a = new Arc 0.075
   a.x1 = 2
-  a.x2 = 1
   a.y1 = -1
+  a.x2 = 1
   a.y2 = -0.5
   a.curve = 30
 

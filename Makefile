@@ -28,7 +28,7 @@ test:
 	@nosetests
 
 testone:
-	@nosetests -s test/madparts_test.py:test_kicad_import_empty
+	@nosetests -s test/madparts_test.py:test_eagle_import_polygon
 
 coverage:
 	@nosetests --with-coverage \

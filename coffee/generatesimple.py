@@ -162,10 +162,11 @@ def _simple_line(prefix, g, x):
 """ % (varname, x['w'], varname, x['x1'],
        varname, x['y1'], varname, x['x2'],
        varname, x['y2'])
+  a = _add_if(x, a, varname, 'curve')
   return (varname, a)
 
-def simple_rect(g, x, vl, ll):
-  varname = "silk%s" % (g.next())
+def simple_rect(t, g, x, vl, ll):
+  varname = "%s%s" % (t, g.next())
   a = """\
 %s = new Rect
 """ % (varname)
@@ -182,6 +183,37 @@ def simple_line(t, g, x, vl, ll):
   (varname, a) = _simple_line(t, g, x)
   if t != 'silk':
     a = a + ("%s.type = '%s'\n" % (varname, t))
+  vl.append(varname)
+  ll.append(a)
+
+"""
+  p4 = new Polygon 0.1
+  p4.start 1,1
+  p4.add 1,0
+  p4.add 0,1
+  p4.end 0
+"""
+def simple_polygon(t, g, x, vl, ll):
+  # TODO a rectangular polygon with w == 0 is actually a rect
+  varname = "%s%s" % (t, g.next())
+  a = """\
+%s = new Polygon %s
+""" % (varname, x['w'])
+  vert = x['v']
+  l = len(vert)
+  if l > 0:
+    a = a + ("%s.start %s, %s\n" % (varname, vert[0]['x1'], vert[0]['y1']))
+    for v in vert[1:l-1]:
+      c = ""
+      if 'curve' in v:
+        if v['curve'] != 0:
+          c = ", %s" % (v['curve'])
+      a = a + ("%s.add %s, %s%s\n" % (varname, v['x1'], v['y1'], c))
+    c = ""
+    if 'curve' in vert[-1]:
+      if vert[-1]['curve'] != 0:
+        c = "%s" % (vert[-1]['curve'])
+    a = a + ("%s.end %s\n" % (varname, c))
   vl.append(varname)
   ll.append(a)
 
@@ -303,6 +335,7 @@ basic_dispatch = {
   'vertex': simple_line,
   'label': simple_label,
   'rect': simple_rect,
+  'polygon': simple_polygon,
 }
 
 special_dispatch = {
@@ -345,7 +378,7 @@ def generate_coffee(interim):
       if key in special_dispatch:
         special_dispatch.get(key)(t, g, x, varnames, lines)
       else:
-        basic_dispatch.get(key, simple_unknown)(t, g, x, varnames, lines)
+        basic_dispatch.get(shape, simple_unknown)(t, g, x, varnames, lines)
   varnames.sort()
   combine = 'combine ['+ (','.join(varnames)) + ']\n'
   lines_joined = ''.join(lines)

@@ -37,7 +37,7 @@ def make_exporter_for(t, fn):
 
 def make_exporter(fn):
   (t,_) = detect(fn)
-  return make_exporter_for(t)
+  return make_exporter_for(t, fn)
 
 
 def make_importer(fn):  

@@ -224,19 +224,18 @@ class Export:
       package.append(disc)
   
     def circle(shape, layer):
-      print shape
       r = fget(shape, 'r')
       rx = fget(shape, 'rx', r)
       ry = fget(shape, 'ry', r)
       x = fget(shape,'x')
       y = fget(shape,'y')
       w = fget(shape,'w')
-      if 'a1' in shape or 'a2' in 'shape':
+      if 'a1' in shape or 'a2' in shape:
         wire = self.soup.new_tag('wire')
         a1 = fget(shape, 'a1')
         a2 = fget(shape, 'a2')
         wire['width'] = w
-        wire['curve'] = (a2 - a1)
+        wire['curve'] = a2-a1
         a1 = a1 * math.pi / 180
         a2 = a2 * math.pi / 180
         wire['x1'] = x + r * math.cos(a1)
@@ -259,7 +258,6 @@ class Export:
       y1 = fget(shape, 'y1')
       x2 = fget(shape, 'x2')
       y2 = fget(shape, 'y2')
-      curve = fget(shape, 'curve')
       w = fget(shape, 'w')
       line = self.soup.new_tag('wire')
       line['x1'] = x1
@@ -268,7 +266,9 @@ class Export:
       line['y2'] = y2
       line['width'] = w
       line['layer'] = layer
-      line['curve'] = curve
+      if 'curve' in shape:
+        if shape['curve'] != 0.0:
+          line['curve'] = fget(shape, 'curve')
       package.append(line)
   
     # eagle polygon format is somewhat wierd
@@ -289,7 +289,9 @@ class Export:
         vert = self.soup.new_tag('vertex')
         vert['x'] = fget(v, 'x1')
         vert['y'] = fget(v, 'y1')
-        vert['curve'] = fget(v, 'curve')
+        curve = fget(v, 'curve')
+        if curve != 0.0:
+          vert['curve'] = fget(v, 'curve')
         p.append(vert)
       package.append(p)
 
@@ -542,7 +544,7 @@ class Import:
       res['type'] = layer_number_to_type(int(x['layer']))
       res['shape'] = 'polygon'
       res['v'] = []
-      for e in x.contents:
+      for e in x.find_all('vertex'):
         vert = {}
         vert['x1'] = float(e['x'])
         vert['y1'] = float(e['y'])
