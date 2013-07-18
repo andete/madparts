@@ -130,10 +130,11 @@ class Export:
         angle = curve*math.pi/180.0
         ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
         a1rad = a1*math.pi/180.0
-        (x3, y3) = (x0 + r * math.cos(a1rad), y0 + r * math.sin(a1rad))
+        #(x3, y3) = (x0 + r * math.cos(a1rad), y0 + r * math.sin(a1rad))
         l.append([S('start'), x0, -y0])
-        l.append([S('end'), x3, -y3])
-        l.append([S('angle'), a2-a1])
+        l.append([S('end'), x1, -y1])
+        # also invert angle because of y inversion
+        l.append([S('angle'), -(a2-a1)])
         l.append([S('layer'), S(layer)])
         l.append([S('width'), fget(shape, 'w')])
       return l
@@ -158,12 +159,11 @@ class Export:
         # angle == angled part in that direction
         a1 = fget(shape, 'a1')
         a2 = fget(shape, 'a2')
-        a1 = a1 * math.pi/180.0
-        a2 = a2 * math.pi/180.0
-        ex = x + r*math.cos(a1)
-        ey = y + r*math.sin(a1)
-        l.append([S('end'), ex, ey])
-        l.append([S('angle'), a2-a1])
+        a1rad = a1 * math.pi/180.0
+        ex = x + r*math.cos(a1rad)
+        ey = y + r*math.sin(a1rad)
+        l.append([S('end'), ex, -ey])
+        l.append([S('angle'), -(a2-a1)])
       l.append([S('layer'), S(layer)])
       l.append([S('width'), fget(shape, 'w')])
       return l
