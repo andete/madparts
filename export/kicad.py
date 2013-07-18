@@ -143,25 +143,27 @@ class Export:
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
       r = fget(shape, 'r')
+      start = [S('start'), x, y]
       if not 'a1' in shape and not 'a2' in shape:
-        l = [S('fp_circle')]  
+        l = [S('fp_circle')] 
+        l.append(start)
         l.append([S('end'), x+(r/math.sqrt(2)), y+(r/math.sqrt(2))])
         l.append([S('layer'), S(layer)])
         l.append([S('width'), fget(shape, 'w')])
       else:
+        l = [S('fp_arc')] 
+        l.append(start)
         # start == center point
         # end == start point of arc
         # angle == angled part in that direction
         a1 = fget(shape, 'a1')
         a2 = fget(shape, 'a2')
-        l = [S('fp_arc')] 
-        l.append([S('angle'), a2-a1])
         a1 = a1 * math.pi/180.0
         a2 = a2 * math.pi/180.0
         ex = x + r*math.cos(a1)
         ey = y + r*math.sin(a1)
         l.append([S('end'), ex, ey])
-      l.append([S('center'), x, y])
+        l.append([S('angle'), a2-a1])
       l.append([S('layer'), S(layer)])
       l.append([S('width'), fget(shape, 'w')])
       return l
@@ -179,26 +181,36 @@ class Export:
       l.append([S('width'), rad])
       return l
 
-   # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
-   # kicad doesn't do arced vertex in polygon :(
-   def polygon(shape, layer):
-    l = [S('fp_poly')]
-    lxy = [S('pts')]
-    for v in shape['v']:
-      xy = [S('xy'), v['x1'], v['y1']]
+    # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
+    # kicad doesn't do arced vertex in polygon :(
+    def polygon(shape, layer):
+      l = [S('fp_poly')]
+      lxy = [S('pts')]
+      for v in shape['v']:
+        xy = [S('xy'), v['x1'], -v['y1']]
+        lxy.append(xy)
+      xy = [S('xy'), shape['v'][0]['x1'], -shape['v'][0]['y1']]
       lxy.append(xy)
-    l.append(lxy)
-    l.append([S('layer'), S(layer)])
-    l.append([S('width'), shape['w']])
-    return l
+      l.append(lxy)
+      l.append([S('layer'), S(layer)])
+      l.append([S('width'), shape['w']])
+      return l
 
-    # (pad "" smd rect (at 1.27 0) (size 0.39878 0.8001) (layers F.SilkS))
     def rect(shape, layer):
-      # TODO: Don't do this with a pad. Use a polygon
-      l = [S('pad'), "", S('smd'), S('rect')] 
-      l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y'), iget(shape, 'rot')])
-      l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy')])
-      l.append([S('layers'), S(layer)])
+      l = [S('fp_poly')]
+      x = fget(shape, 'x')
+      y = - fget(shape, 'y')
+      dx = fget(shape, 'dx')
+      dy = fget(shape, 'dy')
+      lxy = [S('pts')]
+      lxy.append([S('xy'), x - dx/2, y - dy/2])
+      lxy.append([S('xy'), x - dx/2, y + dy/2])
+      lxy.append([S('xy'), x + dx/2, y + dy/2])
+      lxy.append([S('xy'), x + dx/2, y - dy/2])
+      lxy.append([S('xy'), x - dx/2, y - dy/2])
+      l.append(lxy)
+      l.append([S('layer'), S(layer)])
+      l.append([S('width'), 0])
       return l
 
     # (fp_text reference MYCONN3 (at 0 -2.54) (layer F.SilkS)
