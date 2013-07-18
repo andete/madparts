@@ -1,10 +1,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import glob
-import math
-import os.path
-import uuid
+import glob, math, os.path, uuid
 
 import sexpdata
 from sexpdata import Symbol
@@ -122,28 +119,51 @@ class Export:
         l.append([S('width'), fget(shape, 'w')])
       else:
         l = [S('fp_arc')] 
-        # TODO
         # start == center point
         # end == start point of arc
         # angle == angled part in that direction
-        l.append([S('start'), fget(shape, 'x1'), -fget(shape, 'y1')])
-        l.append([S('end'), fget(shape, 'x2'), -fget(shape, 'y2')])
-        l.append([S('angle'), fget(shape, 'curve')])
+        x1 = fget(shape, 'x1')
+        y1 = fget(shape, 'y1')
+        x2 = fget(shape, 'x2')
+        y2 = fget(shape, 'y2')
+        curve =  fget(shape, 'curve')
+        angle = curve*math.pi/180.0
+        ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
+        a1rad = a1*math.pi/180.0
+        (x3, y3) = (x0 + r * math.cos(a1rad), y0 + r * math.sin(a1rad))
+        l.append([S('start'), x0, -y0])
+        l.append([S('end'), x3, -y3])
+        l.append([S('angle'), a2-a1])
         l.append([S('layer'), S(layer)])
         l.append([S('width'), fget(shape, 'w')])
       return l
 
     # (fp_circle (center 5.08 0) (end 6.35 -1.27) (layer F.SilkS) (width 0.15))
     def circle(shape, layer):
-      l = [S('fp_circle')]  
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
-      l.append([S('center'), x, y])
       r = fget(shape, 'r')
-      l.append([S('end'), x+(r/math.sqrt(2)), y+(r/math.sqrt(2))])
+      if not 'a1' in shape and not 'a2' in shape:
+        l = [S('fp_circle')]  
+        l.append([S('end'), x+(r/math.sqrt(2)), y+(r/math.sqrt(2))])
+        l.append([S('layer'), S(layer)])
+        l.append([S('width'), fget(shape, 'w')])
+      else:
+        # start == center point
+        # end == start point of arc
+        # angle == angled part in that direction
+        a1 = fget(shape, 'a1')
+        a2 = fget(shape, 'a2')
+        l = [S('fp_arc')] 
+        l.append([S('angle'), a2-a1])
+        a1 = a1 * math.pi/180.0
+        a2 = a2 * math.pi/180.0
+        ex = x + r*math.cos(a1)
+        ey = y + r*math.sin(a1)
+        l.append([S('end'), ex, ey])
+      l.append([S('center'), x, y])
       l.append([S('layer'), S(layer)])
       l.append([S('width'), fget(shape, 'w')])
-      # TODO: a1, a2 -> arc
       return l
 
     # a disc is just a circle with a clever radius and width
@@ -158,6 +178,19 @@ class Export:
       l.append([S('layer'), S(layer)])
       l.append([S('width'), rad])
       return l
+
+   # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
+   # kicad doesn't do arced vertex in polygon :(
+   def polygon(shape, layer):
+    l = [S('fp_poly')]
+    lxy = [S('pts')]
+    for v in shape['v']:
+      xy = [S('xy'), v['x1'], v['y1']]
+      lxy.append(xy)
+    l.append(lxy)
+    l.append([S('layer'), S(layer)])
+    l.append([S('width'), shape['w']])
+    return l
 
     # (pad "" smd rect (at 1.27 0) (size 0.39878 0.8001) (layers F.SilkS))
     def rect(shape, layer):
@@ -203,6 +236,7 @@ class Export:
       elif s == 'disc': return disc(shape, layer)
       elif s == 'label': return label(shape, layer)
       elif s == 'rect': return rect(shape, layer)
+      elif s == 'polygon': return polygon(shape, layer)
 
     def unknown(shape):
       return None
@@ -419,6 +453,7 @@ class Import:
       return shape
 
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
+    # TODO: convert to vertex instead!
     def fp_arc(x):
       [x1, y1] = get_sub(x, 'start')
       [x2, y2] = get_sub(x, 'end')
