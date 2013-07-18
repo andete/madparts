@@ -1,6 +1,8 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+import math
+
 def oget(m, k, d):
   if k in m: return m[k]
   return d
@@ -29,3 +31,53 @@ def list_combine(l):
   l2 = []
   for x in l: l2 = l2 + x
   return l2
+
+# angle is expected in radians
+def calc_center_r_a1_a2(p, q, angle):
+  (x1, y1) = p
+  (x2, y2) = q
+  dx = x2-x1
+  dy = y2-y1
+  # l: distance between p and q
+  l = math.sqrt(dx*dx + dy*dy)
+  angle_for_sin = abs(angle)
+  if angle_for_sin > math.pi:
+    angle_for_sin = -(2*math.pi-angle)
+  # rc: radius of circle containing p and q and arcing through it
+  #     with 'angle'
+  rc = l / (2 * math.sin(angle_for_sin/2))
+  # a: distance from center point to point in between p and q
+  a = math.sqrt((rc * rc) - ((l/2)*(l/2)))
+  # (ndx, ndy): unit vector pointing from p to q
+  (ndx, ndy) = (dx / l, dy / l)
+  # (pdx, pdy): perpendicular unit vector
+  (pdx, pdy) = (-ndy, ndx)
+  # (x3, y3): point between p and q
+  (x3,y3) = ((x1+x2)/2, (y1+y2)/2) 
+  # (fx, fy): (x3, y3) vector with length a
+  # fix sign of (fx, fy) if needed
+  (fx, fy) = (a*pdx, a*pdy)
+  if rc > 0:
+     (fx, fy) = (-fx, -fy)
+  if angle > 0:
+     (fx, fy) = (-fx, -fy)
+  # (x0, y0): center point of circle aka 'c'
+  (x0, y0) = (x3 + fx, y3 + fy)
+  # (cpx, cpy): vector from c to p
+  (cpx, cpy) = (x1-x0, y1-y0)
+  # (cqx, cqy): vector from c to q
+  (cqx, cqy) = (x2-x0, y2-y0)
+  # calculate angles
+  a1 = math.acos(cpx/rc)
+  a1s = math.asin(cpy/rc)
+  a2 = math.acos(cqx/rc)
+  a2s = math.asin(cqy/rc)
+  if a1s < 0:
+    a1 = 2*math.pi - a1
+  if a2s < 0:
+    a2 = 2*math.pi - a2
+  a1 = a1 * 180 / math.pi
+  a2 = a2 * 180 / math.pi
+  if angle < 0:
+    (a1, a2) = (a2, a1)
+  return ((x0, y0), rc, a1, a2)
