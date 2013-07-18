@@ -59,11 +59,32 @@ def _import_eagle_package(eagle_package_xml, import_name, expected):
       f.write(str(importer.soup))
     importer = export.eagle.Import(eagle_lib)
     interim = inter.import_footprint(importer, import_name) 
+    assert interim != None
     coffee = generatesimple.generate_coffee(interim)
     # print coffee
     _assert_equal_no_meta(expected, coffee)
   finally:
     os.unlink(eagle_lib)
+
+def _export_kicad_package(code, expected_name, expected):
+  (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
+  assert interim != None
+  exporter = export.kicad.Export("dummy.kicad_mod")
+  kicad_name = exporter.export_footprint(interim)
+  assert kicad_name == expected_name
+  assert_multi_line_equal(expected, exporter.get_string())
+
+def _import_kicad_package(kicad_s, import_name, expected_coffee):
+  try:
+    kicad_lib = 'test/foo.kicad_mod'
+    with open(kicad_lib, "w+") as f:
+      f.write(kicad_s)
+    importer = export.kicad.Import(kicad_lib)
+    interim = inter.import_footprint(importer, import_name) 
+    coffee = generatesimple.generate_coffee(interim)
+    _assert_equal_no_meta(expected_coffee, coffee)
+  finally:
+    os.unlink(kicad_lib)
 
 def test_export_eagle_full_lib():
    code = """\
@@ -553,23 +574,23 @@ Id: 708e13cc5f4e43f7833af53070ba5078
 </package>"""
   _export_eagle_package(coffee, 'TEST_EMPTY', eagle)
 
-def _export_kicad(code, expected_name, expected):
-  (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
-  assert interim != None
-  exporter = export.kicad.Export("dummy.kicad_mod")
-  kicad_name = exporter.export_footprint(interim)
-  assert kicad_name == expected_name
-  assert_multi_line_equal(expected, exporter.get_string())
-
 def test_kicad_export_empty():
   coffee = empty_coffee
   kicad = "(module TEST_EMPTY (layer F.Cu) (descr \"coffee test\"))"
-  _export_kicad(coffee, 'TEST_EMPTY', kicad)
+  _export_kicad_package(coffee, 'TEST_EMPTY', kicad)
 
 def test_kicad_import_empty():
-  expected_coffee = empty_coffee
-  importer = export.kicad.Import("test/kicad_empty.kicad_mod")
-  interim = inter.import_footprint(importer, 'TEST_EMPTY') 
-  assert interim != None
-  coffee = generatesimple.generate_coffee(interim)
-  _assert_equal_no_meta(expected_coffee, coffee)
+  with open("test/kicad_empty.kicad_mod") as f:
+    _import_kicad_package(f.read(), "TEST_EMPTY", empty_coffee)
+
+kicad_polygon = """\
+(module Polygon (layer F.Cu) (descr "a simple polygon example") (fp_poly (pts (xy 0 -1) (xy -1 0) (xy 0 1) (xy 1 0) (xy 0 -1)) (layer Dwgs.User) (width 0.1)) (fp_arc (start 0.0 -0.0) (end 1.41421356237 -1.41421356237) (angle -180.0) (layer F.SilkS) (width 0.2)) (fp_poly (pts (xy 1 0) (xy 3 -2) (xy 4 0) (xy 3 2) (xy 1 0)) (layer Dwgs.User) (width 0.05)) (fp_poly (pts (xy 1 4) (xy -1 4) (xy -1 3) (xy -0.0 2) (xy 1 4)) (layer F.SilkS) (width 0.1)) (fp_poly (pts (xy 1.1 -1.2) (xy 1.1 -0.2) (xy 0.1 -1.2) (xy 1.1 -1.2)) (layer F.SilkS) (width 0.05)) (fp_arc (start 0.566987298108 2.61602540378) (end 2.0 1.0) (angle -30.0) (layer F.SilkS) (width 0.075)))\
+"""
+
+def test_kicad_export_polygon():
+  with open('examples/0aa9e2e2188f4b66a94f7e0f4b6bdded.coffee') as f:
+    _export_kicad_package(f.read(), 'Polygon', kicad_polygon)
+
+def test_kicad_import_polygon():
+  expected_code = reimported_coffee_polygon
+  _import_kicad_package(kicad_polygon, 'Polygon', expected_code)
