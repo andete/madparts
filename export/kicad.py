@@ -402,7 +402,6 @@ class Import:
       [x1, y1, rot] = get_at_sub(x)
       shape['x'] = x1
       shape['y'] = -y1
-      # TODO: Add rotated pad support
       shape['rot'] = rot
       [dx, dy] = get_sub(x, 'size')
       if s == 'circle':
@@ -435,7 +434,7 @@ class Import:
       layer = get_layer_sub(x, 'silk')
       width = get_single_element_sub(x, 'width')
       shape = { 
-        'shape': 'line',
+        'shape': 'vertex',
         'x1': x1, 'y1': -y1, 
         'x2': x2, 'y2': -y2, 
         'type': layer, 'w': width
@@ -467,19 +466,37 @@ class Import:
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
     # TODO: convert to vertex instead!
     def fp_arc(x):
-      [x1, y1] = get_sub(x, 'start')
-      [x2, y2] = get_sub(x, 'end')
-      [a] = get_sub(x, 'angle')
+      # start is actually center point
+      [xc, yc] = get_sub(x, 'start')
+      yc = -yc
+      # end is actually start point of arc
+      [x1, y1] = get_sub(x, 'end')
+      y1 = -y1
+      [angle] = get_sub(x, 'angle')
+      a = angle*math.pi/180.0
+      dx = x1-xc
+      dy = y1-yc
+      r = math.sqrt(dx*dx + dy*dy)
+      a1 = math.acos(dx/r)
+      if math.asin(dy/r) < 0:
+        a1 = 2*math.pi - a1
+      a2 = a1 + a
+      x2 = xc + r*math.cos(a2)
+      y2 = yc + r*math.sin(a2)
       width = get_single_element_sub(x, 'width')
-      shape = { 'shape': 'arc'}
+      shape = { 'shape': 'vertex'}
       shape['type'] = get_layer_sub(x, 'silk')
       shape['a'] = a
       shape['x1'] = x1
-      shape['y1'] = -y1
+      shape['y1'] = y1
       shape['x2'] = x2
-      shape['y2'] = -y2
+      shape['y2'] = y2
       shape['w'] = width
       return shape
+
+    # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
+    def fp_poly(x):
+      pass
 
     # (fp_text reference MYCONN3 (at 0 -2.54) (layer F.SilkS)
     #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
@@ -523,6 +540,7 @@ class Import:
         'fp_circle': fp_circle,
         'fp_arc': fp_arc,
         'fp_text': fp_text,
+        'fp_poly': fp_poly,
       }.get(_convert_sexp_symbol_to_string(x[0]), lambda a: None)(x)
       if res != None:
         l.append(res)
