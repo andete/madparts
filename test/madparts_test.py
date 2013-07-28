@@ -481,6 +481,48 @@ footprint = () ->
   combine [docu1,docu2,silk1,silk2,silk3,silk4]
 """
 
+reimported_coffee_polygon_kicad = """\
+footprint = () ->
+  silk1 = new Line 0.2
+  silk1.x1 = 1.41421356237
+  silk1.y1 = 1.41421356237
+  silk1.x2 = -1.41421356237
+  silk1.y2 = -1.41421356237
+  silk1.curve = 180.0
+  silk2 = new Polygon 0.1
+  silk2.start 1, -4
+  silk2.add -1, -4
+  silk2.add -1, -3
+  silk2.add -0.0, -2
+  silk2.end 0.0
+  silk3 = new Polygon 0.05
+  silk3.start 1.1, 1.2
+  silk3.add 1.1, 0.2
+  silk3.add 0.1, 1.2
+  silk3.end 0.0
+  silk4 = new Line 0.075
+  silk4.x1 = 2.0
+  silk4.y1 = -1.0
+  silk4.x2 = 1.0
+  silk4.y2 = -0.5
+  silk4.curve = 30.0
+  docu1 = new Polygon 0.1
+  docu1.start 0, 1
+  docu1.add -1, 0
+  docu1.add 0, -1
+  docu1.add 1, 0
+  docu1.end 0.0
+  docu1.type = 'docu'
+  docu2 = new Polygon 0.05
+  docu2.start 1, 0
+  docu2.add 3, 2
+  docu2.add 4, 0
+  docu2.add 3, -2
+  docu2.end 0.0
+  docu2.type = 'docu'
+  combine [docu1,docu2,silk1,silk2,silk3,silk4]
+"""
+
 eagle_polygon = """\
 <package name="Polygon">
  <description>
@@ -592,5 +634,5 @@ def test_kicad_export_polygon():
     _export_kicad_package(f.read(), 'Polygon', kicad_polygon)
 
 def test_kicad_import_polygon():
-  expected_code = reimported_coffee_polygon
+  expected_code = reimported_coffee_polygon_kicad
   _import_kicad_package(kicad_polygon, 'Polygon', expected_code)

@@ -332,8 +332,8 @@ class Import:
     l = [meta]
 
     def get_sub(x, name):
-      print "X: "
-      print x
+      #print "X: "
+      #print x
       for e in x:
         if ("__len__" not in dir(e)):
           continue # Ignore objects without length
@@ -514,6 +514,7 @@ class Import:
         v = { 'shape':'vertex' }
         v['x1'] = p[1]
         v['y1'] = -p[2]
+        shape['v'].append(v)
       l = len(shape['v'])
       for i in range(0, l):
         shape['v'][i]['x2'] = shape['v'][i-l+1]['x1']
@@ -553,8 +554,8 @@ class Import:
       return shape
 
     for x in s[3:]:
-      print "ELEMENT:"
-      print x
+      #print "ELEMENT:"
+      #print x
       res = {
         'descr': descr,
         'pad': pad,
