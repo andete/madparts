@@ -12,6 +12,7 @@ import coffee.generatesimple as generatesimple
 from inter import inter
 import export.eagle
 import export.kicad
+import export.kicad_old
 
 assert_multi_line_equal.im_class.maxDiff = None
 
@@ -80,6 +81,26 @@ def _import_kicad_package(kicad_s, import_name, expected_coffee):
     with open(kicad_lib, "w+") as f:
       f.write(kicad_s)
     importer = export.kicad.Import(kicad_lib)
+    interim = inter.import_footprint(importer, import_name) 
+    coffee = generatesimple.generate_coffee(interim)
+    _assert_equal_no_meta(expected_coffee, coffee)
+  finally:
+    os.unlink(kicad_lib)
+
+def _export_kicad_old_package(code, expected_name, expected):
+  (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
+  assert interim != None
+  exporter = export.kicad_old.Export("dummy.mod")
+  kicad_name = exporter.export_footprint(interim)
+  assert kicad_name == expected_name
+  assert_multi_line_equal(expected, exporter.get_string())
+
+def _import_kicad_old_package(kicad_s, import_name, expected_coffee):
+  try:
+    kicad_lib = 'test/foo.mod'
+    with open(kicad_lib, "w+") as f:
+      f.write(kicad_s)
+    importer = export.kicad_old.Import(kicad_lib)
     interim = inter.import_footprint(importer, import_name) 
     coffee = generatesimple.generate_coffee(interim)
     _assert_equal_no_meta(expected_coffee, coffee)
@@ -621,9 +642,10 @@ def test_kicad_export_empty():
   kicad = "(module TEST_EMPTY (layer F.Cu) (descr \"coffee test\"))"
   _export_kicad_package(coffee, 'TEST_EMPTY', kicad)
 
+kicad_empty = """(module TEST_EMPTY (layer F.Cu) (descr "coffee test"))"""
+
 def test_kicad_import_empty():
-  with open("test/kicad_empty.kicad_mod") as f:
-    _import_kicad_package(f.read(), "TEST_EMPTY", empty_coffee)
+  _import_kicad_package(kicad_empty, "TEST_EMPTY", empty_coffee)
 
 kicad_polygon = """\
 (module Polygon (layer F.Cu) (descr "a simple polygon example") (fp_poly (pts (xy 0 -1) (xy -1 0) (xy 0 1) (xy 1 0) (xy 0 -1)) (layer Dwgs.User) (width 0.1)) (fp_arc (start 0.0 -0.0) (end 1.41421356237 -1.41421356237) (angle -180.0) (layer F.SilkS) (width 0.2)) (fp_poly (pts (xy 1 0) (xy 3 -2) (xy 4 0) (xy 3 2) (xy 1 0)) (layer Dwgs.User) (width 0.05)) (fp_poly (pts (xy 1 4) (xy -1 4) (xy -1 3) (xy -0.0 2) (xy 1 4)) (layer F.SilkS) (width 0.1)) (fp_poly (pts (xy 1.1 -1.2) (xy 1.1 -0.2) (xy 0.1 -1.2) (xy 1.1 -1.2)) (layer F.SilkS) (width 0.05)) (fp_arc (start 0.566987298108 2.61602540378) (end 2.0 1.0) (angle -30.0) (layer F.SilkS) (width 0.075)))\
@@ -636,3 +658,73 @@ def test_kicad_export_polygon():
 def test_kicad_import_polygon():
   expected_code = reimported_coffee_polygon_kicad
   _import_kicad_package(kicad_polygon, 'Polygon', expected_code)
+
+kicad_old_empty = """\
+PCBNEW-LibModule-V1  Sat 22 Jun 2013 04:47:58 PM CEST
+# encoding utf-8
+Units mm
+$INDEX
+TEST_EMPTY
+$EndINDEX
+$MODULE TEST_EMPTY
+Po 0 0 0 15 51C5B8A8 00000000 ~~
+Li TEST_EMPTY
+Cd this is the documentation
+Sc 0
+Op 0 0 0
+$EndMODULE TEST_EMPTY
+$EndLIBRARY
+"""
+
+# made by exporting to kicad_new and saving as .mod in kicad
+kicad_old_polygon = """\
+PCBNEW-LibModule-V1  Sun 28 Jul 2013 12:02:51 PM CEST
+# encoding utf-8
+Units mm
+$INDEX
+Polygon
+$EndINDEX
+$MODULE Polygon
+Po 0 0 0 15 51F4CCE7 00000000 ~~
+Li Polygon
+Cd a simple polygon example
+Sc 0
+AR 
+Op 0 0 0
+T0 0 0 1.524 1.524 0 0.15 N V 21 N ""
+T1 0 0 1.524 1.524 0 0.15 N V 21 N ""
+DP 0 0 0 0 5 0.1 24
+Dl 0 -1
+Dl -1 0
+Dl 0 1
+Dl 1 0
+Dl 0 -1
+DA 0 0 1.414214 -1.414214 -1800 0.2 21
+DP 0 0 0 0 5 0.05 24
+Dl 1 0
+Dl 3 -2
+Dl 4 0
+Dl 3 2
+Dl 1 0
+DP 0 0 0 0 5 0.1 21
+Dl 1 4
+Dl -1 4
+Dl -1 3
+Dl 0 2
+Dl 1 4
+DP 0 0 0 0 4 0.05 21
+Dl 1.1 -1.2
+Dl 1.1 -0.2
+Dl 0.1 -1.2
+Dl 1.1 -1.2
+DA 0.566987 2.616025 2 1 -300 0.075 21
+$EndMODULE Polygon
+$EndLIBRARY
+"""
+
+def test_kicad_old_import_empty():
+  _import_kicad_old_package(kicad_old_empty, "TEST_EMPTY", empty_coffee)
+
+def test_kicad_old_import_polygon():
+  expected_code = reimported_coffee_polygon_kicad
+  _import_kicad_old_package(kicad_old_polygon, 'Polygon', expected_code)
