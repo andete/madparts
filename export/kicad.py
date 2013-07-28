@@ -488,7 +488,7 @@ class Import:
       a1 = math.acos(dx/r)
       if math.asin(dy/r) < 0:
         a1 = 2*math.pi - a1
-      a2 = a1 + a
+      a2 = a1 - a
       x2 = xc + r*math.cos(a2)
       y2 = yc + r*math.sin(a2)
       width = get_single_element_sub(x, 'width')
