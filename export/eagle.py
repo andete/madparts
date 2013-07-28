@@ -539,13 +539,12 @@ class Import:
       return res
      
     def polygon(x):
-      res = {}
+      res = { 'shape':'polygon' }
       res['w'] = float(x['width'])
       res['type'] = layer_number_to_type(int(x['layer']))
-      res['shape'] = 'polygon'
       res['v'] = []
       for e in x.find_all('vertex'):
-        vert = {}
+        vert = { 'shape':'vertex' }
         vert['x1'] = float(e['x'])
         vert['y1'] = float(e['y'])
         if e.has_key('curve'):

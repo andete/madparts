@@ -185,7 +185,7 @@ class Polygon
       @lasty = y1
     
     @add = (x1, y1, curve=0) ->
-      vertex = new Vertex @lastx,@lasty, x1, y1, curve
+      vertex = new Vertex @lastx, @lasty, x1, y1, curve
       @v = @v.concat([vertex])
       @lastx = x1
       @lasty = y1

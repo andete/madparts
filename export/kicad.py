@@ -360,6 +360,14 @@ class Import:
           raise Exception("Unexpected multi-element '%s' sub: %s" % (name, str(sub)))
         return sub[0]
       return default
+
+    def get_list_sub(x, name, default=None):
+      sub = get_sub(x, name)
+      if (sub != None):
+        if len(sub) < 1:
+          return []
+        else:
+          return sub
       
     def get_layer_sub(x, default=None):
       layer = get_single_element_sub(x, 'layer')
@@ -486,17 +494,31 @@ class Import:
       width = get_single_element_sub(x, 'width')
       shape = { 'shape': 'vertex'}
       shape['type'] = get_layer_sub(x, 'silk')
-      shape['a'] = a
+      shape['curve'] = -angle
       shape['x1'] = x1
       shape['y1'] = y1
       shape['x2'] = x2
       shape['y2'] = y2
+      width = get_single_element_sub(x, 'width')
       shape['w'] = width
       return shape
 
     # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
     def fp_poly(x):
-      pass
+      width = get_single_element_sub(x, 'width')
+      shape = { 'shape': 'polygon'}
+      shape['w'] = width
+      shape['type'] = get_layer_sub(x, 'silk')
+      shape['v'] = []
+      for p in get_list_sub(x, 'pts')[0:-1]:
+        v = { 'shape':'vertex' }
+        v['x1'] = p[1]
+        v['y1'] = -p[2]
+      l = len(shape['v'])
+      for i in range(0, l):
+        shape['v'][i]['x2'] = shape['v'][i-l+1]['x1']
+        shape['v'][i]['y2'] = shape['v'][i-l+1]['y1']
+      return shape
 
     # (fp_text reference MYCONN3 (at 0 -2.54) (layer F.SilkS)
     #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
