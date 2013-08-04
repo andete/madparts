@@ -96,21 +96,32 @@ class Import:
 
     # DA Xcentre Ycentre Xstart_point Ystart_point angle width layer
     def arc(s):
-      shape = { 'shape': 'arc' }
-      shape['x1'] = float(s[1])
-      shape['y1'] = -float(s[2])
-      shape['x2'] = float(s[3])
-      shape['y2'] = -float(s[4])
-      shape['a'] = float(s[5])/10
+      shape = { 'shape': 'vertex' }
+      xc = float(s[1])
+      yc = -float(s[2])
+      x1 = float(s[3])
+      y1 = -float(s[4])
+      angle = float(s[5])/10
+      a = angle*math.pi/180.0
+      (x2, y2) = mutil.calc_second_point((xc,yc),(x1,y1),a)
       shape['w'] = float(s[6])
       shape['type'] = num_to_type(s[7])
+      shape['curve'] = -angle
+      shape['x1'] = x1
+      shape['y1'] = y1
+      shape['x2'] = x2
+      shape['y2'] = y2
       return shape
 
     # DP 0 0 0 0 corners_count width layer
     # Dl corner_posx corner_posy
-    def polygon(lines):
-      pass
-      # TODO, polygon needs multiline parsing
+    def polygon(lines, i):
+      shape = { 'shape': 'polygon'}
+      s = shlex.split(lines[i])
+      count = int(s[5])
+      shape['w'] = float(s[6])
+      shape['type'] = num_to_type(s[7])
+      return shape
 
     def import_pad(lines, i):
       shape = { }
@@ -200,7 +211,9 @@ class Import:
       elif k == '$pad':
         (i, pad) = import_pad(lines, i)
         l.append(pad)
-      # TODO Polygon
+      elif k == 'dp':
+        (i, poly) = import_polygon(lines, i)
+        l.append(poly)
       else:
         res = {
           'cd': lambda a: cd(a, lines[i][3:]),
@@ -220,6 +233,7 @@ class Import:
         for k in x.keys():
           if type(x[k]) == type(3.14):
             x[k] = x[k] * 0.00254
+    l = mutil.clean_floats(l)
     return l
 
   def import_footprint(self, name):
@@ -264,7 +278,7 @@ class Export:
     self.fn = fn
 
   def export_footprint(self, interim):
-    raise Exception("Export to KiCad old not yet supported")
+    raise Exception("Export to KiCad-old not yet supported")
 
   def save(self):
     pass

@@ -472,7 +472,6 @@ class Import:
       return shape
 
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
-    # TODO: convert to vertex instead!
     def fp_arc(x):
       # start is actually center point
       [xc, yc] = get_sub(x, 'start')
@@ -482,15 +481,7 @@ class Import:
       y1 = -y1
       [angle] = get_sub(x, 'angle')
       a = angle*math.pi/180.0
-      dx = x1-xc
-      dy = y1-yc
-      r = math.sqrt(dx*dx + dy*dy)
-      a1 = math.acos(dx/r)
-      if math.asin(dy/r) < 0:
-        a1 = 2*math.pi - a1
-      a2 = a1 - a
-      x2 = xc + r*math.cos(a2)
-      y2 = yc + r*math.sin(a2)
+      (x2, y2) = calc_second_point((xc,yc),(x1,y1),a)
       width = get_single_element_sub(x, 'width')
       shape = { 'shape': 'vertex'}
       shape['type'] = get_layer_sub(x, 'silk')
@@ -567,7 +558,8 @@ class Import:
       }.get(_convert_sexp_symbol_to_string(x[0]), lambda a: None)(x)
       if res != None:
         l.append(res)
-    return l
+
+    return clean_floats(l)
 
     
     

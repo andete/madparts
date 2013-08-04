@@ -103,6 +103,7 @@ def _import_kicad_old_package(kicad_s, import_name, expected_coffee):
     importer = export.kicad_old.Import(kicad_lib)
     interim = inter.import_footprint(importer, import_name) 
     coffee = generatesimple.generate_coffee(interim)
+    print coffee
     _assert_equal_no_meta(expected_coffee, coffee)
   finally:
     os.unlink(kicad_lib)
@@ -722,9 +723,56 @@ $EndMODULE Polygon
 $EndLIBRARY
 """
 
+# slightly different from kicad new.. less precision for float
+# always name and value
+reimported_coffee_polygon_kicad_old = """\
+footprint = () ->
+  name1 = new Name -0.0
+  value2 = new Value -0.0
+  silk3 = new Line 0.2
+  silk3.x1 = 1.414214
+  silk3.y1 = 1.414214
+  silk3.x2 = -1.414214
+  silk3.y2 = -1.414214
+  silk3.curve = 180.0
+  silk2 = new Polygon 0.1
+  silk2.start 1, -4
+  silk2.add -1, -4
+  silk2.add -1, -3
+  silk2.add -0.0, -2
+  silk2.end 0.0
+  silk3 = new Polygon 0.05
+  silk3.start 1.1, 1.2
+  silk3.add 1.1, 0.2
+  silk3.add 0.1, 1.2
+  silk3.end 0.0
+  silk4 = new Line 0.075
+  silk4.x1 = 2.0
+  silk4.y1 = -1.0
+  silk4.x2 = 1.0
+  silk4.y2 = -0.5
+  silk4.curve = 30.0
+  docu1 = new Polygon 0.1
+  docu1.start 0, 1
+  docu1.add -1, 0
+  docu1.add 0, -1
+  docu1.add 1, 0
+  docu1.end 0.0
+  docu1.type = 'docu'
+  docu2 = new Polygon 0.05
+  docu2.start 1, 0
+  docu2.add 3, 2
+  docu2.add 4, 0
+  docu2.add 3, -2
+  docu2.end 0.0
+  docu2.type = 'docu'
+  combine [docu1,docu2,silk1,silk2,silk3,silk4]
+"""
+
+
 def test_kicad_old_import_empty():
   _import_kicad_old_package(kicad_old_empty, "TEST_EMPTY", empty_coffee)
 
 def test_kicad_old_import_polygon():
-  expected_code = reimported_coffee_polygon_kicad
+  expected_code = reimported_coffee_polygon_kicad_old
   _import_kicad_old_package(kicad_old_polygon, 'Polygon', expected_code)

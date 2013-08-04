@@ -576,5 +576,5 @@ class Import:
           'polygon': polygon,
           }.get(x.name, unknown)(x)
         if result != None: l.append(result)
-    return l
+    return clean_floats(l)
 

@@ -81,3 +81,27 @@ def calc_center_r_a1_a2(p, q, angle):
   if angle < 0:
     (a1, a2) = (a2, a1)
   return ((x0, y0), rc, a1, a2)
+
+def calc_second_point(c, s, a):
+   (xc, yc) = c
+   (x1, y1) = s
+   dx = x1-xc
+   dy = y1-yc
+   r = math.sqrt(dx*dx + dy*dy)
+   a1 = math.acos(dx/r)
+   if math.asin(dy/r) < 0:
+     a1 = 2*math.pi - a1
+   a2 = a1 - a
+   x2 = xc + r*math.cos(a2)
+   y2 = yc + r*math.sin(a2)
+   return (x2, y2)
+
+def clean_floats(l):
+  def clean_one(h):
+    for k in h.keys():
+      v = h[k]
+      if type(v) == type(42.3):
+        if str(v)=='-0.0':
+          h[k] = -v
+    return h
+  return [clean_one(x) for x in l]

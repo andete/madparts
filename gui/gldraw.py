@@ -255,6 +255,8 @@ class GLDraw:
     dx = x2-x1
     dy = y2-y1
     l = math.sqrt(dx*dx + dy*dy)
+    if l == 0.0:
+      return labels
     if angle == 0.0:
       px = dy * r / l # trigoniometrics
       py = dx * r / l # trigoniometrics

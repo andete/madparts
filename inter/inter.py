@@ -63,7 +63,10 @@ def bounding_box(inter):
     if k in m: return m[k]
     return d
   def fget(m, k, d = 0.0):
-    return float(oget(m, k, d))
+    try:
+      return float(oget(m, k, d))
+    except TypeError:
+      return d
   def circle(shape):
     r = fget(shape, 'r')
     rx = fget(shape, 'rx', r)
