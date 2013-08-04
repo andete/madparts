@@ -107,6 +107,7 @@ class Export:
     # make a deep copy so we can make mods without harm
     interim = copy.deepcopy(interim)
     interim = self.add_ats_to_names(interim)
+    interim = clean_floats(interim)
     meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
     # make name eagle compatible

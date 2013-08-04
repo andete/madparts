@@ -28,7 +28,8 @@ def num_to_type(i):
     19: 'paste',
     21: 'silk',
     23: 'stop',
-    25: 'docu',
+    24: 'docu', # ???
+    25: 'docu', # ???
   }.get(i)
     
 class Import:
@@ -115,13 +116,14 @@ class Import:
 
     # DP 0 0 0 0 corners_count width layer
     # Dl corner_posx corner_posy
-    def polygon(lines, i):
+    def import_polygon(lines, i):
       shape = { 'shape': 'polygon'}
       s = shlex.split(lines[i])
       count = int(s[5])
       shape['w'] = float(s[6])
       shape['type'] = num_to_type(s[7])
-      return shape
+      shape['v'] = []
+      return (i+1, shape)
 
     def import_pad(lines, i):
       shape = { }

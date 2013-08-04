@@ -131,8 +131,8 @@ class Export:
         ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
         a1rad = a1*math.pi/180.0
         #(x3, y3) = (x0 + r * math.cos(a1rad), y0 + r * math.sin(a1rad))
-        l.append([S('start'), x0, -y0])
-        l.append([S('end'), x1, -y1])
+        l.append([S('start'), fc(x0), fc(-y0)])
+        l.append([S('end'), fc(x1), fc(-y1)])
         # also invert angle because of y inversion
         l.append([S('angle'), -(a2-a1)])
         l.append([S('layer'), S(layer)])
@@ -144,11 +144,11 @@ class Export:
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
       r = fget(shape, 'r')
-      start = [S('start'), x, y]
+      start = [S('start'), fc(x), fc(y)]
       if not 'a1' in shape and not 'a2' in shape:
         l = [S('fp_circle')] 
         l.append(start)
-        l.append([S('end'), x+(r/math.sqrt(2)), y+(r/math.sqrt(2))])
+        l.append([S('end'), fc(x+(r/math.sqrt(2))), fc(y+(r/math.sqrt(2)))])
         l.append([S('layer'), S(layer)])
         l.append([S('width'), fget(shape, 'w')])
       else:
@@ -162,7 +162,7 @@ class Export:
         a1rad = a1 * math.pi/180.0
         ex = x + r*math.cos(a1rad)
         ey = y + r*math.sin(a1rad)
-        l.append([S('end'), ex, -ey])
+        l.append([S('end'), fc(ex), fc(-ey)])
         l.append([S('angle'), -(a2-a1)])
       l.append([S('layer'), S(layer)])
       l.append([S('width'), fget(shape, 'w')])
@@ -173,7 +173,7 @@ class Export:
       l = [S('fp_circle')] 
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
-      l.append([S('center'), x, y])
+      l.append([S('center'), fc(x), fc(y)])
       r = fget(shape, 'r')
       rad = r/2
       l.append([S('end'), x+(rad/math.sqrt(2)), y+(rad/math.sqrt(2))])
@@ -187,9 +187,9 @@ class Export:
       l = [S('fp_poly')]
       lxy = [S('pts')]
       for v in shape['v']:
-        xy = [S('xy'), v['x1'], -v['y1']]
+        xy = [S('xy'), fc(v['x1']), fc(-v['y1'])]
         lxy.append(xy)
-      xy = [S('xy'), shape['v'][0]['x1'], -shape['v'][0]['y1']]
+      xy = [S('xy'), fc(shape['v'][0]['x1']), fc(-shape['v'][0]['y1'])]
       lxy.append(xy)
       l.append(lxy)
       l.append([S('layer'), S(layer)])
@@ -203,11 +203,11 @@ class Export:
       dx = fget(shape, 'dx')
       dy = fget(shape, 'dy')
       lxy = [S('pts')]
-      lxy.append([S('xy'), x - dx/2, y - dy/2])
-      lxy.append([S('xy'), x - dx/2, y + dy/2])
-      lxy.append([S('xy'), x + dx/2, y + dy/2])
-      lxy.append([S('xy'), x + dx/2, y - dy/2])
-      lxy.append([S('xy'), x - dx/2, y - dy/2])
+      lxy.append([S('xy'), fc(x - dx/2), fc(y - dy/2)])
+      lxy.append([S('xy'), fc(x - dx/2), fc(y + dy/2)])
+      lxy.append([S('xy'), fc(x + dx/2), fc(y + dy/2)])
+      lxy.append([S('xy'), fc(x + dx/2), fc(y - dy/2)])
+      lxy.append([S('xy'), fc(x - dx/2), fc(y - dy/2)])
       l.append(lxy)
       l.append([S('layer'), S(layer)])
       l.append([S('width'), 0])
@@ -226,9 +226,9 @@ class Export:
       if s == 'NAME': t = 'reference'
       l = [S('fp_text'), S(t), S(shape['value'])]
       if (('rot' in shape) and (fget(shape, 'rot') != 0.0)):
-        l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y'), fget(shape, 'rot')])
+        l.append([S('at'), fget(shape, 'x'), fc(-fget(shape, 'y')), fget(shape, 'rot')])
       else:
-        l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y')])
+        l.append([S('at'), fget(shape, 'x'), fc(-fget(shape, 'y'))])
       l.append([S('layer'), S(layer)])
       if s == 'VALUE':
         l.append(S('hide'))

@@ -8,7 +8,10 @@ def oget(m, k, d):
   return d
 
 def fget(m, k, d = 0.0):
-  return float(oget(m, k, d))
+  f = float(oget(m, k, d))
+  if str(f)=='-0.0':
+    return -f
+  return f
 
 def iget(m, k, d = 0.0):
   return int(oget(m, k, d))
@@ -95,6 +98,11 @@ def calc_second_point(c, s, a):
    x2 = xc + r*math.cos(a2)
    y2 = yc + r*math.sin(a2)
    return (x2, y2)
+
+def fc(f):
+  if str(f)=='-0.0':
+    return -f
+  return f
 
 def clean_floats(l):
   def clean_one(h):

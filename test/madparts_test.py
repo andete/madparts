@@ -473,7 +473,7 @@ footprint = () ->
   silk2.start 1.0, -4.0
   silk2.add -1.0, -4.0
   silk2.add -1.0, -3.0
-  silk2.add -0.0, -2.0, -90.0
+  silk2.add 0.0, -2.0, -90.0
   silk2.end -70.0
   silk3 = new Polygon 0.05
   silk3.start 1.1, 1.2
@@ -515,7 +515,7 @@ footprint = () ->
   silk2.start 1, -4
   silk2.add -1, -4
   silk2.add -1, -3
-  silk2.add -0.0, -2
+  silk2.add 0.0, -2
   silk2.end 0.0
   silk3 = new Polygon 0.05
   silk3.start 1.1, 1.2
@@ -570,7 +570,7 @@ Id: 0aa9e2e2188f4b66a94f7e0f4b6bdded
   <vertex x="1.0" y="-4.0"/>
   <vertex x="-1.0" y="-4.0"/>
   <vertex curve="-90.0" x="-1.0" y="-3.0"/>
-  <vertex curve="-70.0" x="-0.0" y="-2.0"/>
+  <vertex curve="-70.0" x="0.0" y="-2.0"/>
  </polygon>
  <polygon layer="21" width="0.05">
   <vertex x="1.1" y="1.2"/>
@@ -649,7 +649,7 @@ def test_kicad_import_empty():
   _import_kicad_package(kicad_empty, "TEST_EMPTY", empty_coffee)
 
 kicad_polygon = """\
-(module Polygon (layer F.Cu) (descr "a simple polygon example") (fp_poly (pts (xy 0 -1) (xy -1 0) (xy 0 1) (xy 1 0) (xy 0 -1)) (layer Dwgs.User) (width 0.1)) (fp_arc (start 0.0 -0.0) (end 1.41421356237 -1.41421356237) (angle -180.0) (layer F.SilkS) (width 0.2)) (fp_poly (pts (xy 1 0) (xy 3 -2) (xy 4 0) (xy 3 2) (xy 1 0)) (layer Dwgs.User) (width 0.05)) (fp_poly (pts (xy 1 4) (xy -1 4) (xy -1 3) (xy -0.0 2) (xy 1 4)) (layer F.SilkS) (width 0.1)) (fp_poly (pts (xy 1.1 -1.2) (xy 1.1 -0.2) (xy 0.1 -1.2) (xy 1.1 -1.2)) (layer F.SilkS) (width 0.05)) (fp_arc (start 0.566987298108 2.61602540378) (end 2.0 1.0) (angle -30.0) (layer F.SilkS) (width 0.075)))\
+(module Polygon (layer F.Cu) (descr "a simple polygon example") (fp_poly (pts (xy 0 -1) (xy -1 0) (xy 0 1) (xy 1 0) (xy 0 -1)) (layer Dwgs.User) (width 0.1)) (fp_arc (start 0.0 0.0) (end 1.41421356237 -1.41421356237) (angle -180.0) (layer F.SilkS) (width 0.2)) (fp_poly (pts (xy 1 0) (xy 3 -2) (xy 4 0) (xy 3 2) (xy 1 0)) (layer Dwgs.User) (width 0.05)) (fp_poly (pts (xy 1 4) (xy -1 4) (xy -1 3) (xy 0.0 2) (xy 1 4)) (layer F.SilkS) (width 0.1)) (fp_poly (pts (xy 1.1 -1.2) (xy 1.1 -0.2) (xy 0.1 -1.2) (xy 1.1 -1.2)) (layer F.SilkS) (width 0.05)) (fp_arc (start 0.566987298108 2.61602540378) (end 2.0 1.0) (angle -30.0) (layer F.SilkS) (width 0.075)))\
 """
 
 def test_kicad_export_polygon():
@@ -727,8 +727,8 @@ $EndLIBRARY
 # always name and value
 reimported_coffee_polygon_kicad_old = """\
 footprint = () ->
-  name1 = new Name -0.0
-  value2 = new Value -0.0
+  name1 = new Name 0.0
+  value2 = new Value 0.0
   silk3 = new Line 0.2
   silk3.x1 = 1.414214
   silk3.y1 = 1.414214
@@ -739,7 +739,7 @@ footprint = () ->
   silk2.start 1, -4
   silk2.add -1, -4
   silk2.add -1, -3
-  silk2.add -0.0, -2
+  silk2.add 0.0, -2
   silk2.end 0.0
   silk3 = new Polygon 0.05
   silk3.start 1.1, 1.2
