@@ -111,7 +111,7 @@ class Export:
     #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
     def vertex(shape, layer):
-      if not 'curve' in shape:
+      if not 'curve' in shape or shape['curve'] == 0.0:
         l = [S('fp_line')] 
         l.append([S('start'), fget(shape, 'x1'), -fget(shape, 'y1')])
         l.append([S('end'), fget(shape, 'x2'), -fget(shape, 'y2')])

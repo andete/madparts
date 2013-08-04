@@ -383,8 +383,10 @@ class MainWin(QtGui.QMainWindow):
       exporter.save()
       self.status("Exported to "+self.export_library_filename+".")
     except Exception as ex:
-      QtGui.QMessageBox.warning(self, "warning", str(ex))
-      self.status(str(ex))
+      tb = traceback.format_exc()
+      s = "export failure: %s" % (tb)
+      QtGui.QMessageBox.warning(self, "warning", s)
+      self.status(s)
 
 def gui_main():
   QtCore.QCoreApplication.setOrganizationName("madparts")
