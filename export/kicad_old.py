@@ -94,6 +94,11 @@ class Import:
         shape['r'] = shape['r'] * 2
         del shape['w']
       shape['type'] = num_to_type(s[6])
+      if shape['type'] == 'hole':
+        shape['drill'] = shape['r'] * 2
+        shape['shape'] = 'hole'
+        delete shape['w']
+        delete shape['r']
       return shape
 
     # DA Xcentre Ycentre Xstart_point Ystart_point angle width layer

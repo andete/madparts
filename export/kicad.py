@@ -464,20 +464,20 @@ class Import:
       [x1, y1] = get_sub(x, 'center')
       shape['x'] = x1
       shape['y'] = -y1
-      shape['width'] = get_single_element_sub(x, 'width')
+      shape['w'] = get_single_element_sub(x, 'width')
       [ex, ey] = get_sub(x, 'end')
       dx = abs(x1 - ex)
       dy = abs(y1 - ey)
       if f_eq(dx, dy):
         shape['r'] = dx*math.sqrt(2)
-        if f_eq(shape['width'], shape['r']):
+        if f_eq(shape['w'], shape['r']):
           shape['type'] = 'disc'
           shape['r'] = shape['r'] * 2
-          del shape['width']
+          del shape['w']
         elif shape['type'] == 'hole':
           shape['shape'] = 'hole'
           shape['drill'] = shape['r'] * 2
-          del shape['width']
+          del shape['w']
           del shape['r']
       else:
         shape['rx'] = dx*math.sqrt(2)
