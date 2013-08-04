@@ -108,6 +108,8 @@ def clean_floats(l):
   def clean_one(h):
     for k in h.keys():
       v = h[k]
+      if k == 'v':
+        h[k] = clean_floats(v)
       if type(v) == type(42.3):
         if str(v)=='-0.0':
           h[k] = -v

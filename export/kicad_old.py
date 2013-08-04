@@ -116,14 +116,24 @@ class Import:
 
     # DP 0 0 0 0 corners_count width layer
     # Dl corner_posx corner_posy
-    def import_polygon(lines, i):
+    def import_polygon(lines, k):
       shape = { 'shape': 'polygon'}
-      s = shlex.split(lines[i])
+      s = shlex.split(lines[k])
       count = int(s[5])
       shape['w'] = float(s[6])
       shape['type'] = num_to_type(s[7])
       shape['v'] = []
-      return (i+1, shape)
+      for j in range(k+1, k+count): # don't want last looping back
+        s = shlex.split(lines[j])
+        v = { 'shape':'vertex' }
+        v['x1'] = float(s[1])
+        v['y1'] = -float(s[2])
+        shape['v'].append(v)
+      l = len(shape['v'])
+      for i in range(0, l):
+        shape['v'][i]['x2'] = shape['v'][i-l+1]['x1']
+        shape['v'][i]['y2'] = shape['v'][i-l+1]['y1']
+      return (k+count+1, shape)
 
     def import_pad(lines, i):
       shape = { }

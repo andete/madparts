@@ -103,7 +103,7 @@ def _import_kicad_old_package(kicad_s, import_name, expected_coffee):
     importer = export.kicad_old.Import(kicad_lib)
     interim = inter.import_footprint(importer, import_name) 
     coffee = generatesimple.generate_coffee(interim)
-    print coffee
+    # print coffee
     _assert_equal_no_meta(expected_coffee, coffee)
   finally:
     os.unlink(kicad_lib)
@@ -736,10 +736,10 @@ footprint = () ->
   silk3.y2 = -1.414214
   silk3.curve = 180.0
   silk4 = new Polygon 0.1
-  silk4.start 1, -4
-  silk4.add -1, -4
-  silk4.add -1, -3
-  silk4.add 0.0, -2
+  silk4.start 1.0, -4.0
+  silk4.add -1.0, -4.0
+  silk4.add -1.0, -3.0
+  silk4.add 0.0, -2.0
   silk4.end 0.0
   silk5 = new Polygon 0.05
   silk5.start 1.1, 1.2
@@ -753,17 +753,17 @@ footprint = () ->
   silk6.y2 = -0.499999796849
   silk6.curve = 30.0
   docu1 = new Polygon 0.1
-  docu1.start 0, 1
-  docu1.add -1, 0
-  docu1.add 0, -1
-  docu1.add 1, 0
+  docu1.start 0.0, 1.0
+  docu1.add -1.0, 0.0
+  docu1.add 0.0, -1.0
+  docu1.add 1.0, 0.0
   docu1.end 0.0
   docu1.type = 'docu'
   docu2 = new Polygon 0.05
-  docu2.start 1, 0
-  docu2.add 3, 2
-  docu2.add 4, 0
-  docu2.add 3, -2
+  docu2.start 1.0, 0.0
+  docu2.add 3.0, 2.0
+  docu2.add 4.0, 0.0
+  docu2.add 3.0, -2.0
   docu2.end 0.0
   docu2.type = 'docu'
   combine [docu1,docu2,name1,silk3,silk4,silk5,silk6,value2]
