@@ -175,6 +175,13 @@ class Export:
       smd['layer'] = type_to_layer_number('smd')
       package.append(smd)
 
+    def hole(shape):
+      hole = self.soup.new_tag('hole')
+      hole['drill'] = fget(shape, 'drill')
+      hole['x'] = fget(shape, 'x')
+      hole['y'] = fget(shape, 'y')
+      package.append(hole)
+
     def rect(shape, layer):
       rect = self.soup.new_tag('rectangle')
       x = fget(shape, 'x')
@@ -331,6 +338,7 @@ class Export:
           'restrict': silk,
           'vrestrict': silk,
           'smd': smd,
+          'hole': hole,
           }.get(shape['type'], unknown)(shape)
     return name
 
