@@ -30,6 +30,7 @@ def num_to_type(i):
     23: 'stop',
     24: 'docu', # ???
     25: 'docu', # ???
+    28: 'hole', # actually, 'edge'
   }.get(i)
     
 class Import:

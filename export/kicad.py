@@ -22,6 +22,7 @@ def type_to_layer_name(layer):
     'stop': 'F.Mask',
     'glue': 'F.Adhes',
     'docu': 'Dwgs.User',
+    'hole': 'Edge.Cuts',
     }.get(layer)
 
 def layer_name_to_type(name):
@@ -181,6 +182,10 @@ class Export:
       l.append([S('width'), rad])
       return l
 
+    def hole(shape):
+      layer = type_to_layer_name(shape['type']) # aka 'hole'
+      return circle(shape, layer)
+
     # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
     # kicad doesn't do arced vertex in polygon :(
     def polygon(shape, layer):
@@ -265,6 +270,7 @@ class Export:
           'restrict': unknown,
           'vrestrict': unknown,
           'smd': lambda s: pad(s, smd=True),
+          'hole': hole,
           }.get(shape['type'], unknown)(shape)
         if l2 != None:
          l.append(l2)
