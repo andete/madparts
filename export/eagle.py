@@ -547,6 +547,13 @@ class Import:
         res['r'] = dia/2
       return res
      
+    def hole(x):
+      res = {'type':'hole', 'shape':'hole'}
+      res['drill'] = float(x('drill'))
+      res['x'] = float(x('x'))
+      res['y'] = float(x('y'))
+      return res
+
     def polygon(x):
       res = { 'shape':'polygon' }
       res['w'] = float(x['width'])
@@ -583,6 +590,7 @@ class Import:
           'wire': wire,
           'rectangle': rect,
           'polygon': polygon,
+          'hole': hole,
           }.get(x.name, unknown)(x)
         if result != None: l.append(result)
     return clean_floats(l)
