@@ -735,23 +735,23 @@ footprint = () ->
   silk3.x2 = -1.414214
   silk3.y2 = -1.414214
   silk3.curve = 180.0
-  silk2 = new Polygon 0.1
-  silk2.start 1, -4
-  silk2.add -1, -4
-  silk2.add -1, -3
-  silk2.add 0.0, -2
-  silk2.end 0.0
-  silk3 = new Polygon 0.05
-  silk3.start 1.1, 1.2
-  silk3.add 1.1, 0.2
-  silk3.add 0.1, 1.2
-  silk3.end 0.0
-  silk4 = new Line 0.075
-  silk4.x1 = 2.0
-  silk4.y1 = -1.0
-  silk4.x2 = 1.0
-  silk4.y2 = -0.5
-  silk4.curve = 30.0
+  silk4 = new Polygon 0.1
+  silk4.start 1, -4
+  silk4.add -1, -4
+  silk4.add -1, -3
+  silk4.add 0.0, -2
+  silk4.end 0.0
+  silk5 = new Polygon 0.05
+  silk5.start 1.1, 1.2
+  silk5.add 1.1, 0.2
+  silk5.add 0.1, 1.2
+  silk5.end 0.0
+  silk6 = new Line 0.075
+  silk6.x1 = 2.0
+  silk6.y1 = -1.0
+  silk6.x2 = 1.00000016195
+  silk6.y2 = -0.499999796849
+  silk6.curve = 30.0
   docu1 = new Polygon 0.1
   docu1.start 0, 1
   docu1.add -1, 0
@@ -766,7 +766,7 @@ footprint = () ->
   docu2.add 3, -2
   docu2.end 0.0
   docu2.type = 'docu'
-  combine [docu1,docu2,silk1,silk2,silk3,silk4]
+  combine [docu1,docu2,name1,silk3,silk4,silk5,silk6,value2]
 """
 
 
