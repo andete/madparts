@@ -148,6 +148,14 @@ class GLDraw:
       labels.append(lambda: self._txt(shape, max(rx*1.5, drill), max(ry*1.5, drill), x, y, True))
     return labels
 
+  def hole(self, shape, labels):
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    drill = fget(shape,'drill')
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
+    return labels
+
   def circle(self, shape, labels):
     r = fget(shape, 'r')
     rx = fget(shape, 'rx', r)
@@ -298,6 +306,7 @@ class GLDraw:
           'octagon': self.octagon,
           'rect': self.rect,
           'polygon': self.polygon,
+          'hole': self.hole,
         }
         labels = dispatch.get(shape['shape'], self.skip)(shape, labels)
     for draw_label in labels:

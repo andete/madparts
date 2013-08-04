@@ -150,7 +150,14 @@ class Circle
     @r = 0
     @x = 0
     @y = 0
-    
+
+class Hole
+  constructor: (@drill) ->
+    @type = 'hole'
+    @shape = 'hole'
+    @x = 0
+    @y = 0
+            
 class Vertex
   constructor: (@x1, @y1, @x2, @y2, @curve=0) ->
     @shape = 'vertex'
