@@ -145,7 +145,7 @@ class Export:
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
       r = fget(shape, 'r')
-      start = [S('start'), fc(x), fc(y)]
+      start = [S('center'), fc(x), fc(y)]
       if not 'a1' in shape and not 'a2' in shape:
         l = [S('fp_circle')] 
         l.append(start)
@@ -184,6 +184,7 @@ class Export:
 
     def hole(shape):
       layer = type_to_layer_name(shape['type']) # aka 'hole'
+      shape['r'] = shape['drill'] / 2
       return circle(shape, layer)
 
     # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
