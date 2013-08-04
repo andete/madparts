@@ -31,6 +31,7 @@ def layer_name_to_type(name):
     'Dwgs.User': 'docu',
     'F.Mask': 'stop',
     'F.Adhes': 'glue',
+    'Edge.Cuts': 'hole',
    }.get(name)
 
 
@@ -459,6 +460,7 @@ class Import:
     # (fp_circle (center 5.08 0) (end 6.35 -1.27) (layer F.SilkS) (width 0.15))
     def fp_circle(x):
       shape = { 'shape': 'circle' }
+      shape['type'] = get_layer_sub(x, 'silk')
       [x1, y1] = get_sub(x, 'center')
       shape['x'] = x1
       shape['y'] = -y1
@@ -472,10 +474,14 @@ class Import:
           shape['type'] = 'disc'
           shape['r'] = shape['r'] * 2
           del shape['width']
+        elif shape['type'] == 'hole':
+          shape['shape'] = 'hole'
+          shape['drill'] = shape['r'] * 2
+          del shape['width']
+          del shape['r']
       else:
         shape['rx'] = dx*math.sqrt(2)
         shape['ry'] = dy*math.sqrt(2)
-      shape['type'] = get_layer_sub(x, 'silk')
       return shape
 
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
