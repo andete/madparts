@@ -131,8 +131,6 @@ class Export:
         curve =  fget(shape, 'curve')
         angle = curve*math.pi/180.0
         ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
-        a1rad = a1*math.pi/180.0
-        #(x3, y3) = (x0 + r * math.cos(a1rad), y0 + r * math.sin(a1rad))
         l.append([S('start'), fc(x0), fc(-y0)])
         l.append([S('end'), fc(x1), fc(-y1)])
         # also invert angle because of y inversion

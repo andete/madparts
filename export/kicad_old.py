@@ -15,8 +15,10 @@ def detect(fn):
       l = f.readlines()
       l0 = l[0]
       l2 = l0.split()
-      if (l2[0] == 'PCBNEW-LibModule-V1'): return "1"
-      elif (l2[0] == 'PCBNEW-LibModule-V2'): return "2"
+      if (l2[0] == 'PCBNEW-LibModule-V1'): 
+        return "1" # imperial only
+      elif (l2[0] == 'PCBNEW-LibModule-V2'):
+        return "2" # support metric also
       return None
   except:
     return None
@@ -32,6 +34,145 @@ def num_to_type(i):
     25: 'docu', # ???
     28: 'hole', # actually, 'edge'
   }.get(i)
+
+def type_to_num(t):
+  return {
+    'glue': 17,
+    'paste': 19,
+    'silk': 21,
+    'stop': 23,
+    'docu': 24,
+    'hole': 28,
+  }.get(t, 21)
+
+class Export:
+
+  def __init__(self, fn):
+    self.fn = fn
+
+  def export_footprint(self, interim):
+    meta = inter.get_meta(interim)
+    name = eget(meta, 'name', 'Name not found')
+    idx = eget(meta, 'id', 'Id not found')
+    descr = oget(meta, 'desc', '')
+    parent_idx = oget(meta, 'parent', None)
+    d = []
+    # generate kicad-old for individual footprint
+    # use metric; convert to imperial in "save" if needed
+    d.append("$MODULE %s" % (name))
+    d.append("Po 0 0 0 154F986D86 00000000 ~~") # dummy data
+    d.append("Li %s" % (name))
+    d.append("Cd %s" % (desc.replace('\n',' '))) # ugly
+    # assuming Kw is optional
+    d.append("Sc 00000000")
+    d.append("Op 0 0 0")
+
+  # DS Xstart Ystart Xend Yend Width Layer
+  # DS 6000 1500 6000 -1500 120 21
+  # DA Xcentre Ycentre Xstart_point Ystart_point angle width layer
+  def vertex(shape, layer):
+    l = []
+    x1 = fget(shape, 'x1')
+    y1 = fget(shape, 'y1')
+    x2 = fget(shape, 'x2')
+    y2 = fget(shape, 'y2')
+    w = fget(shape, 'w')
+    if not 'curve' in shape or shape['curve'] == 0.0:
+      line = "DS %s %s %s %s %s %s" % (x1, fc(-y1), x2, fc(-y2), w, layer)
+      l.append(line)
+    else:
+      curve =  fget(shape, 'curve')
+      angle = curve*math.pi/180.0
+      ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
+      arc = "DA %s %s %s %s %s %s %s" 
+        % (x0, fc(-y0), x1, fc(-y1), -(a2-a1), w, layer)
+      l.append(arc)
+    return l
+
+    # DC Xcentre Ycentre Xpoint Ypoint Width Layer
+    def circle(shape, layer):
+      l = []
+      x = fget(shape, 'x')
+      y = fget(shape, 'y')
+      r = fget(shape, 'r')
+      w = fget(shape, 'w')
+      if not 'a1' in shape and not 'a2' in shape:
+        circle = "DC %s %s %s %s %s %s" 
+          % (x, fc(-y), fc(x+(r/math.sqrt(2))), fc(-y+(r/math.sqrt(2))), w, layer)
+        l.append(circle)
+      else:
+        l = [S('fp_arc')] 
+        l.append(start)
+        # start == center point
+        # end == start point of arc
+        # angle == angled part in that direction
+        a1 = fget(shape, 'a1')
+        a2 = fget(shape, 'a2')
+        a1rad = a1 * math.pi/180.0
+        ex = x + r*math.cos(a1rad)
+        ey = y + r*math.sin(a1rad)
+        arc = "DA %s %s %s %s %s %s %s" 
+          % (x, fc(-y), ex, fc(-ey), -(a2-a1), w, layer)
+        l.append(arc)
+      return l
+
+    # T0 -79 -3307 600 600 0 120 N V 21 N "XT"
+    def label(shape, layer):
+      s = shape['value'].upper()
+      t = 'T2'
+      visible = 'V'
+      if s == 'VALUE': 
+        t = 'T1'
+        visible = 'I'
+      if s == 'NAME': 
+        t = 'T0'
+      dy = fget(shape, 'dy', 1/1.6)
+      w = fget(shape, 'w', 0.1)
+      x = fget(shape, 'x')
+      y = fc(-fget(shape, 'y'))
+      line = "%s %s %s %s %s 0 %s N %s \"%s\"" % 
+        (t, x, y, dy, dy, w, visible, shape['value'])
+      return [l]
+
+    def silk(shape):
+      if not 'shape' in shape: return None
+      layer = type_to_num(shape['type'])
+      s = shape['shape']
+      if s == 'line': return vertex(shape, layer)
+      if s == 'vertex': return vertex(shape, layer)
+      elif s == 'circle': return circle(shape, layer)
+      elif s == 'disc': return disc(shape, layer)
+      elif s == 'label': return label(shape, layer)
+      elif s == 'rect': return rect(shape, layer)
+      elif s == 'polygon': return polygon(shape, layer) 
+
+    def unknown(shape):
+      return None
+
+    for shape in interim:
+      if 'type' in shape:
+        l = {
+          'pad': pad,
+          'silk': silk,
+          'docu': silk,
+          'keepout': unknown,
+          'stop': silk,
+          'glue': silk,
+          'restrict': unknown,
+          'vrestrict': unknown,
+          'smd': lambda s: pad(s, smd=True),
+          'hole': hole,
+          }.get(shape['type'], unknown)(shape)
+        if l != None:
+         d += l
+      
+    d.append("$ENDMODULE %s" % (name))
+    self.data = d
+
+  def save(self):
+    # check index and see if part already exist, making it an
+    # overwrite or an insert
+    pass
     
 class Import:
 
@@ -289,14 +430,3 @@ class Import:
         elif k == '$endmodule':
           l.append((name, desc))
     return l
-
-class Export:
-
-  def __init__(self, fn):
-    self.fn = fn
-
-  def export_footprint(self, interim):
-    raise Exception("Export to KiCad-old not yet supported")
-
-  def save(self):
-    pass
