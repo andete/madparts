@@ -67,27 +67,66 @@ class Export:
     d.append("Sc 00000000")
     d.append("Op 0 0 0")
 
-  # DS Xstart Ystart Xend Yend Width Layer
-  # DS 6000 1500 6000 -1500 120 21
-  # DA Xcentre Ycentre Xstart_point Ystart_point angle width layer
-  def vertex(shape, layer):
-    l = []
-    x1 = fget(shape, 'x1')
-    y1 = fget(shape, 'y1')
-    x2 = fget(shape, 'x2')
-    y2 = fget(shape, 'y2')
-    w = fget(shape, 'w')
-    if not 'curve' in shape or shape['curve'] == 0.0:
-      line = "DS %s %s %s %s %s %s" % (x1, fc(-y1), x2, fc(-y2), w, layer)
-      l.append(line)
-    else:
-      curve =  fget(shape, 'curve')
-      angle = curve*math.pi/180.0
-      ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
-      arc = "DA %s %s %s %s %s %s %s" 
-        % (x0, fc(-y0), x1, fc(-y1), -(a2-a1), w, layer)
-      l.append(arc)
-    return l
+    def pad(shape, smd=False):
+      l = ['$PAD']
+      # Sh <pad name> shape Xsize Ysize Xdelta Ydelta Orientation
+      if shape['shape'] == 'disc':
+        sh = 'C'
+        dx = shape['r']*2
+        dy = dx
+      elif shape['shape'] == 'rect':
+        dx = shape['dx']
+        dy = shape['dy']
+        sh = 'R'
+        # any rect with roundness >= 50 is considered kicad 'oblong'
+        if 'ro' in shape:
+          if shape['ro'] >= 50:
+            sh = 'O'
+      
+      l.append("Sh %s %s %s %s %s %s %s" 
+               % (shape['name'], sh, dx, dy, 0, 0, 0))
+      # Dr <Pad drill> Xoffset Yoffset (round hole)
+      if not smd:
+        l.append("Dr %s %s %s" % (fget(shape, 'drill'), 
+          fget(shape, 'drill_dx'), fc(-fget(shape, 'drill_dy'))))
+      # Po <x> <y>
+      l.append("Po %s %s" % (shape['x'], fc(-shape['y'])))
+      # At <Pad type> N <layer mask>
+      t = 'STD'
+      layer_mask = '00E0FFFF'
+      if smd:
+        t = 'SMD'
+        layer_mask = '00888000'
+      l.append("At %s N %s" % (t, layer_mask))
+      l.append('Ne 0 ""')
+      if not smd:
+        l2 = [S('drill'), fget(shape, 'drill')]
+        if 'drill_dx' in shape or 'drill_dy' in shape:
+          l2.append([S('offset'), fget(shape, 'drill_dx'), fget(shape, 'drill_dy')])
+        l.append(l2)
+      l.append("$ENDPAD")
+      return l
+
+    # DS Xstart Ystart Xend Yend Width Layer
+    # DS 6000 1500 6000 -1500 120 21
+    # DA Xcentre Ycentre Xstart_point Ystart_point angle width layer
+    def vertex(shape, layer):
+      l = []
+      x1 = fget(shape, 'x1')
+      y1 = fget(shape, 'y1')
+      x2 = fget(shape, 'x2')
+      y2 = fget(shape, 'y2')
+      w = fget(shape, 'w')
+      if not 'curve' in shape or shape['curve'] == 0.0:
+        line = "DS %s %s %s %s %s %s" % (x1, fc(-y1), x2, fc(-y2), w, layer)
+        l.append(line)
+      else:
+        curve =  fget(shape, 'curve')
+        angle = curve*math.pi/180.0
+        ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
+        arc = "DA %s %s %s %s %s %s %s" % (x0, fc(-y0), x1, fc(-y1), -(a2-a1), w, layer)
+        l.append(arc)
+      return l
 
     # DC Xcentre Ycentre Xpoint Ypoint Width Layer
     def circle(shape, layer):
@@ -97,8 +136,7 @@ class Export:
       r = fget(shape, 'r')
       w = fget(shape, 'w')
       if not 'a1' in shape and not 'a2' in shape:
-        circle = "DC %s %s %s %s %s %s" 
-          % (x, fc(-y), fc(x+(r/math.sqrt(2))), fc(-y+(r/math.sqrt(2))), w, layer)
+        circle = "DC %s %s %s %s %s %s" % (x, fc(-y), fc(x+(r/math.sqrt(2))), fc(-y+(r/math.sqrt(2))), w, layer)
         l.append(circle)
       else:
         l = [S('fp_arc')] 
@@ -111,8 +149,7 @@ class Export:
         a1rad = a1 * math.pi/180.0
         ex = x + r*math.cos(a1rad)
         ey = y + r*math.sin(a1rad)
-        arc = "DA %s %s %s %s %s %s %s" 
-          % (x, fc(-y), ex, fc(-ey), -(a2-a1), w, layer)
+        arc = "DA %s %s %s %s %s %s %s" % (x, fc(-y), ex, fc(-ey), -(a2-a1), w, layer)
         l.append(arc)
       return l
 
@@ -130,8 +167,7 @@ class Export:
       w = fget(shape, 'w', 0.1)
       x = fget(shape, 'x')
       y = fc(-fget(shape, 'y'))
-      line = "%s %s %s %s %s 0 %s N %s \"%s\"" % 
-        (t, x, y, dy, dy, w, visible, shape['value'])
+      line = "%s %s %s %s %s 0 %s N %s \"%s\"" % (t, x, y, dy, dy, w, visible, shape['value'])
       return [l]
 
     def silk(shape):
@@ -238,8 +274,8 @@ class Import:
       if shape['type'] == 'hole':
         shape['drill'] = shape['r'] * 2
         shape['shape'] = 'hole'
-        delete shape['w']
-        delete shape['r']
+        del shape['w']
+        del shape['r']
       return shape
 
     # DA Xcentre Ycentre Xstart_point Ystart_point angle width layer
@@ -308,7 +344,7 @@ class Import:
           if dx != 0.0:
             shape['drill_dx'] = dx
           if dy != 0.0:
-            shape['drill_dy'] = dy
+            shape['drill_dy'] = fc(-dy)
 
       # Sh <pad name> shape Xsize Ysize Xdelta Ydelta Orientation 
       def handle_shape(s):

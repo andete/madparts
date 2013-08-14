@@ -144,16 +144,15 @@ class Export:
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
       r = fget(shape, 'r')
-      start = [S('center'), fc(x), fc(y)]
       if not 'a1' in shape and not 'a2' in shape:
         l = [S('fp_circle')] 
-        l.append(start)
+        l.append([S('center'),fc(x),fc(y)])
         l.append([S('end'), fc(x+(r/math.sqrt(2))), fc(y+(r/math.sqrt(2)))])
         l.append([S('layer'), S(layer)])
         l.append([S('width'), fget(shape, 'w')])
       else:
         l = [S('fp_arc')] 
-        l.append(start)
+        l.append([S('start'),fc(x),fc(y)])
         # start == center point
         # end == start point of arc
         # angle == angled part in that direction
