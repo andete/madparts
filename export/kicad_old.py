@@ -57,6 +57,22 @@ def type_to_num(t):
     'hole': 28,
   }.get(t, 21)
 
+def list_names(fn):
+  l = []
+  with open(fn, 'r') as f:
+    lines = f.readlines()
+    for line in lines:
+      s = shlex.split(line)
+      k = s[0].lower()
+      if k == '$module':
+        name = s[1]
+        desc = None
+      elif k == 'cd':
+        desc = s[1]
+      elif k == '$endmodule':
+        l.append((name, desc))
+  return l
+
 class Export:
 
   def __init__(self, fn):
@@ -67,6 +83,7 @@ class Export:
       timestamp = time.time()
     meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
+    self.name = name
     idx = eget(meta, 'id', 'Id not found')
     desc = oget(meta, 'desc', '')
     parent_idx = oget(meta, 'parent', None)
@@ -118,11 +135,6 @@ class Export:
         layer_mask = '00888000'
       l.append("At %s N %s" % (t, layer_mask))
       l.append('Ne 0 ""')
-      if not smd:
-        l2 = [S('drill'), fget(shape, 'drill')]
-        if 'drill_dx' in shape or 'drill_dy' in shape:
-          l2.append([S('offset'), fget(shape, 'drill_dx'), fget(shape, 'drill_dy')])
-        l.append(l2)
       l.append("$ENDPAD")
       return l
 
@@ -263,10 +275,58 @@ class Export:
     s = '\n'.join(self.data)
     return s
 
+  def _make_new_file(self):
+    empty = """PCBNEW-LibModule-V1  Sat 22 Jun 2013 04:47:58 PM CEST
+# encoding utf-8
+Units mm
+$INDEX
+#$EndINDEX
+$EndLIBRARY"""
+    with open(self.fn, 'w+') as f:
+      f.write(empty)
+
   def save(self):
-    # check index and see if part already exist, making it an
-    # overwrite or an insert
-    pass
+    if os.path.isdir(self.fn):
+      raise Exception("Can't save to directory")
+    if not os.path.exists(self.fn):
+      self._make_new_file()
+    
+    names = [x for (x,y) in list_names(self.fn)]
+    overwrite = self.name in names
+    
+    with open(self.fn, 'r') as f:
+      l = f.readlines()
+   
+    l2 = []
+    n = len(l)
+    pos = 0
+    while pos < n:
+      line = l[pos]
+      if not overwrite:
+        if line.lower() == "$endindex":
+          l2.append(name)
+        elif line.lower() == "#endlibrary":
+          # add new module definition just before endlibrary
+          l2 += self.data
+        l2.append(line)
+        pos += 1
+      else:
+        s = shlex.split(line)
+        if s[0].lower() == "$module" and s[1] == name:
+          # add new module definition
+          l2 += self.data
+          # skip old module definition
+          while s[0].lower() != "$endmodule":
+            pos += 1
+            line = l[pos]
+            s = shlex.split(line)
+        else:
+          l2.append(line)
+          pos += 1
+
+    with open(self.fn, 'w+') as f:
+      f.write("\n".join(l2))
+      
     
 class Import:
 
@@ -510,17 +570,4 @@ class Import:
         print s[1]
 
   def list_names(self):
-    l = []
-    with open(self.fn, 'r') as f:
-      lines = f.readlines()
-      for line in lines:
-        s = shlex.split(line)
-        k = s[0].lower()
-        if k == '$module':
-          name = s[1]
-          desc = None
-        elif k == 'cd':
-          desc = s[1]
-        elif k == '$endmodule':
-          l.append((name, desc))
-    return l
+    return list_names(self.fn)
