@@ -105,7 +105,7 @@ class Export:
 
     def pad(shape, smd=False):
       l = ['$PAD']
-      # Sh <pad name> shape Xsize Ysize Xdelta Ydelta Orientation
+      # Sh "<pad name>" shape Xsize Ysize Xdelta Ydelta Orientation
       if shape['shape'] == 'disc':
         sh = 'C'
         dx = shape['r']*2
@@ -119,7 +119,7 @@ class Export:
           if shape['ro'] >= 50:
             sh = 'O'
       
-      l.append("Sh %s %s %s %s %s %s %s" 
+      l.append("Sh \"%s\" %s %s %s %s %s %s" 
                % (shape['name'], sh, dx, dy, 0, 0, 0))
       # Dr <Pad drill> Xoffset Yoffset (round hole)
       if not smd:
@@ -202,7 +202,7 @@ class Export:
       x = fget(shape, 'x')
       y = fc(-fget(shape, 'y'))
       line = "%s %s %s %s %s 0 %s N %s \"%s\"" % (t, x, y, dy, dy, w, visible, shape['value'])
-      return [l]
+      return [line]
 
     def rect(shape, layer):
       l = []
@@ -301,11 +301,11 @@ $EndLIBRARY"""
     n = len(l)
     pos = 0
     while pos < n:
-      line = l[pos]
+      line = l[pos].strip()
       if not overwrite:
         if line.lower() == "$endindex":
-          l2.append(name)
-        elif line.lower() == "#endlibrary":
+          l2.append(self.name)
+        elif line.lower() == "$endlibrary":
           # add new module definition just before endlibrary
           l2 += self.data
         l2.append(line)
@@ -318,7 +318,7 @@ $EndLIBRARY"""
           # skip old module definition
           while s[0].lower() != "$endmodule":
             pos += 1
-            line = l[pos]
+            line = l[pos].strip()
             s = shlex.split(line)
         else:
           l2.append(line)
