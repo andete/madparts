@@ -28,7 +28,7 @@ test:
 	@nosetests
 
 testone:
-	@nosetests -s test/madparts_test.py:test_kicad_old_import_polygon
+	@nosetests -s test/madparts_test.py:test_kicad_old_export_polygon
 
 list:
 	@nosetests --collect-only -v

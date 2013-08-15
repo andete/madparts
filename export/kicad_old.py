@@ -1,12 +1,24 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+# kicad old format info can be found in:
+#
+#  - file_formats.pdf
+#  - pcbnew/legacy_plugin.cpp
+
 import os.path
 import shlex
 import uuid
 import math
+import time
 
 import mutil.mutil as mutil
+eget = mutil.eget
+fget = mutil.fget
+oget = mutil.oget
+fc = mutil.fc
+
+from inter import inter
 
 def detect(fn):
   if os.path.isdir(fn): return None
@@ -16,7 +28,7 @@ def detect(fn):
       l0 = l[0]
       l2 = l0.split()
       if (l2[0] == 'PCBNEW-LibModule-V1'): 
-        return "1" # imperial only
+        return "1" # imperial only although in practice there seem to be files that do metric anyway...?!
       elif (l2[0] == 'PCBNEW-LibModule-V2'):
         return "2" # support metric also
       return None
@@ -50,22 +62,29 @@ class Export:
   def __init__(self, fn):
     self.fn = fn
 
-  def export_footprint(self, interim):
+  def export_footprint(self, interim, timestamp = None):
+    if timestamp is None:
+      timestamp = time.time()
     meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
     idx = eget(meta, 'id', 'Id not found')
-    descr = oget(meta, 'desc', '')
+    desc = oget(meta, 'desc', '')
     parent_idx = oget(meta, 'parent', None)
     d = []
     # generate kicad-old for individual footprint
     # use metric; convert to imperial in "save" if needed
     d.append("$MODULE %s" % (name))
-    d.append("Po 0 0 0 154F986D86 00000000 ~~") # dummy data
+    d.append("Po 0 0 0 15 %x 00000000 ~~" % timestamp)
     d.append("Li %s" % (name))
     d.append("Cd %s" % (desc.replace('\n',' '))) # ugly
     # assuming Kw is optional
-    d.append("Sc 00000000")
+    d.append("Sc 0")
+    # d.append("AR ") assume AR is optional
     d.append("Op 0 0 0")
+    # if no T0 or T1 are specified, kicad defaults to this:
+    # right now I'm assuming this is optional
+    # T0 0 0 1.524 1.524 0 0.15 N V 21 N ""
+    # T1 0 0 1.524 1.524 0 0.15 N V 21 N ""
 
     def pad(shape, smd=False):
       l = ['$PAD']
@@ -123,8 +142,8 @@ class Export:
       else:
         curve =  fget(shape, 'curve')
         angle = curve*math.pi/180.0
-        ((x0, y0), r, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
-        arc = "DA %s %s %s %s %s %s %s" % (x0, fc(-y0), x1, fc(-y1), -(a2-a1), w, layer)
+        ((x0, y0), r, a1, a2) = mutil.calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
+        arc = "DA %f %f %f %f %s %s %s" % (x0, fc(-y0), x1, fc(-y1), int(round((-10.0)*(a2-a1))), w, layer)
         l.append(arc)
       return l
 
@@ -139,8 +158,6 @@ class Export:
         circle = "DC %s %s %s %s %s %s" % (x, fc(-y), fc(x+(r/math.sqrt(2))), fc(-y+(r/math.sqrt(2))), w, layer)
         l.append(circle)
       else:
-        l = [S('fp_arc')] 
-        l.append(start)
         # start == center point
         # end == start point of arc
         # angle == angled part in that direction
@@ -149,9 +166,14 @@ class Export:
         a1rad = a1 * math.pi/180.0
         ex = x + r*math.cos(a1rad)
         ey = y + r*math.sin(a1rad)
-        arc = "DA %s %s %s %s %s %s %s" % (x, fc(-y), ex, fc(-ey), -(a2-a1), w, layer)
+        arc = "DA %f %f %f %f %s %s %s" % (x, fc(-y), ex, fc(-ey), int(round((-10)*(a2-a1))), w, layer)
         l.append(arc)
       return l
+ 
+    def hole(shape, layer):
+      layer = type_to_layer_name(shape['type']) # aka 'hole'
+      shape['r'] = shape['drill'] / 2
+      return circle(shape, layer)
 
     # T0 -79 -3307 600 600 0 120 N V 21 N "XT"
     def label(shape, layer):
@@ -169,6 +191,37 @@ class Export:
       y = fc(-fget(shape, 'y'))
       line = "%s %s %s %s %s 0 %s N %s \"%s\"" % (t, x, y, dy, dy, w, visible, shape['value'])
       return [l]
+
+    def rect(shape, layer):
+      l = []
+      w = shape['w']
+      l.append("DP 0 0 0 0 %s %s %s" % (5, w, layer))
+      x = fget(shape, 'x')
+      y = -fget(shape, 'y')
+      dx = fget(shape, 'dx')
+      dy = fget(shape, 'dy')
+      def add(x1, y1):
+        l.append("Dl %f %f" % (fc(x1), fc(y1)))
+      add(x - dx/2, y - dy/2)
+      add(x - dx/2, y + dy/2)
+      add(x + dx/2, y + dy/2)
+      add(x + dx/2, y - dy/2)
+      add(x - dx/2, y - dy/2)
+      return l
+ 
+    # DP 0 0 0 0 corners_count width layer
+    # DP 0 0 0 0 5 0.1 24
+    # Dl corner_posx corner_posy
+    # Dl 0 -1
+    def polygon(shape, layer):
+      l = []
+      n = len(shape['v'])
+      w = shape['w']
+      l.append("DP 0 0 0 0 %s %s %s" % (n + 1, w, layer))
+      for v in shape['v']:
+        l.append("Dl %g %g" % (fc(v['x1']), fc(-v['y1'])))
+      l.append("Dl %g %g" % (fc(shape['v'][0]['x1']), fc(-shape['v'][0]['y1'])))
+      return l
 
     def silk(shape):
       if not 'shape' in shape: return None
@@ -202,8 +255,13 @@ class Export:
         if l != None:
          d += l
       
-    d.append("$ENDMODULE %s" % (name))
+    d.append("$EndMODULE %s" % (name))
     self.data = d
+    return name
+
+  def get_string(self):
+    s = '\n'.join(self.data)
+    return s
 
   def save(self):
     # check index and see if part already exist, making it an

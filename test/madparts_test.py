@@ -3,7 +3,7 @@
 
 from nose.tools import *
 from functools import partial
-import copy, shutil, os
+import copy, shutil, os, time
 
 from bs4 import BeautifulSoup
 
@@ -87,11 +87,11 @@ def _import_kicad_package(kicad_s, import_name, expected_coffee):
   finally:
     os.unlink(kicad_lib)
 
-def _export_kicad_old_package(code, expected_name, expected):
+def _export_kicad_old_package(code, expected_name, expected, timestamp):
   (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
   assert interim != None
   exporter = export.kicad_old.Export("dummy.mod")
-  kicad_name = exporter.export_footprint(interim)
+  kicad_name = exporter.export_footprint(interim, timestamp)
   assert kicad_name == expected_name
   assert_multi_line_equal(expected, exporter.get_string())
 
@@ -670,12 +670,22 @@ $EndINDEX
 $MODULE TEST_EMPTY
 Po 0 0 0 15 51C5B8A8 00000000 ~~
 Li TEST_EMPTY
-Cd this is the documentation
+Cd coffee test
 Sc 0
 Op 0 0 0
 $EndMODULE TEST_EMPTY
 $EndLIBRARY
 """
+
+def kicad_old_just_empty(timestamp):
+  return """\
+$MODULE TEST_EMPTY
+Po 0 0 0 15 %x 00000000 ~~
+Li TEST_EMPTY
+Cd coffee test
+Sc 0
+Op 0 0 0
+$EndMODULE TEST_EMPTY""" % (timestamp)
 
 # made by exporting to kicad_new and saving as .mod in kicad
 kicad_old_polygon = """\
@@ -718,10 +728,45 @@ Dl 1.1 -1.2
 Dl 1.1 -0.2
 Dl 0.1 -1.2
 Dl 1.1 -1.2
-DA 0.566987 2.616025 2 1 -300 0.075 21
+DA 0.566987 2.616025 2.0 1.0 -300 0.075 21
 $EndMODULE Polygon
 $EndLIBRARY
 """
+
+def kicad_old_just_polygon(timestamp):
+  return """\
+$MODULE Polygon
+Po 0 0 0 15 %x 00000000 ~~
+Li Polygon
+Cd a simple polygon example
+Sc 0
+Op 0 0 0
+DP 0 0 0 0 5 0.1 24
+Dl 0 -1
+Dl -1 0
+Dl 0 1
+Dl 1 0
+Dl 0 -1
+DA 0.000000 0.000000 1.414214 -1.414214 -1800 0.2 21
+DP 0 0 0 0 5 0.05 24
+Dl 1 0
+Dl 3 -2
+Dl 4 0
+Dl 3 2
+Dl 1 0
+DP 0 0 0 0 5 0.1 21
+Dl 1 4
+Dl -1 4
+Dl -1 3
+Dl 0 2
+Dl 1 4
+DP 0 0 0 0 4 0.05 21
+Dl 1.1 -1.2
+Dl 1.1 -0.2
+Dl 0.1 -1.2
+Dl 1.1 -1.2
+DA 0.566987 2.616025 2.000000 1.000000 -300 0.075 21
+$EndMODULE Polygon""" % (timestamp)
 
 # slightly different from kicad new.. less precision for float
 # always name and value
@@ -776,3 +821,14 @@ def test_kicad_old_import_empty():
 def test_kicad_old_import_polygon():
   expected_code = reimported_coffee_polygon_kicad_old
   _import_kicad_old_package(kicad_old_polygon, 'Polygon', expected_code)
+
+def test_kicad_old_export_empty():
+  timestamp = time.time()
+  coffee = empty_coffee
+  kicad_old = kicad_old_just_empty(timestamp)
+  _export_kicad_old_package(coffee, 'TEST_EMPTY', kicad_old, timestamp)
+
+def test_kicad_old_export_polygon():
+  timestamp = time.time()
+  with open('examples/0aa9e2e2188f4b66a94f7e0f4b6bdded.coffee') as f:
+    _export_kicad_old_package(f.read(), 'Polygon', kicad_old_just_polygon(timestamp), timestamp)
