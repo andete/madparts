@@ -207,11 +207,13 @@ class Export:
       dx = fget(shape, 'dx')
       dy = fget(shape, 'dy')
       lxy = [S('pts')]
-      lxy.append([S('xy'), fc(x - dx/2), fc(y - dy/2)])
-      lxy.append([S('xy'), fc(x - dx/2), fc(y + dy/2)])
-      lxy.append([S('xy'), fc(x + dx/2), fc(y + dy/2)])
-      lxy.append([S('xy'), fc(x + dx/2), fc(y - dy/2)])
-      lxy.append([S('xy'), fc(x - dx/2), fc(y - dy/2)])
+      def add(x1, y1):
+        lxy.append([S('xy'), fc(x1), fc(y1)])
+      add(x - dx/2, y - dy/2)
+      add(x - dx/2, y + dy/2)
+      add(x + dx/2, y + dy/2)
+      add(x + dx/2, y - dy/2)
+      add(x - dx/2, y - dy/2)
       l.append(lxy)
       l.append([S('layer'), S(layer)])
       l.append([S('width'), 0])
