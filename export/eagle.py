@@ -414,7 +414,7 @@ class Import:
       layer = int(text['layer'])
       size = float(text['size'])
       align = 'bottom-left' # eagle default
-      if text.has_key('align'):
+      if text.has_attr('align'):
         align = text['align']
       if align == 'center':
         x = float(text['x'])
@@ -434,7 +434,7 @@ class Import:
         res['value'] = 'VALUE'
       if x != 0: res['x'] = x
       if y != 0: res['y'] = y
-      if text.has_key('size'):
+      if text.has_attr('size'):
         res['dy'] = text['size']
       return res
 
@@ -447,9 +447,9 @@ class Import:
       res['dy'] = float(smd['dy'])
       res['x'] = float(smd['x'])
       res['y'] = float(smd['y'])
-      if smd.has_key('rot'):
+      if smd.has_attr('rot'):
         res['rot'] = int(smd['rot'][1:])
-      if smd.has_key('roundness'):
+      if smd.has_attr('roundness'):
         if smd['roundness'] != '0':
           res['ro'] = smd['roundness']
       return res
@@ -466,7 +466,7 @@ class Import:
       res['y'] = (y1+y2)/2
       res['dx'] = abs(x1-x2)
       res['dy'] = abs(y1-y2)
-      if rect.has_key('rot'):
+      if rect.has_attr('rot'):
         res['rot'] = int(rect['rot'][1:])
       return res
 
@@ -481,7 +481,7 @@ class Import:
       res['w'] = float(wire['width'])
       # assymetry here: an Arc exported will come back as
       # a curved vertex
-      if wire.has_key('curve'):
+      if wire.has_attr('curve'):
         res['curve'] = float(wire['curve'])
       return res
 
@@ -513,14 +513,14 @@ class Import:
       res['y'] = float(pad['y'])
       drill = float(pad['drill'])
       res['drill'] = drill
-      if pad.has_key('diameter'):
+      if pad.has_attr('diameter'):
         dia = float(pad['diameter'])
       else:
         dia = res['drill'] * 1.5
-      if pad.has_key('rot'):
+      if pad.has_attr('rot'):
         res['rot'] = int(pad['rot'][1:])
       shape = 'round'
-      if pad.has_key('shape'):
+      if pad.has_attr('shape'):
         shape = pad['shape']
       if shape == 'round':
         res['shape'] = 'disc'
@@ -563,7 +563,7 @@ class Import:
         vert = { 'shape':'vertex' }
         vert['x1'] = float(e['x'])
         vert['y1'] = float(e['y'])
-        if e.has_key('curve'):
+        if e.has_attr('curve'):
           vert['curve'] = float(e['curve'])
         res['v'].append(vert)
       l = len(res['v'])
