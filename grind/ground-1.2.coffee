@@ -62,6 +62,10 @@ reverse = (x) -> x.reverse()
 
 filter = (list, func) -> x for x in list when func(x)
 
+map = (list, func) ->
+  list.map func
+  list
+
 make_sure_is_array = (unit) ->
   if not (unit instanceof Array)
     [unit]
@@ -492,6 +496,4 @@ remove = (l, i) ->
       j = x.xname
       if j > i
         x.xname = j-1
-  l = filter l, not_named_i
-  l.map renumber
-  l
+  map (filter l, not_named_i), renumber
