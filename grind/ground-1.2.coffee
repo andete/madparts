@@ -237,7 +237,7 @@ rotate90pad = (item) ->
 rotate90_1 = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate90pad item
-  else if item.shape == 'line' or item.shape == 'vertex'
+  if item.shape == 'line' or item.shape == 'vertex'
     ox1 = item.x1
     oy1 = item.y1
     ox2 = item.x2
