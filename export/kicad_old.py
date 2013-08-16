@@ -67,7 +67,7 @@ def list_names(fn):
       if k == '$module':
         name = s[1]
         desc = None
-      elif k == 'cd':
+      elif k == 'cd' and len(s) > 1:
         desc = s[1]
       elif k == '$endmodule':
         l.append((name, desc))
@@ -206,7 +206,7 @@ class Export:
 
     def rect(shape, layer):
       l = []
-      w = shape['w']
+      w = fget(shape,'w')
       l.append("DP 0 0 0 0 %s %s %s" % (5, w, layer))
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
