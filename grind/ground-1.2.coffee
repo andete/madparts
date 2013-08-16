@@ -60,17 +60,22 @@ combine = (a) -> [].concat a...
 
 reverse = (x) -> x.reverse()
 
+filter = (list, func) -> x for x in list when func(x)
+
 make_sure_is_array = (unit) ->
   if not (unit instanceof Array)
     [unit]
   else
     unit
 
+# this assumes the pad comes first in the list
 generate_names = (l, i=0) ->
   for smd in l
     if smd['type'] in ['smd', 'pad']
       smd.name = (i+1)
       i = i + 1
+    else
+      smd.xname = i
   l
 
 ### SECTION 2: type constructors ###
@@ -468,3 +473,25 @@ make_rect = (dx, dy, line_width, type) ->
     l.map ((o) ->
         o.type = type
         o)
+
+remove = (l, i) ->
+  not_named_i = (x) ->
+    if x.name?
+      x.name != i
+    else if x.xname?
+      x.xname != i
+    else
+      true
+  renumber = (x) ->
+    j = 0
+    if x.name?
+      j = x.name
+      if j > i
+        x.name = j-1
+    if x.xname?
+      j = x.xname
+      if j > i
+        x.xname = j-1
+  l = filter l, not_named_i
+  l.map renumber
+  l
