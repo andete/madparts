@@ -126,7 +126,7 @@ class Export:
         l.append("Dr %s %s %s" % (fget(shape, 'drill'), 
           fget(shape, 'drill_dx'), fc(-fget(shape, 'drill_dy'))))
       # Po <x> <y>
-      l.append("Po %s %s" % (shape['x'], fc(-shape['y'])))
+      l.append("Po %s %s" % (fget(shape,'x'), fc(-fget(shape,'y'))))
       # At <Pad type> N <layer mask>
       t = 'STD'
       layer_mask = '00E0FFFF'
@@ -182,8 +182,8 @@ class Export:
         l.append(arc)
       return l
  
-    def hole(shape, layer):
-      layer = type_to_layer_name(shape['type']) # aka 'hole'
+    def hole(shape):
+      layer = type_to_num(shape['type'])
       shape['r'] = shape['drill'] / 2
       return circle(shape, layer)
 
@@ -312,7 +312,7 @@ $EndLIBRARY"""
         pos += 1
       else:
         s = shlex.split(line)
-        if s[0].lower() == "$module" and s[1] == name:
+        if s[0].lower() == "$module" and s[1] == self.name:
           # add new module definition
           l2 += self.data
           # skip old module definition
