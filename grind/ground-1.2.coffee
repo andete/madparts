@@ -284,7 +284,7 @@ rotate270pad = (item) -> rotate90pad (rotate180pad item)
 mirror1_y = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
-  else if item.shape == 'line' or item.shape == 'vertex'
+  if item.shape == 'line' or item.shape == 'vertex'
     item.x1 = -item.x1
     item.x2 = -item.x2
     item.curve = -item.curve
