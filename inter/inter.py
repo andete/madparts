@@ -326,7 +326,7 @@ def _check_dual_alt(r1, r2):
   for (p1, p2) in zip(r1, r2):
     n1 = int(p1['name'])
     n2 = int(p2['name'])
-    print i, n1, n2
+    #print i, n1, n2
     if not (n1 == i and n2 == i+1):
       return False
     i = i + 2
@@ -336,11 +336,11 @@ def _check_dual(orig_pads, horizontal):
   if horizontal:
     split_direction = 'y'
     diff_direction = 'x'
-    print 'dual horizontal?'
+    #print 'dual horizontal?'
   else:
     split_direction = 'x'
     diff_direction = 'y'
-    print 'dual vertical?'
+    #print 'dual vertical?'
   # split in two rows
   (r1, r2) = _split_dual(orig_pads, split_direction)
   # sort pads in 2 rows
@@ -348,21 +348,21 @@ def _check_dual(orig_pads, horizontal):
   r2 = _sort_by_field(r2, diff_direction)
   # check if the distance is uniform
   if not _equidistant(r1, diff_direction):
-    print "r1 not equidistant", diff_direction
+    #print "r1 not equidistant", diff_direction
     return orig_pads
   if not _equidistant(r2, diff_direction):
-    print "r2 not equidistant", diff_direction
+    #print "r2 not equidistant", diff_direction
     return orig_pads
   # check if all coordinates are equal in split_direction
   if not _all_equal(r1, split_direction):
-    print "r1 not all equal", split_direction
+    #print "r1 not all equal", split_direction
     return orig_pads
   if not _all_equal(r2, split_direction):
-    print "r2 not all equal", split_direction
+    #print "r2 not all equal", split_direction
     return orig_pads
   # check that the two rows are one by one equal
   if not _one_by_one_equal(r1, r2, diff_direction):
-    print "r1,r2 not one by one equal", diff_direction
+    #print "r1,r2 not one by one equal", diff_direction
     return orig_pads
   # normal: 1 6 alt: 1 2
   #         2 5      3 4
@@ -431,29 +431,29 @@ def _split_quad(pads):
 def _check_quad(orig_pads):
   n = len(orig_pads)
   if not (n % 4 == 0):
-    print 'quad: n not dividable by 4'
+    #print 'quad: n not dividable by 4'
     return orig_pads
   (left_x, down_y, right_x, up_y) = _split_quad(orig_pads)
   if len(left_x) != n/4 or len(down_y) != n/4 or len(right_x) != n/4 or len(up_y) != n/4:
-    print 'quad: some row is not n/4 length'
+    #print 'quad: some row is not n/4 length'
     return origpads
   dx = right_x[0]['x'] - left_x[0]['x']
   dy = up_y[0]['y'] - down_y[0]['y']
   if f_neq(dx, dy):
-    print 'quad: distance not equal between x and y rows', dx, dy
+    #print 'quad: distance not equal between x and y rows', dx, dy
     return orig_pads
   between = dx   
   if not _equidistant(left_x, 'y'):
-    print 'quad: left row not equidistant'
+    #print 'quad: left row not equidistant'
     return orig_pads
   if not _equidistant(right_x, 'y'):
-    print 'quad: right row not equidistant'
+    #print 'quad: right row not equidistant'
     return orig_pads
   if not _equidistant(up_y, 'x'):
-    print 'quad: up row not equidistant'
+    #print 'quad: up row not equidistant'
     return orig_pads
   if not _equidistant(down_y, 'x'):
-    print 'quad: down row not equidistant'
+    #print 'quad: down row not equidistant'
     return orig_pads
   # we have a quad!
   # create a pad based on the second pad
@@ -476,7 +476,7 @@ def _check_quad(orig_pads):
 
 def _check_sequential(pads):
   for (i, pad) in zip(range(0, len(pads)), pads):
-    print i, pad
+    #print i, pad
     if 'name' in pad:
       if pad['name'] == str(i):
          del pad['name']
@@ -493,9 +493,9 @@ def _find_pad_patterns(pads):
     return pads
 
   (x_diff, _z) = _count_num_values(pads, 'x')
-  print 'x diff ', x_diff
+  #print 'x diff ', x_diff
   (y_diff, _z) = _count_num_values(pads, 'y')
-  print 'y diff ', y_diff
+  #print 'y diff ', y_diff
 
   # possibly single row
   if x_diff == 1 and y_diff == n:
