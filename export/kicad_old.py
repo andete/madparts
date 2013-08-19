@@ -508,7 +508,7 @@ class Import:
         s = shlex.split(lines[i])
         k = s[0].lower()
         if k == "$endpad":
-          print shape
+          #print shape
           return (i+1, shape)
         else:
           {
