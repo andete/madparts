@@ -83,6 +83,8 @@ class Export:
       timestamp = time.time()
     meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
+    # make name kicad compatible
+    name = re.sub(' ','_',name)
     self.name = name
     idx = eget(meta, 'id', 'Id not found')
     desc = oget(meta, 'desc', '')
