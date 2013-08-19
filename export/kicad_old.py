@@ -204,8 +204,8 @@ class Export:
       w = fget(shape, 'w', 0.1)
       x = fget(shape, 'x')
       y = fc(-fget(shape, 'y'))
-      # T0 -7 -3 60 60 0 10 N V  21 "XT"
-      line = "%s %s %s %s %s 0 %s N %s %s \"%s\"" % (t, x, y, dy, dy, w, visible, layer, shape['value'])
+      # T0 -7 -3 60 60 0 10 N V 21 N "XT"
+      line = "%s %s %s %s %s 0 %s N %s %s N \"%s\"" % (t, x, y, dy, dy, w, visible, layer, shape['value'])
       return [line]
 
     def rect(shape, layer):
