@@ -313,7 +313,7 @@ class Import:
              desc = x['desc']
              break
       l.append((name, desc))
-      return l
+    return l
 
   def list(self):
     for f in self.files:
