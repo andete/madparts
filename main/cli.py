@@ -37,7 +37,7 @@ def export_footprint(remaining):
 def import_footprint(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' import')
   parser.add_argument('library', help='library file')
-  parser.add_argument('footprint', help='footprint name')
+  parser.add_argument('footprint', help='footprint name', nargs='?')
   args = parser.parse_args(remaining)
   try:
     importer = detect.make_importer(args.library)
@@ -45,7 +45,13 @@ def import_footprint(remaining):
     print >> sys.stderr, str(ex)
     return 1
   names = map(lambda (a,_): a, importer.list_names())
-  if not args.footprint in names:
+  if args.footprint is None:
+    if len(names) == 1:
+      args.footprint = names[0]
+    else:
+      print >> sys.stderr, "Please specify the footprint name as more then one were found in %s." % (args.library)
+      return 1
+  elif not args.footprint in names:
     print >> sys.stderr, "Footprint %s not found in %s." % (args.footprint, args.library)
     return 1
   interim = inter.import_footprint(importer, args.footprint) 
