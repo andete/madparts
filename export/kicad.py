@@ -71,7 +71,7 @@ class Export:
     parent_idx = oget(meta, 'parent', None)
     l = [
       S('module'),
-      S(name),
+      name,
       [S('layer'), S('F.Cu')],
       [S('descr'), descr],
     ]
