@@ -123,7 +123,7 @@ def preprocess_coffee(code):
       return str(i*25.4)
     else:
       return m.group(0)
-  return re.sub('([-+]?[0-9]*\.?[0-9]+)([im][ni]l?)', repl, code)
+  return re.sub('([-+]?[0-9]*\.?[0-9]+)([mi][ni]l?)', repl, code)
 
 def compile_coffee(code):
   try:
