@@ -11,6 +11,7 @@ import shlex
 import uuid
 import math
 import time
+import re
 
 import mutil.mutil as mutil
 eget = mutil.eget
