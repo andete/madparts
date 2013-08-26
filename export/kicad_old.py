@@ -109,7 +109,8 @@ class Export:
     def pad(shape, smd=False):
       l = ['$PAD']
       # Sh "<pad name>" shape Xsize Ysize Xdelta Ydelta Orientation
-      if shape['shape'] == 'disc':
+      # octagons are not supported by kicad
+      if shape['shape'] == 'disc' or shape['shape'] == 'octagon':
         sh = 'C'
         dx = shape['r']*2
         dy = dx
@@ -185,6 +186,18 @@ class Export:
         l.append(arc)
       return l
  
+    def disc(shape, layer):
+      l = []
+      x = fget(shape, 'x')
+      y = -fget(shape, 'y')
+      r = fget(shape, 'r')
+      rad = r/2
+      ex = x+(rad/math.sqrt(2))
+      ey = y+(rad/math.sqrt(2))
+      circle = "DC %s %s %s %s %s %s" % (x, fc(y), fc(ex), fc(ey), rad, layer)
+      l.append(circle)
+      return l
+
     def hole(shape):
       layer = type_to_num(shape['type'])
       shape['r'] = shape['drill'] / 2
