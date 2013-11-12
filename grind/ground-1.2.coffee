@@ -244,7 +244,7 @@ rotate90pad = (item) ->
   item
 
 rotate90_1 = (item) ->
-  if item.type == 'smd' or item.type == 'pad'
+  if item.type == 'smd' or item.type == 'pad' or item.shape == 'rect'
     rotate90pad item
   if item.shape == 'line' or item.shape == 'vertex'
     ox1 = item.x1
@@ -447,7 +447,7 @@ quad = (unit, num, distance, between) ->
   n = Math.floor(num / 4)
   b = between / 2
   s1 = single unit, n, distance
-  s1 = s1.map ((item) -> adjust_x (rotate180pad item), -between/2)
+  s1 = s1.map ((item) -> adjust_x (rotate180 item), -between/2)
   s2 = s1.map ((item) -> rotate90 (clone item))
   s3 = s2.map ((item) -> rotate90 (clone item))
   s4 = s3.map ((item) -> rotate90 (clone item))
