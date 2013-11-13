@@ -122,9 +122,9 @@ class Export:
         if 'ro' in shape:
           if shape['ro'] >= 50:
             sh = 'O'
-      
+      rot = fget(shape, 'rot')*10
       l.append("Sh \"%s\" %s %s %s %s %s %s" 
-               % (shape['name'], sh, dx, dy, 0, 0, 0))
+               % (shape['name'], sh, dx, dy, 0, 0, rot))
       # Dr <Pad drill> Xoffset Yoffset (round hole)
       if not smd:
         l.append("Dr %s %s %s" % (fget(shape, 'drill'), 
@@ -224,11 +224,14 @@ class Export:
     def rect(shape, layer):
       l = []
       w = fget(shape,'w')
+      rot = abs(fget(shape, 'rot'))
       l.append("DP 0 0 0 0 %s %s %s" % (5, w, layer))
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
       dx = fget(shape, 'dx')
       dy = fget(shape, 'dy')
+      if rot == 90 or rot == 270:
+        (dx,dy) = (dy,dx)
       def add(x1, y1):
         l.append("Dl %f %f" % (fc(x1), fc(y1)))
       add(x - dx/2, y - dy/2)
