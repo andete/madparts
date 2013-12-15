@@ -1,8 +1,14 @@
+madparts (1.2.1-1) unstable; urgency=low
+
+  * New package for 1.2.1 release
+
+ -- Joost Yervante Damad <joost@damad.be>  Sun, 15 Dec 2013 10:25:09 +0100
+
 madparts (1.2-1) unstable; urgency=low
 
   * New package for 1.2 release.
 
- -- Joost Yervante Damad <andete@debian.org>  Mon, 19 Aug 2013 15:14:55 +0200
+ -- Joost Yervante Damad <joost@damad.be>  Mon, 19 Aug 2013 15:14:55 +0200
 
 madparts (1.1-1) unstable; urgency=low
 

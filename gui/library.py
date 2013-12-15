@@ -101,7 +101,7 @@ class Explorer(QtGui.QTreeView):
     self.active_library = None
     if first_foot_lib is not None:
       #print "selected", first_foot_lib.name
-      if first_foot_lib.select_first_foot():
+#      if first_foot_lib.select_first_foot():
         #print "selected", first_foot_meta.id
         self.active_footprint = first_foot_meta
         self.active_library = first_foot_lib.coffee_lib
@@ -127,7 +127,8 @@ class Explorer(QtGui.QTreeView):
     self._footprint_selected()
     with open(fn) as f:
       self.parent.update_text(f.read())
-    self.parent.set_code_textedit_readonly(meta.readonly)
+    #self.parent.set_code_textedit_readonly(meta.readonly)
+
 
   def _footprint_selected(self):
     for action in self.actions():

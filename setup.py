@@ -3,7 +3,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-VERSION='1.2'
+VERSION='1.2.1'
 
 import glob, sys, platform
 

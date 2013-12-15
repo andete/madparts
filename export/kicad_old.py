@@ -109,7 +109,8 @@ class Export:
     def pad(shape, smd=False):
       l = ['$PAD']
       # Sh "<pad name>" shape Xsize Ysize Xdelta Ydelta Orientation
-      if shape['shape'] == 'disc':
+      # octagons are not supported by kicad
+      if shape['shape'] == 'disc' or shape['shape'] == 'octagon':
         sh = 'C'
         dx = shape['r']*2
         dy = dx
@@ -121,9 +122,9 @@ class Export:
         if 'ro' in shape:
           if shape['ro'] >= 50:
             sh = 'O'
-      
+      rot = fget(shape, 'rot')*10
       l.append("Sh \"%s\" %s %s %s %s %s %s" 
-               % (shape['name'], sh, dx, dy, 0, 0, 0))
+               % (shape['name'], sh, dx, dy, 0, 0, rot))
       # Dr <Pad drill> Xoffset Yoffset (round hole)
       if not smd:
         l.append("Dr %s %s %s" % (fget(shape, 'drill'), 
@@ -185,6 +186,18 @@ class Export:
         l.append(arc)
       return l
  
+    def disc(shape, layer):
+      l = []
+      x = fget(shape, 'x')
+      y = -fget(shape, 'y')
+      r = fget(shape, 'r')
+      rad = r/2
+      ex = x+(rad/math.sqrt(2))
+      ey = y+(rad/math.sqrt(2))
+      circle = "DC %s %s %s %s %s %s" % (x, fc(y), fc(ex), fc(ey), rad, layer)
+      l.append(circle)
+      return l
+
     def hole(shape):
       layer = type_to_num(shape['type'])
       shape['r'] = shape['drill'] / 2
@@ -211,11 +224,14 @@ class Export:
     def rect(shape, layer):
       l = []
       w = fget(shape,'w')
+      rot = abs(fget(shape, 'rot'))
       l.append("DP 0 0 0 0 %s %s %s" % (5, w, layer))
       x = fget(shape, 'x')
       y = -fget(shape, 'y')
       dx = fget(shape, 'dx')
       dy = fget(shape, 'dy')
+      if rot == 90 or rot == 270:
+        (dx,dy) = (dy,dx)
       def add(x1, y1):
         l.append("Dl %f %f" % (fc(x1), fc(y1)))
       add(x - dx/2, y - dy/2)
