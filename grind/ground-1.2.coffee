@@ -305,6 +305,7 @@ mirror_y = (item) ->
 mirror1_x = (item) ->
   if item.type == 'smd' or item.type == 'pad'
     rotate180pad item
+    item.y = -item.y
   else if item.shape == 'line' or item.shape == 'vertex'
     item.y1 = -item.y1
     item.y2 = -item.y2
