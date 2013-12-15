@@ -3,7 +3,6 @@
 
 from ctypes import util
 
-from PySide import QtGui, QtCore
 from PySide.QtOpenGL import *
 
 from OpenGL.GL import *
@@ -12,10 +11,11 @@ import OpenGL.arrays.vbo as vbo
 import numpy as np
 import math, sys
 import os, os.path, time
+import math
+import os, os.path
 
 from mutil.mutil import *
 from defaultsettings import color_schemes
-from inter import inter
 
 import glFreeType
 
@@ -44,17 +44,21 @@ class GLDraw:
     self.circle_inner_loc = self.circle_shader.uniformLocation("inner")
     self.circle_drill_loc = self.circle_shader.uniformLocation("drill")
     self.circle_drill_offset_loc = self.circle_shader.uniformLocation("drill_offset")
+    self.circle_angles_loc = self.circle_shader.uniformLocation("angles")
+
     self.rect_shader = make_shader("rect")
     self.rect_size_loc = self.rect_shader.uniformLocation("size")
     self.rect_move_loc = self.rect_shader.uniformLocation("move")
     self.rect_round_loc = self.rect_shader.uniformLocation("round")
     self.rect_drill_loc = self.rect_shader.uniformLocation("drill")
     self.rect_drill_offset_loc = self.rect_shader.uniformLocation("drill_offset")
+
     self.octagon_shader = make_shader("octagon")
     self.octagon_size_loc = self.octagon_shader.uniformLocation("size")
     self.octagon_move_loc = self.octagon_shader.uniformLocation("move")
     self.octagon_drill_loc = self.octagon_shader.uniformLocation("drill")
     self.octagon_drill_offset_loc = self.octagon_shader.uniformLocation("drill_offset")
+
     self.hole_shader = make_shader("hole")
     self.hole_move_loc = self.hole_shader.uniformLocation("move")
     self.hole_radius_loc = self.hole_shader.uniformLocation("radius")
@@ -79,7 +83,8 @@ class GLDraw:
       self.set_color(shape['type'])
     else:
       self.set_color('silk')
-    l = len(s)
+    if (len(s) == 0):
+      return # Do nothing if there's no text
     dxp = dx * self.zoom() # dx in pixels
     dyp = dy * self.zoom() # dy in pixels
     (fdx, fdy) = self.font.ft.getsize(s)
@@ -101,7 +106,7 @@ class GLDraw:
     self._txt(shape, dx, dy, x, y)
     return labels
 
-  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
+  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0, a1 = 0.0, a2 = 360.0):
     self.circle_shader.bind()
     self.circle_shader.setUniformValue(self.circle_move_loc, x, y)
     self.square_data_vbo.bind()
@@ -111,6 +116,9 @@ class GLDraw:
     self.circle_shader.setUniformValue(self.circle_inner_loc, irx, iry)
     self.circle_shader.setUniformValue(self.circle_drill_loc, drill, 0.0)
     self.circle_shader.setUniformValue(self.circle_drill_offset_loc, drill_dx, drill_dy)
+    a1 = (a1 % 361) * math.pi / 180.0
+    a2 = (a2 % 361) * math.pi / 180.0
+    self.circle_shader.setUniformValue(self.circle_angles_loc, a1, a2)
     glDrawArrays(GL_QUADS, 0, 4)
     self.circle_shader.release() 
 
@@ -142,6 +150,14 @@ class GLDraw:
       labels.append(lambda: self._txt(shape, max(rx*1.5, drill), max(ry*1.5, drill), x, y, True))
     return labels
 
+  def hole(self, shape, labels):
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    drill = fget(shape,'drill')
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
+    return labels
+
   def circle(self, shape, labels):
     r = fget(shape, 'r')
     rx = fget(shape, 'rx', r)
@@ -155,9 +171,18 @@ class GLDraw:
     iry = fget(shape, 'iry', ry)
     ry = ry + w/2
     iry = iry - w/2
-    self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry)
+    a1 = fget(shape, 'a1', 0.0)
+    a2 = fget(shape, 'a2', 360.0)
+    self._disc(x, y, rx, ry, 0.0, 0.0, 0.0, irx, iry, a1, a2)
     if 'name' in shape:
       labels.append(lambda: self._txt(shape, rx*1.5, ry*1.5, x, y, True))
+    if abs(a1 - a2) > 0.25:
+      x1 = r * math.cos(a1*math.pi/180)
+      y1 = r * math.sin(a1*math.pi/180)
+      x2 = r * math.cos(a2*math.pi/180)
+      y2 = r * math.sin(a2*math.pi/180)
+      self._disc(x1, y1, w/2, w/2, 0.0, 0.0, 0.0)
+      self._disc(x2, y2, w/2, w/2, 0.0, 0.0, 0.0)
     return labels
 
   def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
@@ -227,29 +252,45 @@ class GLDraw:
       labels.append(lambda: self._txt(shape ,m, m, x, y, True))
     return labels
 
-  def line(self, shape, labels):
+  def vertex(self, shape, labels):
     x1 = fget(shape, 'x1')
     y1 = fget(shape, 'y1')
     x2 = fget(shape, 'x2')
     y2 = fget(shape, 'y2')
     w = fget(shape, 'w')
+    curve = fget(shape, 'curve', 0.0)
+    angle = curve*math.pi/180.0
     r = w/2
 
     dx = x2-x1
     dy = y2-y1
     l = math.sqrt(dx*dx + dy*dy)
-    px = dy * r / l # trigoniometrics
-    py = dx * r / l # trigoniometrics
-    glBegin(GL_QUADS)
-    glVertex3f(x1-px, y1+py, 0)
-    glVertex3f(x1+px, y1-py, 0)
-    glVertex3f(x2+px, y2-py, 0)
-    glVertex3f(x2-px, y2+py, 0)
-    glEnd()
+    if l == 0.0:
+      return labels
+    if angle == 0.0:
+      px = dy * r / l # trigoniometrics
+      py = dx * r / l # trigoniometrics
+      glBegin(GL_QUADS)
+      glVertex3f(x1-px, y1+py, 0)
+      glVertex3f(x1+px, y1-py, 0)
+      glVertex3f(x2+px, y2-py, 0)
+      glVertex3f(x2-px, y2+py, 0)
+      glEnd()
+    else:
+      ((x0, y0), rc, a1, a2) = calc_center_r_a1_a2((x1,y1),(x2,y2),angle)
+      self._disc(x0, y0, rc+r, rc+r, 0.0, 0.0, 0.0, rc-r, rc-r, a1, a2)
     self._disc(x1, y1, r, r, 0.0, 0.0, 0.0)
     self._disc(x2, y2, r, r, 0.0, 0.0, 0.0)
     return labels
  
+  def polygon(self, shape, labels):
+    w = fget(shape, 'w')
+    vert= shape['v']
+    for x in vert:
+      x['w'] = w
+      labels = self.vertex(x, labels)
+    return labels
+
   def skip(self, shape, labels):
     return labels
    
@@ -262,9 +303,12 @@ class GLDraw:
           'circle': self.circle,
           'disc': self.disc,
           'label': self.label,
-          'line': self.line,
+          'line': self.vertex,
+          'vertex': self.vertex,
           'octagon': self.octagon,
           'rect': self.rect,
+          'polygon': self.polygon,
+          'hole': self.hole,
         }
         labels = dispatch.get(shape['shape'], self.skip)(shape, labels)
     for draw_label in labels:

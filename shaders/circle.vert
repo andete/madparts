@@ -9,6 +9,7 @@ uniform vec2 radius; // radius
 uniform vec2 inner;  // inner radius
 uniform vec2 drill;  // drill diameter
 uniform vec2 drill_offset;
+uniform vec2 angles;
 
 // output
 varying vec2 pos2;    // adjusted position
@@ -16,6 +17,7 @@ varying vec2 radius2; // radius
 varying vec2 inner2;  // inner radius
 varying float drill2; // drill diameter
 varying vec2 drill_offset2;
+varying vec2 angles2;
 
 void main() {
   gl_FrontColor = gl_Color;
@@ -31,4 +33,5 @@ void main() {
   drill2 = drill.x;
   drill_offset2 = drill_offset;
   inner2 = inner;
+  angles2 = angles;
 }

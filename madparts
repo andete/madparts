@@ -3,7 +3,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import sys, string, os
+import sys, os
 
 if __name__ == '__main__':
     # trick needed to make OpenGL work on win32

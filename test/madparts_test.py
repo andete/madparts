@@ -3,7 +3,7 @@
 
 from nose.tools import *
 from functools import partial
-import copy, shutil, os
+import copy, shutil, os, time
 
 from bs4 import BeautifulSoup
 
@@ -11,6 +11,8 @@ import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
 from inter import inter
 import export.eagle
+import export.kicad
+import export.kicad_old
 
 assert_multi_line_equal.im_class.maxDiff = None
 
@@ -35,13 +37,14 @@ def _export_eagle_package(code, expected_name, expected):
   eagle_name = exporter.export_footprint(interim)
   assert eagle_name == expected_name
   data = exporter.get_pretty_footprint(eagle_name)
+  # print data
   assert_multi_line_equal(expected, data)
-  #print code, expected
+  # print code, expected
   return data
 
 def _assert_equal_no_meta(expected, actual):
-  a2 = '\n'.join(filter(lambda l: l[0] != '#', actual.splitlines()))
-  e2 = '\n'.join(filter(lambda l: l[0] != '#', expected.splitlines()))
+  a2 = '\n'.join(filter(lambda l: len(l) > 0 and l[0] != '#', actual.splitlines()))
+  e2 = '\n'.join(filter(lambda l: len(l) > 0 and l[0] != '#', expected.splitlines()))
   assert_multi_line_equal(e2, a2)
 
 def _import_eagle_package(eagle_package_xml, import_name, expected):
@@ -57,10 +60,53 @@ def _import_eagle_package(eagle_package_xml, import_name, expected):
       f.write(str(importer.soup))
     importer = export.eagle.Import(eagle_lib)
     interim = inter.import_footprint(importer, import_name) 
+    assert interim != None
     coffee = generatesimple.generate_coffee(interim)
+    # print coffee
     _assert_equal_no_meta(expected, coffee)
   finally:
     os.unlink(eagle_lib)
+
+def _export_kicad_package(code, expected_name, expected):
+  (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
+  assert interim != None
+  exporter = export.kicad.Export("dummy.kicad_mod")
+  kicad_name = exporter.export_footprint(interim)
+  assert kicad_name == expected_name
+  assert_multi_line_equal(expected, exporter.get_string())
+
+def _import_kicad_package(kicad_s, import_name, expected_coffee):
+  try:
+    kicad_lib = 'test/foo.kicad_mod'
+    with open(kicad_lib, "w+") as f:
+      f.write(kicad_s)
+    importer = export.kicad.Import(kicad_lib)
+    interim = inter.import_footprint(importer, import_name) 
+    coffee = generatesimple.generate_coffee(interim)
+    _assert_equal_no_meta(expected_coffee, coffee)
+  finally:
+    os.unlink(kicad_lib)
+
+def _export_kicad_old_package(code, expected_name, expected, timestamp):
+  (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
+  assert interim != None
+  exporter = export.kicad_old.Export("dummy.mod")
+  kicad_name = exporter.export_footprint(interim, timestamp)
+  assert kicad_name == expected_name
+  assert_multi_line_equal(expected, exporter.get_string())
+
+def _import_kicad_old_package(kicad_s, import_name, expected_coffee):
+  try:
+    kicad_lib = 'test/foo.mod'
+    with open(kicad_lib, "w+") as f:
+      f.write(kicad_s)
+    importer = export.kicad_old.Import(kicad_lib)
+    interim = inter.import_footprint(importer, import_name) 
+    coffee = generatesimple.generate_coffee(interim)
+    # print coffee
+    _assert_equal_no_meta(expected_coffee, coffee)
+  finally:
+    os.unlink(kicad_lib)
 
 def test_export_eagle_full_lib():
    code = """\
@@ -415,6 +461,129 @@ def test_eagle_export_one():
       d2 = copy.deepcopy(d)
       yield _eagle_do, d2, mod
 
+reimported_coffee_polygon = """\
+footprint = () ->
+  silk1 = new Line 0.2
+  silk1.x1 = 1.41421356237
+  silk1.y1 = 1.41421356237
+  silk1.x2 = -1.41421356237
+  silk1.y2 = -1.41421356237
+  silk1.curve = 180.0
+  silk2 = new Polygon 0.1
+  silk2.start 1.0, -4.0
+  silk2.add -1.0, -4.0
+  silk2.add -1.0, -3.0
+  silk2.add 0.0, -2.0, -90.0
+  silk2.end -70.0
+  silk3 = new Polygon 0.05
+  silk3.start 1.1, 1.2
+  silk3.add 1.1, 0.2
+  silk3.add 0.1, 1.2
+  silk3.end 0.0
+  silk4 = new Line 0.075
+  silk4.x1 = 2.0
+  silk4.y1 = -1.0
+  silk4.x2 = 1.0
+  silk4.y2 = -0.5
+  silk4.curve = 30.0
+  docu1 = new Polygon 0.1
+  docu1.start 0.0, 1.0
+  docu1.add -1.0, 0.0, 180.0
+  docu1.add 0.0, -1.0, 180.0
+  docu1.add 1.0, 0.0, -10.0
+  docu1.end -10.0
+  docu1.type = 'docu'
+  docu2 = new Polygon 0.05
+  docu2.start 1.0, 0.0
+  docu2.add 3.0, 2.0, 40.0
+  docu2.add 4.0, 0.0, -45.0
+  docu2.add 3.0, -2.0, -40.0
+  docu2.end 40.0
+  docu2.type = 'docu'
+  combine [docu1,docu2,silk1,silk2,silk3,silk4]
+"""
+
+reimported_coffee_polygon_kicad = """\
+footprint = () ->
+  silk1 = new Line 0.2
+  silk1.x1 = 1.41421356237
+  silk1.y1 = 1.41421356237
+  silk1.x2 = -1.41421356237
+  silk1.y2 = -1.41421356237
+  silk1.curve = 180.0
+  silk2 = new Polygon 0.1
+  silk2.start 1, -4
+  silk2.add -1, -4
+  silk2.add -1, -3
+  silk2.add 0.0, -2
+  silk2.end 0.0
+  silk3 = new Polygon 0.05
+  silk3.start 1.1, 1.2
+  silk3.add 1.1, 0.2
+  silk3.add 0.1, 1.2
+  silk3.end 0.0
+  silk4 = new Line 0.075
+  silk4.x1 = 2.0
+  silk4.y1 = -1.0
+  silk4.x2 = 1.0
+  silk4.y2 = -0.5
+  silk4.curve = 30.0
+  docu1 = new Polygon 0.1
+  docu1.start 0, 1
+  docu1.add -1, 0
+  docu1.add 0, -1
+  docu1.add 1, 0
+  docu1.end 0.0
+  docu1.type = 'docu'
+  docu2 = new Polygon 0.05
+  docu2.start 1, 0
+  docu2.add 3, 2
+  docu2.add 4, 0
+  docu2.add 3, -2
+  docu2.end 0.0
+  docu2.type = 'docu'
+  combine [docu1,docu2,silk1,silk2,silk3,silk4]
+"""
+
+eagle_polygon = """\
+<package name="Polygon">
+ <description>
+  a simple polygon example
+&lt;br/&gt;&lt;br/&gt;
+Generated by 'madparts'.&lt;br/&gt;
+Id: 0aa9e2e2188f4b66a94f7e0f4b6bdded
+ </description>
+ <polygon layer="51" width="0.1">
+  <vertex curve="180.0" x="0.0" y="1.0"/>
+  <vertex curve="180.0" x="-1.0" y="0.0"/>
+  <vertex curve="-10.0" x="0.0" y="-1.0"/>
+  <vertex curve="-10.0" x="1.0" y="0.0"/>
+ </polygon>
+ <wire curve="180.0" layer="21" width="0.2" x1="1.41421356237" x2="-1.41421356237" y1="1.41421356237" y2="-1.41421356237"/>
+ <polygon layer="51" width="0.05">
+  <vertex curve="40.0" x="1.0" y="0.0"/>
+  <vertex curve="-45.0" x="3.0" y="2.0"/>
+  <vertex curve="-40.0" x="4.0" y="0.0"/>
+  <vertex curve="40.0" x="3.0" y="-2.0"/>
+ </polygon>
+ <polygon layer="21" width="0.1">
+  <vertex x="1.0" y="-4.0"/>
+  <vertex x="-1.0" y="-4.0"/>
+  <vertex curve="-90.0" x="-1.0" y="-3.0"/>
+  <vertex curve="-70.0" x="0.0" y="-2.0"/>
+ </polygon>
+ <polygon layer="21" width="0.05">
+  <vertex x="1.1" y="1.2"/>
+  <vertex x="1.1" y="0.2"/>
+  <vertex x="0.1" y="1.2"/>
+ </polygon>
+ <wire curve="30.0" layer="21" width="0.075" x1="2.0" x2="1.0" y1="-1.0" y2="-0.5"/>
+</package>"""
+def test_eagle_export_polygon():
+  with open('examples/0aa9e2e2188f4b66a94f7e0f4b6bdded.coffee') as f:
+    hl_coffee = f.read()
+  _export_eagle_package(hl_coffee, 'Polygon', eagle_polygon)
+
 def test_eagle_import_one():
   def _eagle_do(d, mod):
     (code_list, item_list) = mod(*d)
@@ -443,21 +612,223 @@ def test_eagle_import_one():
       d2 = copy.deepcopy(d)
       yield _eagle_do, d2, mod
 
-def test_eagle_export_empty():
-  coffee = """\
+def test_eagle_import_polygon():
+  expected_code = reimported_coffee_polygon
+  _import_eagle_package(eagle_polygon, 'Polygon', expected_code)
+
+empty_coffee = """\
 #format 1.1
 #name TEST_EMPTY
 #id 708e13cc5f4e43f7833af53070ba5078
-#desc eagle test
-footprint = () -> []
+#desc coffee test
+footprint = () ->
+  combine []
 """
+
+def test_eagle_export_empty():
+  coffee = empty_coffee
   eagle = """\
 <package name="TEST_EMPTY">
  <description>
-  eagle test
+  coffee test
 &lt;br/&gt;&lt;br/&gt;
 Generated by 'madparts'.&lt;br/&gt;
 Id: 708e13cc5f4e43f7833af53070ba5078
  </description>
 </package>"""
   _export_eagle_package(coffee, 'TEST_EMPTY', eagle)
+
+def test_kicad_export_empty():
+  coffee = empty_coffee
+  kicad = "(module TEST_EMPTY (layer F.Cu) (descr \"coffee test\"))"
+  _export_kicad_package(coffee, 'TEST_EMPTY', kicad)
+
+kicad_empty = """(module TEST_EMPTY (layer F.Cu) (descr "coffee test"))"""
+
+def test_kicad_import_empty():
+  _import_kicad_package(kicad_empty, "TEST_EMPTY", empty_coffee)
+
+kicad_polygon = """\
+(module Polygon (layer F.Cu) (descr "a simple polygon example") (fp_poly (pts (xy 0 -1) (xy -1 0) (xy 0 1) (xy 1 0) (xy 0 -1)) (layer Dwgs.User) (width 0.1)) (fp_arc (start 0.0 0.0) (end 1.41421356237 -1.41421356237) (angle -180.0) (layer F.SilkS) (width 0.2)) (fp_poly (pts (xy 1 0) (xy 3 -2) (xy 4 0) (xy 3 2) (xy 1 0)) (layer Dwgs.User) (width 0.05)) (fp_poly (pts (xy 1 4) (xy -1 4) (xy -1 3) (xy 0.0 2) (xy 1 4)) (layer F.SilkS) (width 0.1)) (fp_poly (pts (xy 1.1 -1.2) (xy 1.1 -0.2) (xy 0.1 -1.2) (xy 1.1 -1.2)) (layer F.SilkS) (width 0.05)) (fp_arc (start 0.566987298108 2.61602540378) (end 2.0 1.0) (angle -30.0) (layer F.SilkS) (width 0.075)))\
+"""
+
+def test_kicad_export_polygon():
+  with open('examples/0aa9e2e2188f4b66a94f7e0f4b6bdded.coffee') as f:
+    _export_kicad_package(f.read(), 'Polygon', kicad_polygon)
+
+def test_kicad_import_polygon():
+  expected_code = reimported_coffee_polygon_kicad
+  _import_kicad_package(kicad_polygon, 'Polygon', expected_code)
+
+kicad_old_empty = """\
+PCBNEW-LibModule-V1  Sat 22 Jun 2013 04:47:58 PM CEST
+# encoding utf-8
+Units mm
+$INDEX
+TEST_EMPTY
+$EndINDEX
+$MODULE TEST_EMPTY
+Po 0 0 0 15 51C5B8A8 00000000 ~~
+Li TEST_EMPTY
+Cd coffee test
+Sc 0
+Op 0 0 0
+$EndMODULE TEST_EMPTY
+$EndLIBRARY
+"""
+
+def kicad_old_just_empty(timestamp):
+  return """\
+$MODULE TEST_EMPTY
+Po 0 0 0 15 %x 00000000 ~~
+Li TEST_EMPTY
+Cd coffee test
+Sc 0
+Op 0 0 0
+$EndMODULE TEST_EMPTY""" % (timestamp)
+
+# made by exporting to kicad_new and saving as .mod in kicad
+kicad_old_polygon = """\
+PCBNEW-LibModule-V1  Sun 28 Jul 2013 12:02:51 PM CEST
+# encoding utf-8
+Units mm
+$INDEX
+Polygon
+$EndINDEX
+$MODULE Polygon
+Po 0 0 0 15 51F4CCE7 00000000 ~~
+Li Polygon
+Cd a simple polygon example
+Sc 0
+AR 
+Op 0 0 0
+T0 0 0 1.524 1.524 0 0.15 N V 21 N ""
+T1 0 0 1.524 1.524 0 0.15 N V 21 N ""
+DP 0 0 0 0 5 0.1 24
+Dl 0 -1
+Dl -1 0
+Dl 0 1
+Dl 1 0
+Dl 0 -1
+DA 0 0 1.414214 -1.414214 -1800 0.2 21
+DP 0 0 0 0 5 0.05 24
+Dl 1 0
+Dl 3 -2
+Dl 4 0
+Dl 3 2
+Dl 1 0
+DP 0 0 0 0 5 0.1 21
+Dl 1 4
+Dl -1 4
+Dl -1 3
+Dl 0 2
+Dl 1 4
+DP 0 0 0 0 4 0.05 21
+Dl 1.1 -1.2
+Dl 1.1 -0.2
+Dl 0.1 -1.2
+Dl 1.1 -1.2
+DA 0.566987 2.616025 2.0 1.0 -300 0.075 21
+$EndMODULE Polygon
+$EndLIBRARY
+"""
+
+def kicad_old_just_polygon(timestamp):
+  return """\
+$MODULE Polygon
+Po 0 0 0 15 %x 00000000 ~~
+Li Polygon
+Cd a simple polygon example
+Sc 0
+Op 0 0 0
+DP 0 0 0 0 5 0.1 24
+Dl 0 -1
+Dl -1 0
+Dl 0 1
+Dl 1 0
+Dl 0 -1
+DA 0.000000 0.000000 1.414214 -1.414214 -1800 0.2 21
+DP 0 0 0 0 5 0.05 24
+Dl 1 0
+Dl 3 -2
+Dl 4 0
+Dl 3 2
+Dl 1 0
+DP 0 0 0 0 5 0.1 21
+Dl 1 4
+Dl -1 4
+Dl -1 3
+Dl 0 2
+Dl 1 4
+DP 0 0 0 0 4 0.05 21
+Dl 1.1 -1.2
+Dl 1.1 -0.2
+Dl 0.1 -1.2
+Dl 1.1 -1.2
+DA 0.566987 2.616025 2.000000 1.000000 -300 0.075 21
+$EndMODULE Polygon""" % (timestamp)
+
+# slightly different from kicad new.. less precision for float
+# always name and value
+reimported_coffee_polygon_kicad_old = """\
+footprint = () ->
+  name1 = new Name 0.0
+  value2 = new Value 0.0
+  silk3 = new Line 0.2
+  silk3.x1 = 1.414214
+  silk3.y1 = 1.414214
+  silk3.x2 = -1.414214
+  silk3.y2 = -1.414214
+  silk3.curve = 180.0
+  silk4 = new Polygon 0.1
+  silk4.start 1.0, -4.0
+  silk4.add -1.0, -4.0
+  silk4.add -1.0, -3.0
+  silk4.add 0.0, -2.0
+  silk4.end 0.0
+  silk5 = new Polygon 0.05
+  silk5.start 1.1, 1.2
+  silk5.add 1.1, 0.2
+  silk5.add 0.1, 1.2
+  silk5.end 0.0
+  silk6 = new Line 0.075
+  silk6.x1 = 2.0
+  silk6.y1 = -1.0
+  silk6.x2 = 1.00000016195
+  silk6.y2 = -0.499999796849
+  silk6.curve = 30.0
+  docu1 = new Polygon 0.1
+  docu1.start 0.0, 1.0
+  docu1.add -1.0, 0.0
+  docu1.add 0.0, -1.0
+  docu1.add 1.0, 0.0
+  docu1.end 0.0
+  docu1.type = 'docu'
+  docu2 = new Polygon 0.05
+  docu2.start 1.0, 0.0
+  docu2.add 3.0, 2.0
+  docu2.add 4.0, 0.0
+  docu2.add 3.0, -2.0
+  docu2.end 0.0
+  docu2.type = 'docu'
+  combine [docu1,docu2,name1,silk3,silk4,silk5,silk6,value2]
+"""
+
+
+def test_kicad_old_import_empty():
+  _import_kicad_old_package(kicad_old_empty, "TEST_EMPTY", empty_coffee)
+
+def test_kicad_old_import_polygon():
+  expected_code = reimported_coffee_polygon_kicad_old
+  _import_kicad_old_package(kicad_old_polygon, 'Polygon', expected_code)
+
+def test_kicad_old_export_empty():
+  timestamp = time.time()
+  coffee = empty_coffee
+  kicad_old = kicad_old_just_empty(timestamp)
+  _export_kicad_old_package(coffee, 'TEST_EMPTY', kicad_old, timestamp)
+
+def test_kicad_old_export_polygon():
+  timestamp = time.time()
+  with open('examples/0aa9e2e2188f4b66a94f7e0f4b6bdded.coffee') as f:
+    _export_kicad_old_package(f.read(), 'Polygon', kicad_old_just_polygon(timestamp), timestamp)

@@ -19,6 +19,7 @@ color_schemes['default'] = {
   'restrict':  (0.0, 1.0, 0.0, 0.3),
   'stop':  (0.0, 1.0, 1.0, 0.3),
   'keepout':  (1.0, 0.0, 0.5, 0.7),
+  'vrestrict':  (0.0, 1.0, 0.0, 0.4),
   'unknown':  (1.0, 0.0, 1.0, 0.7),
   'hole': (1.0, 1.0, 1.0, 0.7),
   }
@@ -32,15 +33,15 @@ def _inverse(color_scheme):
 color_schemes['inverse'] = _inverse(color_schemes['default'])
 
 default_settings = {
-  'gl/dx': 200,
-  'gl/dy': 200,
-  'gl/zoomfactor': 50,
+  'gl/dx': '200',
+  'gl/dy': '200',
+  'gl/zoomfactor': '50',
   'gl/colorscheme': 'default',
-  'gui/keyidle': 1500,
-  'gl/autozoom': True,
-  'gui/displaydocu': True,
-  'gui/displayrestrict': False,
-  'gui/displaystop': False,
-  'gui/displaykeepout': False,
-  'gui/autocompile': True,
+  'gui/keyidle': '1500',
+  'gl/autozoom': 'True',
+  'gui/displaydocu': 'True',
+  'gui/displayrestrict': 'False',
+  'gui/displaystop': 'False',
+  'gui/displaykeepout': 'False',
+  'gui/autocompile': 'True',
 }

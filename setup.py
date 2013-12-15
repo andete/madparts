@@ -3,6 +3,8 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
+VERSION='1.2'
+
 import glob, sys, platform
 
 from setuptools import setup
@@ -85,7 +87,7 @@ setup(
   long_description = long_description,
   author = 'Joost Yervante Damad',
   author_email = 'joost@damad.be',
-  version = '1.1',
+  version = VERSION,
   url = 'http://madparts.org/',
   packages = [
         'coffee',

@@ -3,13 +3,12 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import argparse, sys, traceback, os.path, glob
+import argparse, sys, traceback
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
 from inter import inter
-import coffee.library
-import export.eagle
+import export.detect as detect
 
 def export_footprint(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' export')
@@ -26,11 +25,10 @@ def export_footprint(remaining):
   name = meta['name']
   print name, 'compiled.'
   try:
-    version = export.eagle.check_xml_file(args.library)
+    exporter = detect.make_exporter(args.library)
   except Exception as ex:
     print >> sys.stderr, str(ex)
     return 1
-  exporter = export.eagle.Export(args.library)
   exporter.export_footprint(interim)
   exporter.save()
   print "Exported to "+args.library+"."
@@ -39,16 +37,21 @@ def export_footprint(remaining):
 def import_footprint(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' import')
   parser.add_argument('library', help='library file')
-  parser.add_argument('footprint', help='footprint name')
+  parser.add_argument('footprint', help='footprint name', nargs='?')
   args = parser.parse_args(remaining)
   try:
-    version = export.eagle.check_xml_file(args.library)
+    importer = detect.make_importer(args.library)
   except Exception as ex:
     print >> sys.stderr, str(ex)
     return 1
-  importer = export.eagle.Import(args.library)
   names = map(lambda (a,_): a, importer.list_names())
-  if not args.footprint in names:
+  if args.footprint is None:
+    if len(names) == 1:
+      args.footprint = names[0]
+    else:
+      print >> sys.stderr, "Please specify the footprint name as more then one were found in %s." % (args.library)
+      return 1
+  elif not args.footprint in names:
     print >> sys.stderr, "Footprint %s not found in %s." % (args.footprint, args.library)
     return 1
   interim = inter.import_footprint(importer, args.footprint) 
@@ -65,26 +68,15 @@ def import_footprint(remaining):
   print "%s/%s written to %s." % (args.library, args.footprint, new_file_name)
   return 0
 
-def _list_directory(dirname):
-  library = coffee.library.Library('library', dirname)
-  for meta in library.meta_list:
-    print meta.id, meta.name
-  return 0
-
 def list_library(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' ls')
   parser.add_argument('library', help='library file', nargs='?', default='.')
   args = parser.parse_args(remaining)
-  if os.path.isdir(args.library):
-    return _list_directory(args.library)
   try:
-    version = export.eagle.check_xml_file(args.library)
+    detect.make_importer(args.library).list()
   except Exception as ex:
     print >> sys.stderr, str(ex)
     return 1
-  importer = export.eagle.Import(args.library)
-  names = map(lambda (a,_): a, importer.list_names())
-  for name in names: print name
   return 0
 
 def cli_main():

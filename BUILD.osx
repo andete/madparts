@@ -9,10 +9,6 @@ sudo port install py27-opengl
 sudo port install py27-beautifulsoup4
 sudo port install py27-pil
 
-You need to build pyv8 from source. (TODO document)
-
-copy PyV8.py and _PyV8.so to your source tree.
-
 Execute 'make darwin'
 
 An madparts.app directory will be made in dist/

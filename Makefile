@@ -36,7 +36,10 @@ test:
 	@$(NOSE)
 
 testone:
-	@nosetests test/madparts_test.py:test_eagle_export_empty
+	@nosetests -s test/madparts_test.py:test_kicad_old_export_polygon
+
+list:
+	@nosetests --collect-only -v
 
 coverage:
 	@nosetests --with-coverage \

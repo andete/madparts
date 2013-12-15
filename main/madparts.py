@@ -3,8 +3,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import numpy as np
-import math, time, traceback, re, os, os.path, sys
+import time, traceback, os.path
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
@@ -14,14 +13,13 @@ import gui.gldraw, gui.library
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
-import coffee.library
 
 from inter import inter
 
 from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
 
-import export.eagle
+import export.detect
 
 class MainWin(QtGui.QMainWindow):
 
@@ -171,6 +169,8 @@ class MainWin(QtGui.QMainWindow):
     a = """
 <p align="center"><b>madparts</b><br/>the functional footprint editor</p>
 <p align="center">(c) 2013 Joost Yervante Damad &lt;joost@damad.be&gt;</p>
+<p align="center">Additional Contributors:</p>
+<p align="center">Alex Schultz &lt;alex@strangeautomata.com&gt;</p>
 <p align="center"><a href="http://madparts.org">http://madparts.org</a></p>
 """
     QtGui.QMessageBox.about(self, "about madparts", a)
@@ -236,6 +236,7 @@ class MainWin(QtGui.QMainWindow):
      if dialog.exec_() != QtGui.QDialog.Accepted: return
      self.export_library_filename = dialog.filename
      self.export_library_filetype = dialog.filetype
+     self.export_library_version = dialog.version
      self._export_footprint()
 
   def show_footprint_tab(self):
@@ -377,19 +378,16 @@ class MainWin(QtGui.QMainWindow):
       QtGui.QMessageBox.warning(self, "warning", s)
       self.status(s) 
       return
-    if self.export_library_filetype != 'eagle':
-      s = "Only eagle CAD export is currently supported"
-      QtGui.QMessageBox.critical(self, "error", s)
-      self.status(s)
-      return
     try:
-      exporter = export.eagle.Export(self.export_library_filename)
+      exporter = export.detect.make_exporter_for(self.export_library_filetype, self.export_library_filename)
       exporter.export_footprint(self.executed_footprint)
       exporter.save()
       self.status("Exported to "+self.export_library_filename+".")
     except Exception as ex:
-      self.status(str(ex))
-      raise
+      tb = traceback.format_exc()
+      s = "export failure: %s" % (tb)
+      QtGui.QMessageBox.warning(self, "warning", s)
+      self.status(s)
 
 def gui_main():
   QtCore.QCoreApplication.setOrganizationName("madparts")

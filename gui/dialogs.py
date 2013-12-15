@@ -2,12 +2,13 @@
 # License: GPL
 
 import uuid
+import os.path
 
 from PySide import QtGui, QtCore
 
 from defaultsettings import default_settings, color_schemes
 
-import export.eagle
+import export.detect as detect
 
 def color_scheme_combo(parent, current):
   l_combo = QtGui.QComboBox()
@@ -36,18 +37,30 @@ def library_combo(explorer, allow_non_existing=False, allow_readonly=False):
       l_combo.setCurrentIndex(l_combo.count()-1)
   return l_combo
 
+class FDFileDialog(QtGui.QFileDialog):
+  def __init__(self, parent, txt):
+    super(FDFileDialog, self).__init__(parent, txt)
+    self.currentChanged.connect(self.current_changed)
+
+  def current_changed(self, path):
+    if os.path.isdir(path) and ".pretty" in path:
+      self.setFileMode(QtGui.QFileDialog.Directory)
+    else:
+      self.setFileMode(QtGui.QFileDialog.ExistingFile)
+
 def select_library(obj):
-  result = QtGui.QFileDialog.getOpenFileName(
-    obj,
-    "Select Library", filter="Eagle CAD Library (*.lbr);;XML file (*.xml)")
+  qf = FDFileDialog(obj, 'Select Library')
+  qf.setFilter("CAD Library (*.lbr *.xml *.pretty *.mod *.kicad_mod)")
+  if qf.exec_() == 0: return None
+  result = qf.selectedFiles()
   filename = result[0]
   if (filename == ''): return
-  try:
-    version = export.eagle.check_xml_file(filename)
-    return ('eagle', version, filename)
-  except Exception as ex:
-    QtGui.QMessageBox.critical(obj, "error", str(ex))
-    return None
+  #try:
+  (t, version) = detect.detect(filename)
+  return (t, version, filename)
+  #except Exception as ex:
+  #  QtGui.QMessageBox.critical(obj, "error", str(ex))
+  #  return None
 
 class LibrarySelectDialog(QtGui.QDialog):
 
@@ -84,9 +97,9 @@ class LibrarySelectDialog(QtGui.QDialog):
   def get_file(self):
     result = select_library(self)
     if result == None: return
-    (self.filetype, version, self.filename) = result
+    (self.filetype, self.version, self.filename) = result
     self.lib_filename.setText(self.filename)
-    self.lib_type.setText(version)
+    self.lib_type.setText(self.filetype + " " + self.version)
     self.button_box.button(QtGui.QDialogButtonBox.Ok).setDisabled(False)
     self.button_box.button(QtGui.QDialogButtonBox.Ok).setFocus()
 
@@ -349,7 +362,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
 
   def populate_model(self):
     self.root.removeRows(0, self.root.rowCount())
-    self.importer = export.eagle.Import(self.filename)
+    self.importer = detect.make_importer(self.filename)
     name_desc_list = self.importer.list_names()
     name_desc_list = sorted(name_desc_list, lambda (n1,d1),(n2,d2): cmp(n1,n2))
     for (name, desc) in name_desc_list:
@@ -398,7 +411,6 @@ class PreferencesDialog(QtGui.QDialog):
     button_box.accepted.connect(self.settings_accepted)
     button_box.rejected.connect(self.reject)
     vbox.addWidget(button_box)
-    settings_widget = QtGui.QWidget()
     self.setLayout(vbox)
 
   def settings_restore_defaults(self):
