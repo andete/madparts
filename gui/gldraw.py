@@ -65,6 +65,8 @@ class GLDraw:
     self.square_data_vbo = vbo.VBO(self.square_data)
 
   def set_color(self, t):
+    if t == 'cu':
+      t = 'smd'
     (r,g,b,a) = self.color.get(t, self.color['unknown'])
     glColor4f(r,g,b,a)
 

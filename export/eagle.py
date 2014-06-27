@@ -15,6 +15,7 @@ from inter import inter
 def type_to_layer_number(layer):
   type_to_layer_number_dict = {
     'smd': 1,
+    'cu': 1,
     'pad': 17,
     'silk': 21,
     'name': 25,
@@ -332,6 +333,7 @@ class Export:
         {
           'pad': pad,
           'silk': silk,
+          'cu': silk,
           'docu': silk,
           'keepout': silk,
           'stop': silk,
@@ -549,9 +551,9 @@ class Import:
      
     def hole(x):
       res = {'type':'hole', 'shape':'hole'}
-      res['drill'] = float(x('drill'))
-      res['x'] = float(x('x'))
-      res['y'] = float(x('y'))
+      res['drill'] = fget(x,'drill')
+      res['x'] = fget(x,'x')
+      res['y'] = fget(x,'y')
       return res
 
     def polygon(x):

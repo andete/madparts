@@ -366,6 +366,7 @@ def generate_coffee(interim):
    'glue': generate_ints(),
    'unknown': generate_ints(),
    'special': generate_ints(),
+   'hole': generate_ints(),
   }
   varnames = []
   lines = []

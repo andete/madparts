@@ -16,6 +16,7 @@ def type_to_layer_name(layer):
   return {
     'smd': 'F.Cu', # these two are normally
     'pad': 'F.Cu', # not used like this
+    'cu': 'F.Cu',  # generic non-pad/smd Cu
     'silk': 'F.SilkS',
     'name': 'F.SilkS',
     'value': 'Dwgs.User',
@@ -263,6 +264,7 @@ class Export:
       if 'type' in shape:
         l2 = {
           'pad': pad,
+          'cu': silk,
           'silk': silk,
           'docu': silk,
           'keepout': unknown,

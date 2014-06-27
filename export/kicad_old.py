@@ -39,6 +39,7 @@ def detect(fn):
 def num_to_type(i):
   i = int(i)
   return {
+    1: 'trace',
     17: 'glue',
     19: 'paste',
     21: 'silk',
@@ -50,6 +51,8 @@ def num_to_type(i):
 
 def type_to_num(t):
   return {
+    'trace': 1,
+    'cu': 15,
     'glue': 17,
     'paste': 19,
     'silk': 21,
@@ -222,6 +225,7 @@ class Export:
       return [line]
 
     def rect(shape, layer):
+      print "rect", shape, layer
       l = []
       w = fget(shape,'w')
       rot = abs(fget(shape, 'rot'))
@@ -274,6 +278,7 @@ class Export:
       if 'type' in shape:
         l = {
           'pad': pad,
+          'cu': silk,
           'silk': silk,
           'docu': silk,
           'keepout': unknown,
