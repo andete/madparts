@@ -329,6 +329,7 @@ class JYDGLWidget(QGLWidget):
     self.shapes = []
     self.make_dot_field()
     self.called_by_me = False
+    self.is_gl = True
 
   def make_dot_field(self):
     gldx = int(self.parent.setting('gl/dx'))
