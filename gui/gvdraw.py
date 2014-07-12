@@ -7,6 +7,7 @@ from PySide.QtCore import Qt
 from mutil.mutil import *
 from defaultsettings import color_schemes
 import numpy as np
+from math import sqrt
 
 class JYDGVWidget(QtGui.QGraphicsView):
 
@@ -55,6 +56,21 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self.brush = QtGui.QBrush(self.color, Qt.SolidPattern)
     self.pen = QtGui.QPen(self.color)
 
+  def _hole(self, x, y, rx, ry):
+    self.set_color('hole')
+    self.scene.addEllipse(x-rx, y-ry, rx*2, ry*2, self.pen, self.no_brush)
+    rxa = rx/sqrt(2.0)
+    rya = ry/sqrt(2.0)
+    self.scene.addLine(x-rxa, y-rya, x+rxa ,y+rya, self.pen)
+    self.scene.addLine(x+rxa, y-rya, x-rxa ,y+rya, self.pen)
+
+  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
+    # todo drill, offsets
+    self.scene.addEllipse(x-rx, y-ry, rx*2, ry*2, self.pen, self.brush)
+    self.color = QtGui.QColor.fromRgbF(0, 0, 0, 1.0)
+    self.brush = QtGui.QBrush(self.color, Qt.SolidPattern)
+    self.scene.addEllipse(x+drill_dx-drill/2, y+drill_dy+-drill/2, drill, drill, self.pen, self.brush)
+
   def skip(self, shape):
     pass
 
@@ -71,7 +87,18 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self.scene.addEllipse(x-rx, y-ry, rx*2, ry*2, self.pen, self.no_brush)
 
   def disc(self, shape):
-    pass
+    r = fget(shape, 'r')
+    rx = fget(shape, 'rx', r)
+    ry = fget(shape, 'ry', r)
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    drill = fget(shape,'drill')
+    drill_dx = fget(shape,'drill_dx')
+    drill_dy = fget(shape,'drill_dy')
+    self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
+    # TODO labels
 
   def label(self, shape):
     pass
@@ -100,7 +127,11 @@ class JYDGVWidget(QtGui.QGraphicsView):
       self.vertex(x)
 
   def hole(self, shape):
-    pass
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    drill = fget(shape,'drill')
+    if drill > 0.0:
+      self._hole(x,y, drill/2, drill/2)
 
   def draw_shapes(self):
     # really ugly redraw everything
