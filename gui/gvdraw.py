@@ -6,12 +6,14 @@ from PySide.QtCore import Qt
 
 from mutil.mutil import *
 from defaultsettings import color_schemes
+import numpy as np
 
 class JYDGVWidget(QtGui.QGraphicsView):
 
   def __init__(self, parent):
     self.scene = QtGui.QGraphicsScene()
     super(JYDGVWidget, self).__init__(self.scene, parent)
+    self.parent = parent
     self.scene.setBackgroundBrush(Qt.black)
     self.scene.addText('Hello, world')
     self.zoomfactor = 42
@@ -19,7 +21,24 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self.color_scheme = color_schemes[str(parent.setting('gl/colorscheme'))]
     self.brush = QtGui.QBrush(Qt.SolidPattern)
     self.no_brush = QtGui.QBrush(Qt.NoBrush)
+    self.make_dot_field()
     self.scale(self.zoomfactor,self.zoomfactor)
+
+  def make_dot_field(self):
+    gldx = int(self.parent.setting('gl/dx'))
+    gldy = int(self.parent.setting('gl/dy'))
+    self.dot_field_data = np.array(
+      [[x,y] for x in range(-gldx/2, gldx/2) for y in range(-gldy/2, gldy/2)],
+      dtype=np.float32)
+
+  def draw_dot_field(self):
+    self.set_color('grid')
+    for (x,y) in self.dot_field_data:
+      self.scene.addEllipse(x, y, 0.001, 0.001, self.pen, self.brush)
+    self.set_color('axes')
+    self.pen.setWidth(0.0001)
+    self.scene.addLine(-100,0,100,0, self.pen)
+    self.scene.addLine(0,-100,0,100, self.pen)
 
   def set_shapes(self, shapes):
     self.shapes = shapes
@@ -86,6 +105,7 @@ class JYDGVWidget(QtGui.QGraphicsView):
   def draw_shapes(self):
     # really ugly redraw everything
     self.scene.clear()
+    self.draw_dot_field()
     for shape in self.shapes:
       self.set_color(shape['type'])
       if 'shape' in shape:
@@ -101,3 +121,4 @@ class JYDGVWidget(QtGui.QGraphicsView):
           'hole': self.hole,
         }
         dispatch.get(shape['shape'], self.skip)(shape)
+    # TODO set scene rect

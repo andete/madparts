@@ -3,7 +3,7 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import time, traceback, os.path
+import time, traceback, os.path, os
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
@@ -145,8 +145,10 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    self.display = gui.gldraw.JYDGLWidget(self)
-    #self.display = gui.gvdraw.JYDGVWidget(self)
+    if not os.environ.has_key('GVDRAW'):
+      self.display = gui.gldraw.JYDGLWidget(self)
+    else:
+      self.display = gui.gvdraw.JYDGVWidget(self)
     self.zoom_selector = QtGui.QLineEdit(str(self.display.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)

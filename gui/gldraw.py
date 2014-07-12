@@ -340,6 +340,7 @@ class JYDGLWidget(QGLWidget):
 
   def make_dot_field_vbo(self):
     self.dot_field_vbo = vbo.VBO(self.dot_field_data)
+    vbo.VBO(self.dot_field_data)
 
   def initializeGL(self):
     self.glversion = glGetString(GL_VERSION)
