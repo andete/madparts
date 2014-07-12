@@ -65,7 +65,6 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self.scene.addLine(x+rxa, y-rya, x-rxa ,y+rya, self.pen)
 
   def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
-    # todo drill, offsets
     self.scene.addEllipse(x-rx, y-ry, rx*2, ry*2, self.pen, self.brush)
     self.color = QtGui.QColor.fromRgbF(0, 0, 0, 1.0)
     self.brush = QtGui.QBrush(self.color, Qt.SolidPattern)
@@ -101,7 +100,25 @@ class JYDGVWidget(QtGui.QGraphicsView):
     # TODO labels
 
   def label(self, shape):
-    pass
+    x = fget(shape,'x')
+    y = fget(shape,'y')
+    dy = fget(shape,'dy', 1)
+    dx = fget(shape,'dx', 100.0) # arbitrary large number
+    if 'name' in shape:
+      s = str(shape['name'])
+    elif 'value' in shape:
+      s = str(shape['value'])
+    else: return
+    font = QtGui.QFont()
+    font.setPointSize(dy)
+    st = QtGui.QGraphicsTextItem()
+    st.setFont(font)
+    st.setPlainText(s)
+    tw = st.textWidth()
+    st.setX(-tw)
+    #st.setY(y)#-dy/2)
+    st.setDefaultTextColor(self.color)
+    self.scene.addItem(st)
 
   def vertex(self, shape):
     x1 = fget(shape, 'x1')
