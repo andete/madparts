@@ -91,7 +91,7 @@ class JYDGVWidget(QtGui.QGraphicsView):
     width = st.sceneBoundingRect().width()
     height = st.sceneBoundingRect().height()
     st.setBrush(self.color)
-    st.setPos(x*self.q,y*self.q)
+    st.setPos(x*self.q-width/2,-y*self.q-height/2)
 
   def skip(self, shape):
     pass
