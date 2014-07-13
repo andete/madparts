@@ -23,7 +23,7 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self.brush = QtGui.QBrush(Qt.SolidPattern)
     self.no_brush = QtGui.QBrush(Qt.NoBrush)
     self.make_dot_field()
-    self.scale(self.zoomfactor,self.zoomfactor)
+    self.scale(self.zoomfactor, self.zoomfactor)
 
   def make_dot_field(self):
     gldx = int(self.parent.setting('gl/dx'))
@@ -33,9 +33,11 @@ class JYDGVWidget(QtGui.QGraphicsView):
       dtype=np.float32)
 
   def draw_dot_field(self):
-    self.set_color('grid')
-    for (x,y) in self.dot_field_data:
-      self.scene.addEllipse(x, y, 0.001, 0.001, self.pen, self.brush)
+    #grid drawing is really slow
+    #re-enable when it is not redrawn every time
+    #self.set_color('grid')
+    #for (x,y) in self.dot_field_data:
+    #  self.scene.addEllipse(x, y, 0.001, 0.001, self.pen, self.brush)
     self.set_color('axes')
     self.pen.setWidth(0.0001)
     self.scene.addLine(-100,0,100,0, self.pen)
@@ -56,6 +58,7 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self.brush = QtGui.QBrush(self.color, Qt.SolidPattern)
     self.pen = QtGui.QPen(self.color)
 
+  # todo use itemgroups?
   def _hole(self, x, y, rx, ry):
     self.set_color('hole')
     self.scene.addEllipse(x-rx, y-ry, rx*2, ry*2, self.pen, self.no_brush)
@@ -70,6 +73,16 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self.brush = QtGui.QBrush(self.color, Qt.SolidPattern)
     self.scene.addEllipse(x+drill_dx-drill/2, y+drill_dy+-drill/2, drill, drill, self.pen, self.brush)
 
+  def _txt(self, s, x, y, dy):
+    font = QtGui.QFont("Monospace", dy)
+    font.setStyleHint(QtGui.QFont.TypeWriter)
+    font.setWeight(QtGui.QFont.Normal)
+    st = self.scene.addSimpleText(str(s), font)
+    width = st.sceneBoundingRect().width()
+    height = st.sceneBoundingRect().height()
+    st.setBrush(self.color)
+    st.setPos(x-width/4,y-height/2.3)
+
   def skip(self, shape):
     pass
 
@@ -78,7 +91,7 @@ class JYDGVWidget(QtGui.QGraphicsView):
     rx = fget(shape, 'rx', r)
     ry = fget(shape, 'ry', r)
     x = fget(shape,'x')
-    y = fget(shape,'y')
+    y = -fget(shape,'y')
     w = fget(shape,'w')
     # TODO irx/iry handling
     # TODO a1/a2 handling
@@ -90,18 +103,20 @@ class JYDGVWidget(QtGui.QGraphicsView):
     rx = fget(shape, 'rx', r)
     ry = fget(shape, 'ry', r)
     x = fget(shape,'x')
-    y = fget(shape,'y')
+    y = -fget(shape,'y')
     drill = fget(shape,'drill')
     drill_dx = fget(shape,'drill_dx')
-    drill_dy = fget(shape,'drill_dy')
+    drill_dy = -fget(shape,'drill_dy')
     self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
-    # TODO labels
+    if 'name' in shape:
+      self.set_color('name')
+      self._txt(shape['name'], x, y, max(ry, drill))
 
   def label(self, shape):
     x = fget(shape,'x')
-    y = fget(shape,'y')
+    y = -fget(shape,'y')
     dy = fget(shape,'dy', 1)
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     if 'name' in shape:
@@ -109,22 +124,13 @@ class JYDGVWidget(QtGui.QGraphicsView):
     elif 'value' in shape:
       s = str(shape['value'])
     else: return
-    font = QtGui.QFont()
-    font.setPointSize(dy)
-    st = QtGui.QGraphicsTextItem()
-    st.setFont(font)
-    st.setPlainText(s)
-    tw = st.textWidth()
-    st.setX(-tw)
-    #st.setY(y)#-dy/2)
-    st.setDefaultTextColor(self.color)
-    self.scene.addItem(st)
+    self._txt(s, x, y, dy)
 
   def vertex(self, shape):
     x1 = fget(shape, 'x1')
-    y1 = fget(shape, 'y1')
+    y1 = -fget(shape, 'y1')
     x2 = fget(shape, 'x2')
-    y2 = fget(shape, 'y2')
+    y2 = -fget(shape, 'y2')
     w = fget(shape, 'w')
     # TODO curves
     self.pen.setWidth(w)
