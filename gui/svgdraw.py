@@ -8,7 +8,31 @@ from PySide.QtWebKit import QGraphicsWebView
 from mutil.mutil import *
 from defaultsettings import color_schemes
 import numpy as np
-from math import sqrt
+from math import sqrt, pi
+import svgfig
+from svgfig import SVG
+import math
+import random
+
+def ex1():
+  angle_axis = svgfig.LineAxis(5, 0, 5, 2*pi, 0, 2*pi, stroke='white', text_attr={'fill':'white'})
+  angle_axis.text_start = -2.5
+  angle_axis.text_angle = 180.
+  angle_axis.ticks = [x*2*pi/8 for x in range(8)]
+  angle_axis.labels = lambda x: "%g" % (x*180/pi)
+  angle_axis.miniticks = [x*2*pi/8/9 for x in range(8*9)]
+
+  radial_axis = svgfig.XAxis(0, 5, aty=pi/2, stroke='white', text_attr={'fill':'white'})
+  radial_axis.text_start = 5
+  radial_axis.text_angle = 90.
+  radial_axis.ticks = range(5)
+
+  points = [(max(0.5, random.gauss(2.5, 1)), random.uniform(-pi, pi), max(0.1, random.gauss(0.3, 0.1))) for i in range(10)]
+  xerr = svgfig.XErrorBars(points, stroke='white')
+  yerr = svgfig.YErrorBars(points, stroke='white')
+  dots = svgfig.Dots(points, svgfig.make_symbol("name", stroke="white", fill="red", stroke_width="0.25pt"))
+  xml = svgfig.Fig(svgfig.Fig(angle_axis, radial_axis, xerr, yerr, dots, trans="x*cos(y), x*sin(y)")).SVG(svgfig.window(-6, 6, -6, 6)).standalone_xml()
+  return QtCore.QByteArray(xml)
 
 class JYDSVGWidget(QtGui.QGraphicsView):
 
@@ -17,9 +41,10 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     super(JYDSVGWidget, self).__init__(self.scene, parent)
     self.parent = parent
     self.webview = QGraphicsWebView()
+    self.webview.setResizesToContents(True)
     self.scene.addItem(self.webview)
-    #self.scene.setBackgroundBrush(Qt.black)
-    self.scene.addText('Hello, world')
+    self.scene.setBackgroundBrush(Qt.black)
+    #self.scene.addText('Hello, world')
     self.zoomfactor = 42
     self.is_gl = False
     self.color_scheme = color_schemes[str(parent.setting('gl/colorscheme'))]
@@ -193,7 +218,8 @@ class JYDSVGWidget(QtGui.QGraphicsView):
   def draw_shapes(self):
     # really ugly redraw everything
     #self.scene.clear()
-    self.webview.load(QtCore.QUrl("/home/joost/prj/madparts/gui/tmp.svg"))
+    #self.webview.load(QtCore.QUrl("/home/joost/prj/madparts/gui/tmp.svg"))
+    self.webview.setContent(ex1())
     return
     self.draw_dot_field()
     for shape in self.shapes:
