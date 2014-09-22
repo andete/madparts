@@ -9,7 +9,7 @@ from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 
 from gui.dialogs import *
-import gui.gldraw, gui.library, gui.gvdraw
+import gui.library
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
@@ -145,10 +145,12 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    if not os.environ.has_key('GVDRAW'):
+    if not os.environ.has_key('SVGDRAW'):
+      import gui.gldraw
       self.display = gui.gldraw.JYDGLWidget(self)
     else:
-      self.display = gui.gvdraw.JYDGVWidget(self)
+      import gui.svgdraw
+      self.display = gui.svgdraw.JYDSVGWidget(self)
     self.zoom_selector = QtGui.QLineEdit(str(self.display.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)

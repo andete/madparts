@@ -3,26 +3,29 @@
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
+from PySide.QtWebKit import QGraphicsWebView
 
 from mutil.mutil import *
 from defaultsettings import color_schemes
 import numpy as np
 from math import sqrt
 
-class JYDGVWidget(QtGui.QGraphicsView):
+class JYDSVGWidget(QtGui.QGraphicsView):
 
   def __init__(self, parent):
     self.scene = QtGui.QGraphicsScene()
-    super(JYDGVWidget, self).__init__(self.scene, parent)
+    super(JYDSVGWidget, self).__init__(self.scene, parent)
     self.parent = parent
-    self.scene.setBackgroundBrush(Qt.black)
+    self.webview = QGraphicsWebView()
+    self.scene.addItem(self.webview)
+    #self.scene.setBackgroundBrush(Qt.black)
     self.scene.addText('Hello, world')
     self.zoomfactor = 42
     self.is_gl = False
     self.color_scheme = color_schemes[str(parent.setting('gl/colorscheme'))]
     self.brush = QtGui.QBrush(Qt.SolidPattern)
     self.no_brush = QtGui.QBrush(Qt.NoBrush)
-    self.make_dot_field()
+    #self.make_dot_field()
     self.q = 10
     self.scale(self.zoomfactor/self.q, self.zoomfactor/self.q)
 
@@ -189,7 +192,9 @@ class JYDGVWidget(QtGui.QGraphicsView):
 
   def draw_shapes(self):
     # really ugly redraw everything
-    self.scene.clear()
+    #self.scene.clear()
+    self.webview.load(QtCore.QUrl("/home/joost/prj/madparts/gui/tmp.svg"))
+    return
     self.draw_dot_field()
     for shape in self.shapes:
       self.set_color(shape['type'])
