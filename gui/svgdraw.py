@@ -10,7 +10,6 @@ from defaultsettings import color_schemes
 import numpy as np
 from math import sqrt, pi
 import svgfig
-from svgfig import SVG
 import math
 import random
 
@@ -36,48 +35,47 @@ def ex1():
 
 class JYDSVGWidget(QtGui.QGraphicsView):
 
-  def __init__(self, parent):
+  def __init__(self, parent, box):
     self.scene = QtGui.QGraphicsScene()
     super(JYDSVGWidget, self).__init__(self.scene, parent)
     self.parent = parent
+    self.box = box
     self.webview = QGraphicsWebView()
-    self.webview.setResizesToContents(True)
-    self.scene.addItem(self.webview)
+    self.webview.setZoomFactor(0.5)
     self.scene.setBackgroundBrush(Qt.black)
+    self.scene.addItem(self.webview)
     #self.scene.addText('Hello, world')
     self.zoomfactor = 42
     self.is_gl = False
     self.color_scheme = color_schemes[str(parent.setting('gl/colorscheme'))]
     self.brush = QtGui.QBrush(Qt.SolidPattern)
     self.no_brush = QtGui.QBrush(Qt.NoBrush)
-    #self.make_dot_field()
     self.q = 10
     self.scale(self.zoomfactor/self.q, self.zoomfactor/self.q)
 
-  def make_dot_field(self):
-    gldx = int(self.parent.setting('gl/dx'))
-    gldy = int(self.parent.setting('gl/dy'))
-    self.dot_field_data = np.array(
-      [[x,y] for x in range(-gldx/2, gldx/2) for y in range(-gldy/2, gldy/2)],
-      dtype=np.float32)
-
   def _line(self, x1, y1, x2, y2, w):
-    self.pen.setWidth(w*self.q)
-    self.scene.addLine(x1*self.q, -y1*self.q, x2*self.q, -y2*self.q, self.pen)
+    return svgfig.Line(x1, y1, x2, y2, stroke_width=w, stroke=self.color).SVG()
 
   def _ellipse(self, x, y, rx, ry, brush, w=0.001):
     self.pen.setWidth(w*self.q)
     self.scene.addEllipse(x*self.q, -y*self.q, rx*self.q, -ry*self.q, self.pen, brush)
 
   def draw_dot_field(self):
+    self.dot_field_data = np.array(
+      [[x,y] for x in range(-self.dx/2, self.dx/2+1) for y in range(-self.dy/2, self.dy/2+1)],
+      dtype=np.float32)
     #grid drawing is really slow
     #re-enable when it is not redrawn every time
-    #self.set_color('grid')
+    self.set_color('grid')
     #for (x,y) in self.dot_field_data:
     #  self.scene.addEllipse(x, y, 0.001, 0.001, self.pen, self.brush)
+    r = 0.05
+    rpx = "%spx" % (r)
+    dots = svgfig.Dots(self.dot_field_data, svgfig.make_symbol("dot_field", stroke=None, fill=self.color, r=r))
     self.set_color('axes')
-    self._line(-100,0,100,0, 0.0001)
-    self._line(0,-100,0,100, 0.0001)
+    l1 = self._line(-self.dx/2,0,self.dx/2,0, r)
+    l2 = self._line(0,-self.dy/2, 0, self.dy/2, r)
+    return (dots.SVG(), l1, l2)
 
   def set_shapes(self, shapes):
     self.shapes = shapes
@@ -90,9 +88,8 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     if t == 'cu':
       t = 'smd'
     (r,g,b,a) = self.color_scheme.get(t, self.color_scheme['unknown'])
-    self.color = QtGui.QColor.fromRgbF(r,g,b,a)
-    self.brush = QtGui.QBrush(self.color, Qt.SolidPattern)
-    self.pen = QtGui.QPen(self.color)
+    self.color = svgfig.rgb(r,g,b)
+    self.opacity = a
 
   # todo use itemgroups?
   def _hole(self, x, y, rx, ry):
@@ -219,9 +216,29 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     # really ugly redraw everything
     #self.scene.clear()
     #self.webview.load(QtCore.QUrl("/home/joost/prj/madparts/gui/tmp.svg"))
-    self.webview.setContent(ex1())
+    w = self.width()*.5
+    h = self.height()*.5
+    width = "%spx" % (w)
+    height = "%spx" % (h)
+    dx = (int(self.parent.gl_dx + 1)/2)*2
+    dy = (int(self.parent.gl_dy + 1)/2)*2
+    vx = dx
+    dy = dy
+    self.dx = dx
+    self.dy = dy
+    print dx, dy
+    # TODO: clever viewbox calculation     
+    viewbox = "%d %d %d %d" % (-dx/2, -dy/2, dx, dy)
+    rect = svgfig.Rect(-dx/2,-dy/2,dx/2,dy/2, fill='black', stroke=None).SVG()
+    (dots, l1, l2) = self.draw_dot_field()
+    print self.box.contentsRect()
+    print width, height, viewbox
+    canvas = svgfig.canvas(rect, dots, l1, l2, width=width, height=height, viewBox=viewbox)
+    xml = canvas.standalone_xml()
+    print xml
+    self.webview.setContent(QtCore.QByteArray(xml))
+    #self.webview.setContent(ex1())
     return
-    self.draw_dot_field()
     for shape in self.shapes:
       self.set_color(shape['type'])
       if 'shape' in shape:

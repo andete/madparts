@@ -474,7 +474,7 @@ class SVG:
 
 _canvas_defaults = {"width": "400px", "height": "400px", "viewBox": "0 0 100 100", \
                    "xmlns": "http://www.w3.org/2000/svg", "xmlns:xlink": "http://www.w3.org/1999/xlink", "version":"1.1", \
-                   "style": {"stroke":"black", "fill":"none", "stroke-width":"0.5pt", "stroke-linejoin":"round", "text-anchor":"middle"}, \
+                   "style": {"stroke":"white", "fill":"black", "stroke-width":"0.5pt", "stroke-linejoin":"round", "text-anchor":"middle"}, \
                    "font-family": ["Helvetica", "Arial", "FreeSans", "Sans", "sans", "sans-serif"], \
                    }
 
@@ -495,7 +495,7 @@ def canvas(*sub, **attr):
   xmlns           "http://www.w3.org/2000/svg"
   xmlns:xlink     "http://www.w3.org/1999/xlink"
   version         "1.1"
-  style           "stroke:black; fill:none; stroke-width:0.5pt; stroke-linejoin:round; text-anchor:middle"
+  style           "stroke:white; fill:black; stroke-width:0.5pt; stroke-linejoin:round; text-anchor:middle"
   font-family     "Helvetica,Arial,FreeSans?,Sans,sans,sans-serif"
   """
   attributes = dict(_canvas_defaults)
@@ -1884,10 +1884,10 @@ class TextGlobal:
 
 ######################################################################
 
-_symbol_templates = {"dot": SVG("symbol", SVG("circle", cx=0, cy=0, r=1, stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"), \
-                    "box": SVG("symbol", SVG("rect", x1=-1, y1=-1, x2=1, y2=1, stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"), \
-                    "uptri": SVG("symbol", SVG("path", d="M -1 0.866 L 1 0.866 L 0 -0.866 Z", stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"), \
-                    "downtri": SVG("symbol", SVG("path", d="M -1 -0.866 L 1 -0.866 L 0 0.866 Z", stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"), \
+_symbol_templates = {"dot": SVG("symbol", SVG("circle", cx=0, cy=0, r=1, stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"),
+                    "box": SVG("symbol", SVG("rect", x1=-1, y1=-1, x2=1, y2=1, stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"),
+                    "uptri": SVG("symbol", SVG("path", d="M -1 0.866 L 1 0.866 L 0 -0.866 Z", stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"),
+                    "downtri": SVG("symbol", SVG("path", d="M -1 -0.866 L 1 -0.866 L 0 0.866 Z", stroke="none", fill="black"), viewBox="0 0 1 1", overflow="visible"),
                     }
 
 def make_symbol(id, shape="dot", **attr):

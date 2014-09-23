@@ -150,7 +150,7 @@ class MainWin(QtGui.QMainWindow):
       self.display = gui.gldraw.JYDGLWidget(self)
     else:
       import gui.svgdraw
-      self.display = gui.svgdraw.JYDSVGWidget(self)
+      self.display = gui.svgdraw.JYDSVGWidget(self, rvbox)
     self.zoom_selector = QtGui.QLineEdit(str(self.display.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)
