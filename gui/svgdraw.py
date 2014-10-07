@@ -89,7 +89,6 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     res = [dots]
     res += self._line(-self.dx/2,0,self.dx/2,0, r)
     res += self._line(0,-self.dy/2, 0, self.dy/2, r)
-    print res
     return res
 
   def set_shapes(self, shapes):
@@ -157,7 +156,7 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     res += self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
       self.set_color('name')
-      res += self._txt(shape['name'], x, y, max(ry, drill))
+      res += self._txt(shape['name'], x, y, 2*max(ry, drill))
     return res
 
   def label(self, shape):
@@ -256,7 +255,7 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     viewbox = "%d %d %d %d" % (-self.q*dx/2, -self.q*dy/2, self.q*dx, self.q*dy)
     rect = svgfig.Rect(-dx/2,-dy/2,dx/2,dy/2, fill='black', stroke=None).SVG(trans=self.trans)
     dot_field = self.draw_dot_field()
-    print self.box.contentsRect()
+    #print self.box.contentsRect()
     print width, height, viewbox
     svg_g = svgfig.SVG("g")
     svg_g.append(rect)
@@ -277,13 +276,13 @@ class JYDSVGWidget(QtGui.QGraphicsView):
           'hole': self.hole,
         }
         shape_svg = dispatch.get(shape['shape'], self.skip)(shape)
-        print shape_svg
+        #print shape_svg
         for x in shape_svg:
           svg_g.append(x)
     
     #print subs
     canvas = svgfig.canvas(svg_g, width=width, height=height, viewBox=viewbox)
     xml = canvas.standalone_xml()
-    print xml
+    #print xml
     self.webview.setContent(QtCore.QByteArray(xml))
     # TODO set scene rect
