@@ -125,7 +125,7 @@ class Export:
       r = fget(shape, 'r')
       if shape2 == 'disc':
         l.append(S('circle'))
-        l.append([S('size'), r, r])
+        l.append([S('size'), r*2, r*2])
       elif shape2 == 'rect':
         ro = iget(shape, 'ro')
         dx = fget(shape, 'dx')
