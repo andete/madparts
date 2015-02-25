@@ -7,7 +7,7 @@ features
 ========
 
 * a footprint is a small program, giving you huge expressiveness
-* import from, export to eagle cad libraries
+* import from, export to eagle cad and kicad libraries
 * high level pattern detection for single, dual quad formations of pads
 * instant graphical feedback with continuous compilation process
 * easy collaboration because footprints are separate files and libraries are just directories
