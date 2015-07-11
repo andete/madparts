@@ -76,8 +76,8 @@ class Export:
       [S('layer'), S('F.Cu')],
       [S('descr'), descr],
     ]
-    
-    
+
+
     def pad_line(x1,y1,x2,y2,width,layer):
       l = [S('fp_line')] 
       l.append([S('start'), x1,y1])
@@ -234,9 +234,15 @@ class Export:
       return [l]
 
     def hole(shape):
-      layer = type_to_layer_name(shape['type']) # aka 'hole'
-      shape['r'] = shape['drill'] / 2
-      return circle(shape, layer)
+      l = [S('pad'), S("\"\"")]
+      l.append(S('np_thru_hole'))
+      l.append(S('circle'))
+      l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y')])
+      drill = fget(shape, 'drill')
+      l.append([S('size'), drill, drill])
+      l.append([S('drill'), drill])
+      l.append([S('layers'), S('*.Cu'), S('*.Mask'), S('F.SilkS')])
+      return [l]
 
     # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
     # kicad doesn't do arced vertex in polygon :(

@@ -40,6 +40,7 @@ def layer_number_to_type(layer):
     29: 'stop',
     35: 'glue',
     39: 'keepout',
+    40: 'keepout',
     41: 'restrict',
     43: 'vrestrict',
     51: 'docu',
