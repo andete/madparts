@@ -113,7 +113,12 @@ class Export:
 
 
     def pad(shape, smd=False):
-      l = [S('pad'), S(shape['name'])]
+      name = shape['name']
+      if name is None or name == "":
+        name = ""
+      else:
+        name = S(name)
+      l = [S('pad'), name]
       shapes = [l]
       if smd:
         l.append(S('smd'))
@@ -234,7 +239,7 @@ class Export:
       return [l]
 
     def hole(shape):
-      l = [S('pad'), S("\"\"")]
+      l = [S('pad'), ""]
       l.append(S('np_thru_hole'))
       l.append(S('circle'))
       l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y')])
