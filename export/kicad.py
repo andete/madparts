@@ -1,4 +1,4 @@
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 import glob, math, os.path, uuid
@@ -294,7 +294,7 @@ class Export:
       t = 'user'
       if s == 'VALUE': t = 'value'
       if s == 'NAME': t = 'reference'
-      l = [S('fp_text'), S(t), S(shape['value'])]
+      l = [S('fp_text'), S(t), shape['value']]
       if (('rot' in shape) and (fget(shape, 'rot') != 0.0)):
         l.append([S('at'), fget(shape, 'x'), fc(-fget(shape, 'y')), fget(shape, 'rot')])
       else:
