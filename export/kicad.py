@@ -291,9 +291,9 @@ class Export:
     # )
     def label(shape, layer):
       s = shape['value'].upper()
-      t = 'user'
-      if s == 'VALUE': t = 'value'
-      if s == 'NAME': t = 'reference'
+      t = "user"
+      if t == "VALUE": t = "value"
+      if t == "NAME": t = "reference"
       l = [S('fp_text'), S(t), shape['value']]
       if (('rot' in shape) and (fget(shape, 'rot') != 0.0)):
         l.append([S('at'), fget(shape, 'x'), fc(-fget(shape, 'y')), fget(shape, 'rot')])
