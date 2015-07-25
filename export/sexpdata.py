@@ -502,7 +502,8 @@ class Bracket(SExpBase):
         ket = BRACKETS[self._bra]
         c = ' '.join(tosexp(v) for v in self._val)
         return uformat("{0}{1}{2}", bra, c, ket)
-    
+
+    # kicad hack: stretch out 'module' over multiple lines
     def tosexp(self, tosexp=tosexp):
         v0 = tosexp(self._val[0])
         if v0 not in ['module']:
