@@ -8,7 +8,7 @@ import time, traceback, os.path, os
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 
-from gui.dialogs import *
+import gui.dialogs
 import gui.library
 
 import coffee.pycoffee as pycoffee
@@ -20,6 +20,8 @@ from syntax.jssyntax import JSHighlighter
 from syntax.coffeesyntax import CoffeeHighlighter
 
 import export.detect
+
+from gui.defaultsettings import default_settings
 
 class MainWin(QtGui.QMainWindow):
 
@@ -77,6 +79,9 @@ class MainWin(QtGui.QMainWindow):
     self.timer.timeout.connect(self.key_idle_timer_timeout)
 
     self.executed_footprint = []
+    self.export_library_filename = ""
+    self.export_library_filetype = ""
+
     self.gl_dx = 0
     self.gl_dy = 0
     self.gl_w = 0
@@ -170,7 +175,7 @@ class MainWin(QtGui.QMainWindow):
   ### GUI SLOTS
 
   def preferences(self):
-    dialog = PreferencesDialog(self)
+    dialog = gui.dialogs.PreferencesDialog(self)
     dialog.exec_()
 
   def reload_footprint(self):
@@ -210,7 +215,7 @@ class MainWin(QtGui.QMainWindow):
       self._export_footprint()
 
   def export_footprint(self):
-     dialog = LibrarySelectDialog(self)
+     dialog = gui.dialogs.LibrarySelectDialog(self)
      if dialog.exec_() != QtGui.QDialog.Accepted: return
      self.export_library_filename = dialog.filename
      self.export_library_filetype = dialog.filetype
@@ -236,7 +241,7 @@ class MainWin(QtGui.QMainWindow):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
 
   def import_footprints(self):
-    dialog = ImportFootprintsDialog(self)
+    dialog = gui.dialogs.ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, importer, selected_library) = dialog.get_data()
     lib_dir = QtCore.QDir(self.explorer.coffee_lib[selected_library].directory)
