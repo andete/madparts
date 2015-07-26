@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 import argparse, sys, traceback

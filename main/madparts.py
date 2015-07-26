@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 import time, traceback, os.path, os
@@ -23,10 +23,10 @@ import export.detect
 
 class MainWin(QtGui.QMainWindow):
 
-  def __init__(self):
+  def __init__(self, file_name):
     super(MainWin, self).__init__()
-
-    self.explorer = gui.library.Explorer(self)
+    self.file_name = file_name
+    self.setWindowTitle("madparts: " + file_name)
 
     self.settings = QtCore.QSettings()
 
@@ -38,10 +38,10 @@ class MainWin(QtGui.QMainWindow):
     self.add_action(editMenu, '&Preferences', self.preferences)
 
     footprintMenu = menuBar.addMenu('&Footprint')
-    self.add_action(footprintMenu, '&Clone', self.explorer.clone_footprint, 'Ctrl+Alt+C')
-    self.add_action(footprintMenu, '&Delete', self.explorer.remove_footprint, 'Ctrl+Alt+D')
-    self.ac_new = self.add_action(footprintMenu, '&New', self.explorer.new_footprint, 'Ctrl+Alt+N')
-    self.ac_move = self.add_action(footprintMenu, '&Move', self.explorer.move_footprint, 'Ctrl+Alt+M')
+    #self.add_action(footprintMenu, '&Clone', self.explorer.clone_footprint, 'Ctrl+Alt+C')
+    #self.add_action(footprintMenu, '&Delete', self.explorer.remove_footprint, 'Ctrl+Alt+D')
+    #self.ac_new = self.add_action(footprintMenu, '&New', self.explorer.new_footprint, 'Ctrl+Alt+N')
+    #self.ac_move = self.add_action(footprintMenu, '&Move', self.explorer.move_footprint, 'Ctrl+Alt+M')
     self.add_action(footprintMenu, '&Export previous', self.export_previous, 'Ctrl+E')
     self.add_action(footprintMenu, '&Export', self.export_footprint, 'Ctrl+Alt+X')
     self.add_action(footprintMenu, '&Print', None, 'Ctrl+P')
@@ -60,20 +60,14 @@ class MainWin(QtGui.QMainWindow):
     footprintMenu.addSeparator()
     self.add_action(footprintMenu, '&Force Compile', self.compile, 'Ctrl+F')
 
-    libraryMenu = menuBar.addMenu('&Library')
-    self.add_action(libraryMenu, '&Add', self.explorer.add_library)
-    self.add_action(libraryMenu, '&Disconnect', self.explorer.disconnect_library)
-    self.add_action(libraryMenu, '&Import', self.import_footprints, 'Ctrl+Alt+I')
-    self.add_action(libraryMenu, '&Reload', self.explorer.reload_library, 'Ctrl+Alt+R')
-
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
 
-    self.explorer.initialize_libraries(self.settings)
+    #self.explorer.initialize_libraries(self.settings)
 
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
 
-    splitter.addWidget(self._left_part())
+    splitter.addWidget(self._footprint())
     splitter.addWidget(self._right_part())
     self.setCentralWidget(splitter)
 
@@ -84,8 +78,6 @@ class MainWin(QtGui.QMainWindow):
     self.timer.timeout.connect(self.key_idle_timer_timeout)
 
     self.executed_footprint = []
-    self.export_library_filename = ""
-    self.export_library_filetype = ""
     self.gl_dx = 0
     self.gl_dy = 0
     self.gl_w = 0
@@ -116,12 +108,11 @@ class MainWin(QtGui.QMainWindow):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
     self.code_textedit = QtGui.QTextEdit()
     self.code_textedit.setAcceptRichText(False)
-    if self.explorer.has_footprint():
-      with open(self.explorer.active_footprint_file()) as f:
-        self.update_text(f.read())
-      self.set_code_textedit_readonly(self.explorer.active_footprint.readonly)
-    else:
-      self.set_code_textedit_readonly(True)
+    with open(self.file_name) as f:
+      self.update_text(f.read())
+      #self.set_code_textedit_readonly(self.explorer.active_footprint.readonly)
+    #else:
+    #  self.set_code_textedit_readonly(True)
     self.highlighter1 = CoffeeHighlighter(self.code_textedit.document())
     self.code_textedit.textChanged.connect(self.editor_text_changed)
     self.result_textedit = QtGui.QTextEdit()
@@ -133,15 +124,6 @@ class MainWin(QtGui.QMainWindow):
     [s1, s2] = lsplitter.sizes()
     lsplitter.setSizes([min(s1+s2-150, 150), 150])
     return lsplitter  
-
-  def _left_part(self):
-    lqtab = QtGui.QTabWidget()
-    self.explorer.populate()
-    lqtab.addTab(self.explorer, "library")
-    lqtab.addTab(self._footprint(), "footprint")
-    lqtab.setCurrentIndex(1)
-    self.left_qtab = lqtab
-    return lqtab
 
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
@@ -173,7 +155,7 @@ class MainWin(QtGui.QMainWindow):
   def about(self):
     a = """
 <p align="center"><b>madparts</b><br/>the functional footprint editor</p>
-<p align="center">(c) 2013 Joost Yervante Damad &lt;joost@damad.be&gt;</p>
+<p align="center">(c) 2013-2015 Joost Yervante Damad &lt;joost@damad.be&gt;</p>
 <p align="center">Additional Contributors:</p>
 <p align="center">Alex Schultz &lt;alex@strangeautomata.com&gt;</p>
 <p align="center"><a href="http://madparts.org">http://madparts.org</a></p>
@@ -362,9 +344,10 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_stop: filter_out.append('stop')
       if not self.display_keepout: filter_out.append('keepout')
       self.display.set_shapes(inter.prepare_for_display(interim, filter_out))
-      if not self.explorer.active_footprint.readonly:
-        with open(self.explorer.active_footprint_file(), "w+") as f:
-          f.write(code)
+      #if not self.explorer.active_footprint.readonly:
+      #  with open(self.explorer.active_footprint_file(), "w+") as f:
+      #    f.write(code)
+      print "TODO write back code"
       if compilation_failed_last_time:
         self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
@@ -399,7 +382,7 @@ def gui_main(file_name):
   QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
   QtCore.QCoreApplication.setApplicationName("madparts")
   app = QtGui.QApplication(["madparts"])
-  widget = MainWin()
+  widget = MainWin(file_name)
   widget.show()
   if widget.display.is_gl:
     if widget.display.glversion < 2.1:

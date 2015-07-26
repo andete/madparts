@@ -12,7 +12,7 @@ DATA_DIR := .
 export DATA_DIR
 
 all:
-	@$(PYTHON) madparts
+	@$(PYTHON) madparts examples/2ba395a2e67a49bd9defdf961b264e9f.coffee
 
 size:
 	@echo 'python:'
