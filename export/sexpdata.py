@@ -497,11 +497,24 @@ class Bracket(SExpBase):
         return uformat("{0}({1!r}, {2!r})",
             self.__class__.__name__, self._val, self._bra)
 
-    def tosexp(self, tosexp=tosexp):
+    def tosexp2(self, tosexp=tosexp):
         bra = self._bra
         ket = BRACKETS[self._bra]
         c = ' '.join(tosexp(v) for v in self._val)
         return uformat("{0}{1}{2}", bra, c, ket)
+
+    # kicad hack: stretch out 'module' over multiple lines
+    def tosexp(self, tosexp=tosexp):
+        v0 = tosexp(self._val[0])
+        if v0 not in ['module']:
+            return self.tosexp2(tosexp)
+        bra = self._bra
+        ket = BRACKETS[self._bra]
+        if len(self._val) == 1:
+            return uformat("{0}{1}{2}", bra, v0, ket)
+        cl = [tosexp(v) for v in self._val[1:]]
+        c = '\n'.join(cl)
+        return uformat("{0}{1}\n{2}{3}", bra, v0, c, ket)
 
 
 def bracket(val, bra):

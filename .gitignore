@@ -7,3 +7,5 @@ madparts.egg-info
 debian/*.debhelper
 debian/*.log
 debian/*.substvars
+debian/files
+debian/madparts

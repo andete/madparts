@@ -1,4 +1,4 @@
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 import glob, math, os.path, uuid
@@ -16,6 +16,7 @@ def type_to_layer_name(layer):
   return {
     'smd': 'F.Cu', # these two are normally
     'pad': 'F.Cu', # not used like this
+    'cu': 'F.Cu',  # generic non-pad/smd Cu
     'silk': 'F.SilkS',
     'name': 'F.SilkS',
     'value': 'Dwgs.User',
@@ -75,9 +76,50 @@ class Export:
       [S('layer'), S('F.Cu')],
       [S('descr'), descr],
     ]
-    
+
+
+    def pad_line(x1,y1,x2,y2,width,layer):
+      l = [S('fp_line')] 
+      l.append([S('start'), x1,y1])
+      l.append([S('end'), x2,y2])
+      l.append([S('layer'), S(layer)])
+      l.append([S('width'), width])
+      return l
+
+    def pad_lines(s,x1,y1,x2,y2,width):
+      s.append(pad_line(x1,y1,x2,y2,width,'F.Cu'))
+      s.append(pad_line(x1,y1,x2,y2,width,'F.Paste'))
+      s.append(pad_line(x1,y1,x2,y2,width,'F.Mask'))
+
+    def gen_lines(l,x,y,rot,radius,dx,dy):
+      #4 corners
+      xo = dx/2 - radius;
+      yo = dy/2 - radius;
+
+      rot = math.radians(rot)
+
+      xp = math.cos(rot)*xo - math.sin(rot)*yo;
+      yp = math.cos(rot)*yo +  math.sin(rot)*xo;
+            
+      x1 = x - xp;
+      x2 = x + xp;
+      y1 = y - yp;
+      y2 = y + yp;
+
+      pad_lines(l,x1,y1,x2,y1,radius*2)
+      pad_lines(l,x2,y1,x2,y2,radius*2)
+      pad_lines(l,x2,y2,x1,y2,radius*2)
+      pad_lines(l,x1,y2,x1,y1,radius*2)
+
+
     def pad(shape, smd=False):
-      l = [S('pad'), S(shape['name'])]
+      name = shape['name']
+      if name is None or name == "":
+        name = ""
+      else:
+        name = S(name)
+      l = [S('pad'), name]
+      shapes = [l]
       if smd:
         l.append(S('smd'))
       else:
@@ -88,14 +130,30 @@ class Export:
       r = fget(shape, 'r')
       if shape2 == 'disc':
         l.append(S('circle'))
-        l.append([S('size'), r, r])
+        l.append([S('size'), r*2, r*2])
       elif shape2 == 'rect':
         ro = iget(shape, 'ro')
-        if ro == 0:
-          l.append(S('rect'))
-        else:
+        dx = fget(shape, 'dx')
+        dy = fget(shape, 'dy')
+        if ro == 100:
           l.append(S('oval'))
-        l.append([S('size'), fget(shape, 'dx'), fget(shape, 'dy')])
+          l.append([S('size'), dx, dy])
+        else:
+          l.append(S('rect'))
+          if ro == 0:    
+            l.append([S('size'), dx, dy])
+	  else:
+	    #find the smallest dimension and create a rectangular pad squished by that amount
+	    #TODO: the rectangular pad is simple with 4 lines, 1 rect and guaranteed no holes		
+	    #however it can create arbitrarily small pad which will make text in kicad hard to 
+	    #read. may be better to use a oval pad, which can be not shrunk and is still guaranteed 
+	    #to not overrun the pad, however it is tricky to make sure the 4 lines don't create any holes. 
+	    small = dx
+	    if dy < dx :
+               small = dy
+            radius = small/2 * ro / 100.0;
+            l.append([S('size'), dx-radius*2, dy-radius*2])
+            gen_lines(shapes, fget(shape, 'x'), -fget(shape, 'y'), iget(shape, 'rot'), radius, dx, dy)
       else:
         raise Exception("%s shaped pad not supported in kicad" % (shape2))
       l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y'), iget(shape, 'rot')])
@@ -108,7 +166,7 @@ class Export:
         if 'drill_dx' in shape or 'drill_dy' in shape:
           l2.append([S('offset'), fget(shape, 'drill_dx'), fget(shape, 'drill_dy')])
         l.append(l2)
-      return l
+      return shapes
     
     #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))
     # (fp_arc (start 7.62 0) (end 7.62 -2.54) (angle 90) (layer F.SilkS) (width 0.15))
@@ -137,7 +195,7 @@ class Export:
         l.append([S('angle'), -(a2-a1)])
         l.append([S('layer'), S(layer)])
         l.append([S('width'), fget(shape, 'w')])
-      return l
+      return [l]
 
     # (fp_circle (center 5.08 0) (end 6.35 -1.27) (layer F.SilkS) (width 0.15))
     def circle(shape, layer):
@@ -165,7 +223,7 @@ class Export:
         l.append([S('angle'), -(a2-a1)])
       l.append([S('layer'), S(layer)])
       l.append([S('width'), fget(shape, 'w')])
-      return l
+      return [l]
 
     # a disc is just a circle with a clever radius and width
     def disc(shape, layer):
@@ -178,12 +236,18 @@ class Export:
       l.append([S('end'), x+(rad/math.sqrt(2)), y+(rad/math.sqrt(2))])
       l.append([S('layer'), S(layer)])
       l.append([S('width'), rad])
-      return l
+      return [l]
 
     def hole(shape):
-      layer = type_to_layer_name(shape['type']) # aka 'hole'
-      shape['r'] = shape['drill'] / 2
-      return circle(shape, layer)
+      l = [S('pad'), ""]
+      l.append(S('np_thru_hole'))
+      l.append(S('circle'))
+      l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y')])
+      drill = fget(shape, 'drill')
+      l.append([S('size'), drill, drill])
+      l.append([S('drill'), drill])
+      l.append([S('layers'), S('*.Cu'), S('*.Mask'), S('F.SilkS')])
+      return [l]
 
     # (fp_poly (pts (xy 6.7818 1.6002) (xy 6.6294 1.6002) (xy 6.6294 1.4478) (xy 6.7818 1.4478) (xy 6.7818 1.6002)) (layer F.Cu) (width 0.00254))
     # kicad doesn't do arced vertex in polygon :(
@@ -198,7 +262,7 @@ class Export:
       l.append(lxy)
       l.append([S('layer'), S(layer)])
       l.append([S('width'), shape['w']])
-      return l
+      return [l]
 
     def rect(shape, layer):
       l = [S('fp_poly')]
@@ -217,7 +281,7 @@ class Export:
       l.append(lxy)
       l.append([S('layer'), S(layer)])
       l.append([S('width'), 0])
-      return l
+      return [l]
 
     # (fp_text reference MYCONN3 (at 0 -2.54) (layer F.SilkS)
     #   (effects (font (size 1.00076 1.00076) (thickness 0.25146)))
@@ -227,10 +291,10 @@ class Export:
     # )
     def label(shape, layer):
       s = shape['value'].upper()
-      t = 'user'
-      if s == 'VALUE': t = 'value'
-      if s == 'NAME': t = 'reference'
-      l = [S('fp_text'), S(t), S(shape['value'])]
+      t = "user"
+      if t == "VALUE": t = "value"
+      if t == "NAME": t = "reference"
+      l = [S('fp_text'), S(t), shape['value']]
       if (('rot' in shape) and (fget(shape, 'rot') != 0.0)):
         l.append([S('at'), fget(shape, 'x'), fc(-fget(shape, 'y')), fget(shape, 'rot')])
       else:
@@ -242,7 +306,7 @@ class Export:
       th = fget(shape, 'w', 0.1)
       l.append([S('effects'), 
                 [S('font'), [S('size'), dy, dy], [S('thickness'), th]]])
-      return l
+      return [l]
 
     def silk(shape):
       if not 'shape' in shape: return None
@@ -263,6 +327,7 @@ class Export:
       if 'type' in shape:
         l2 = {
           'pad': pad,
+          'cu': silk,
           'silk': silk,
           'docu': silk,
           'keepout': unknown,
@@ -274,7 +339,7 @@ class Export:
           'hole': hole,
           }.get(shape['type'], unknown)(shape)
         if l2 != None:
-         l.append(l2)
+         l.extend(l2)
     self.data = l
     self.name = name
     return name

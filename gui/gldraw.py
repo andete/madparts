@@ -67,6 +67,8 @@ class GLDraw:
     self.square_data_vbo = vbo.VBO(self.square_data)
 
   def set_color(self, t):
+    if t == 'cu':
+      t = 'smd'
     (r,g,b,a) = self.color.get(t, self.color['unknown'])
     glColor4f(r,g,b,a)
 
@@ -329,6 +331,7 @@ class JYDGLWidget(QGLWidget):
     self.shapes = []
     self.make_dot_field()
     self.called_by_me = False
+    self.is_gl = True
 
   def make_dot_field(self):
     gldx = int(self.parent.setting('gl/dx'))
@@ -339,6 +342,7 @@ class JYDGLWidget(QGLWidget):
 
   def make_dot_field_vbo(self):
     self.dot_field_vbo = vbo.VBO(self.dot_field_data)
+    vbo.VBO(self.dot_field_data)
 
   def initializeGL(self):
     self.glversion = glGetString(GL_VERSION)

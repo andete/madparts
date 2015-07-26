@@ -3,13 +3,13 @@
 # (c) 2013 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import time, traceback, os.path
+import time, traceback, os.path, os
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 
 from gui.dialogs import *
-import gui.gldraw, gui.library
+import gui.library
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
@@ -146,8 +146,13 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    self.glw = gui.gldraw.JYDGLWidget(self)
-    self.zoom_selector = QtGui.QLineEdit(str(self.glw.zoomfactor))
+    if not os.environ.has_key('SVGDRAW'):
+      import gui.gldraw
+      self.display = gui.gldraw.JYDGLWidget(self)
+    else:
+      import gui.svgdraw
+      self.display = gui.svgdraw.JYDSVGWidget(self, rvbox)
+    self.zoom_selector = QtGui.QLineEdit(str(self.display.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)
     self.zoom_selector.returnPressed.connect(self.zoom)
@@ -159,7 +164,7 @@ class MainWin(QtGui.QMainWindow):
     self.auto_zoom.stateChanged.connect(self.auto_zoom_changed)
     rhbox.addWidget(self.auto_zoom)
     rvbox.addLayout(rhbox)
-    rvbox.addWidget(self.glw)
+    rvbox.addWidget(self.display)
 
     right = QtGui.QWidget(self)
     right.setLayout(rvbox)
@@ -246,13 +251,13 @@ class MainWin(QtGui.QMainWindow):
     QtGui.qApp.quit()
 
   def zoom(self):
-    self.glw.zoomfactor = int(self.zoom_selector.text())
-    self.glw.zoom_changed = True
-    self.glw.auto_zoom = self.auto_zoom.isChecked()
-    if self.glw.auto_zoom:
+    self.display.zoomfactor = int(self.zoom_selector.text())
+    self.display.zoom_changed = True
+    self.display.auto_zoom = self.auto_zoom.isChecked()
+    if self.display.auto_zoom:
       (dx, dy, x1, y1, x2, y2) = inter.size(self.executed_footprint)
       self.update_zoom(dx, dy, x1, y1, x2, y2, True)
-    self.glw.updateGL()
+    self.display.update()
 
   def auto_zoom_changed(self):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
@@ -317,8 +322,8 @@ class MainWin(QtGui.QMainWindow):
 
   def update_zoom(self, dx, dy, x1, y1, x2, y2, force=False):
     # TODO: keep x1, y1, x2, y2 in account
-    w = self.glw.width()
-    h = self.glw.height()
+    w = self.display.width()
+    h = self.display.height()
     if dx == self.gl_dx and dy == self.gl_dy and w == self.gl_w and h == self.gl_h:
       if not force: return
     self.gl_dx = dx
@@ -336,8 +341,8 @@ class MainWin(QtGui.QMainWindow):
       zoomy = 42
     zoom = int(min(zoomx, zoomy))
     self.zoom_selector.setText(str(zoom))
-    self.glw.zoomfactor = zoom
-    self.glw.zoom_changed = True
+    self.display.zoomfactor = zoom
+    self.display.zoom_changed = True
 
   def compile(self):
     code = self.code_textedit.toPlainText()
@@ -356,7 +361,7 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_restrict: filter_out.append('restrict')
       if not self.display_stop: filter_out.append('stop')
       if not self.display_keepout: filter_out.append('keepout')
-      self.glw.set_shapes(inter.prepare_for_display(interim, filter_out))
+      self.display.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.explorer.active_footprint.readonly:
         with open(self.explorer.active_footprint_file(), "w+") as f:
           f.write(code)
@@ -396,10 +401,11 @@ def gui_main():
   app = QtGui.QApplication(["madparts"])
   widget = MainWin()
   widget.show()
-  if widget.glw.glversion < 2.1:
-    s = """\
+  if widget.display.is_gl:
+    if widget.display.glversion < 2.1:
+      s = """\
 OpenGL 2.1 or better is required (%s found)
 (or use software openGL like mesa)""" % (widget.glw.glversion)
-    QtGui.QMessageBox.critical(widget, "error", s)
-    return 1
+      QtGui.QMessageBox.critical(widget, "error", s)
+      return 1
   return app.exec_()
