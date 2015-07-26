@@ -1,5 +1,9 @@
-PYTHON:=/opt/local/bin/python2.7
-NOSE:=/opt/local/bin/nosetests-2.7
+PYTHON:=python
+NOSE:=nosetests
+# for OSX:
+# PYTHON:=/opt/local/bin/python2.7
+# NOSE:=/opt/local/bin/nosetests-2.7
+
 # set DATA_DIR for unit tests
 DATA_DIR := .
 export DATA_DIR
@@ -36,13 +40,13 @@ test:
 	@$(NOSE)
 
 testone:
-	@nosetests -s test/madparts_test.py:test_kicad_old_export_polygon
+	@$(NOSE) -s test/madparts_test.py:test_kicad_old_export_polygon
 
 list:
-	@nosetests --collect-only -v
+	@$(NOSE) --collect-only -v
 
 coverage:
-	@nosetests --with-coverage \
+	@$(NOSE) --with-coverage \
 	--cover-package=coffee,export,gui,inter,syntax,util
 
 win32:

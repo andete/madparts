@@ -11,8 +11,6 @@ import OpenGL.arrays.vbo as vbo
 import numpy as np
 import math, sys
 import os, os.path, time
-import math
-import os, os.path
 
 from mutil.mutil import *
 from defaultsettings import color_schemes
