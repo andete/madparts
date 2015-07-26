@@ -26,7 +26,8 @@ class MainWin(QtGui.QMainWindow):
   def __init__(self, file_name):
     super(MainWin, self).__init__()
     self.file_name = file_name
-    self.setWindowTitle("madparts: " + file_name)
+    self.readonly = not os.access(self.file_name, os.W_OK)
+    self.setWindowTitle("madparts: " + self.file_name)
 
     self.settings = QtCore.QSettings()
 
@@ -63,8 +64,6 @@ class MainWin(QtGui.QMainWindow):
     helpMenu = menuBar.addMenu('&Help')
     self.add_action(helpMenu, '&About', self.about)
 
-    #self.explorer.initialize_libraries(self.settings)
-
     splitter = QtGui.QSplitter(self, QtCore.Qt.Horizontal)
 
     splitter.addWidget(self._footprint())
@@ -92,17 +91,11 @@ class MainWin(QtGui.QMainWindow):
   def set_code_textedit_readonly(self, readonly):
     self.code_textedit.setReadOnly(readonly)
     pal = self.code_textedit.palette()
-    if not self.explorer.has_footprint(): 
-      pal.setColor(QtGui.QPalette.Base, Qt.darkGray)
-    elif self.explorer.active_footprint.readonly:
+    if self.readonly:
       pal.setColor(QtGui.QPalette.Base, Qt.lightGray)
     else:
       pal.setColor(QtGui.QPalette.Base, Qt.white)
     self.code_textedit.setPalette(pal)
-
-  def set_library_readonly(self, readonly):
-    self.ac_new.setDisabled(readonly)
-    self.ac_move.setDisabled(readonly)
 
   def _footprint(self):
     lsplitter = QtGui.QSplitter(QtCore.Qt.Vertical)
@@ -110,9 +103,7 @@ class MainWin(QtGui.QMainWindow):
     self.code_textedit.setAcceptRichText(False)
     with open(self.file_name) as f:
       self.update_text(f.read())
-      #self.set_code_textedit_readonly(self.explorer.active_footprint.readonly)
-    #else:
-    #  self.set_code_textedit_readonly(True)
+      self.set_code_textedit_readonly(self.readonly)
     self.highlighter1 = CoffeeHighlighter(self.code_textedit.document())
     self.code_textedit.textChanged.connect(self.editor_text_changed)
     self.result_textedit = QtGui.QTextEdit()
@@ -344,10 +335,9 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_stop: filter_out.append('stop')
       if not self.display_keepout: filter_out.append('keepout')
       self.display.set_shapes(inter.prepare_for_display(interim, filter_out))
-      #if not self.explorer.active_footprint.readonly:
-      #  with open(self.explorer.active_footprint_file(), "w+") as f:
-      #    f.write(code)
-      print "TODO write back code"
+      if not self.readonly:
+        with open(self.file_name, "w+") as f:
+          f.write(code)
       if compilation_failed_last_time:
         self.status("Compilation successful.")
       [s1, s2] = self.lsplitter.sizes()
