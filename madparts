@@ -26,8 +26,17 @@ if __name__ == '__main__':
     os.environ['DATA_DIR'] = data_dir
 
     if len(sys.argv) == 1:
-      import main.madparts
-      sys.exit(main.madparts.gui_main())
-    else:
+      sys.stderr.write("""
+Usage:
+  madparts ls <library>
+  madparts import <library> <footprint>
+  madparts export <footprint> <library>
+  madparts <footprint>
+""")
+      sys.exit(1)
+    if sys.argv[1] in ['ls', 'import', 'export']:
       import main.cli
       sys.exit(main.cli.cli_main())
+    else:
+      import main.madparts
+      sys.exit(main.madparts.gui_main(sys.argv[1]))

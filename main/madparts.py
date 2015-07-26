@@ -394,7 +394,7 @@ class MainWin(QtGui.QMainWindow):
       QtGui.QMessageBox.warning(self, "warning", s)
       self.status(s)
 
-def gui_main():
+def gui_main(file_name):
   QtCore.QCoreApplication.setOrganizationName("madparts")
   QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
   QtCore.QCoreApplication.setApplicationName("madparts")

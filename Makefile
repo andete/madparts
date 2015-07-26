@@ -1,3 +1,6 @@
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
+# License: GPL
+
 PYTHON:=python
 NOSE:=nosetests
 # for OSX:
