@@ -25,7 +25,7 @@ from gui.defaultsettings import default_settings
 
 class MainWin(QtGui.QMainWindow):
 
-  def __init__(self, file_name):
+  def __init__(self, file_name, do_import):
     super(MainWin, self).__init__()
     self.file_name = file_name
     self.readonly = not os.access(self.file_name, os.W_OK)
@@ -377,7 +377,7 @@ def gui_main(file_name, do_import=False):
   QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
   QtCore.QCoreApplication.setApplicationName("madparts")
   app = QtGui.QApplication(["madparts"])
-  widget = MainWin(file_name)
+  widget = MainWin(file_name, do_import)
   widget.show()
   if widget.display.is_gl:
     if widget.display.glversion < 2.1:
