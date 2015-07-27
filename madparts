@@ -9,7 +9,7 @@ import main.madparts
 usage = """
 Usage:
   %s <footprint_file>
-  %s import <library>
+  %s import
 """
 
 if __name__ == '__main__':
@@ -32,15 +32,12 @@ if __name__ == '__main__':
       sys.path.append(data_dir)
     os.environ['DATA_DIR'] = data_dir
 
-    if len(sys.argv) not in [2,3]:
+    if len(sys.argv) != 2:
       sys.stderr.write(usage % (sys.argv[0], sys.argv[0]))
       sys.exit(1)
 
     if sys.argv[1] == 'import':
-      if len(sys.argv) != 3:
-        sys.stderr.write(usage % (sys.argv[0], sys.argv[0]))
-        sys.exit(1)
-      sys.exit(main.madparts.gui_main(sys.argv[2], do_import=True))
-      
-    sys.exit(main.madparts.gui_main(sys.argv[1]))
+      sys.exit(main.madparts.gui_main(None, do_import=True))
+    else:  
+      sys.exit(main.madparts.gui_main(sys.argv[1]))
          

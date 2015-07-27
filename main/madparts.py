@@ -27,7 +27,12 @@ class MainWin(QtGui.QMainWindow):
 
   def __init__(self, file_name, do_import):
     super(MainWin, self).__init__()
-    self.file_name = file_name
+
+    if do_import:
+      self.file_name = self.import_footprint()
+    else:
+      self.file_name = file_name
+      
     self.readonly = not os.access(self.file_name, os.W_OK)
     self.setWindowTitle("madparts: " + self.file_name)
 
@@ -240,7 +245,8 @@ class MainWin(QtGui.QMainWindow):
   def auto_zoom_changed(self):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
 
-  def import_footprints(self):
+  def import_footprint(self):
+    # TODO: select only one!
     dialog = gui.dialogs.ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, importer, selected_library) = dialog.get_data()
@@ -259,12 +265,14 @@ class MainWin(QtGui.QMainWindow):
         s = "warning: skipping footprint %s\nerror: %s" % (footprint_name, str(ex) + '\n' + tb)
         QtGui.QMessageBox.warning(self, "warning", s)
     for (footprint_name, coffee) in cl:
+    # TODO don't write!
       meta = pycoffee.eval_coffee_meta(coffee)
       new_file_name = lib_dir.filePath("%s.coffee" % (meta['id']))
       with open(new_file_name, 'w+') as f:
         f.write(coffee)
     self.explorer.rescan_library(selected_library)
     self.status('Importing done.')
+    return new_file_name
 
   def docu_changed(self):
     self.display_docu = self.docu_action.isChecked()
