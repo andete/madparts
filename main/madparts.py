@@ -3,7 +3,7 @@
 # (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import time, traceback, os.path, os
+import time, traceback, os.path, os, argparse
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
@@ -372,7 +372,7 @@ class MainWin(QtGui.QMainWindow):
       QtGui.QMessageBox.warning(self, "warning", s)
       self.status(s)
 
-def gui_main(file_name):
+def gui_main(file_name, do_import=False):
   QtCore.QCoreApplication.setOrganizationName("madparts")
   QtCore.QCoreApplication.setOrganizationDomain("madparts.org")
   QtCore.QCoreApplication.setApplicationName("madparts")

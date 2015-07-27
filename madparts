@@ -4,6 +4,13 @@
 # License: GPL
 
 import sys, os
+import main.madparts
+
+usage = """
+Usage:
+  %s <footprint_file>
+  %s import <library>
+"""
 
 if __name__ == '__main__':
     # trick needed to make OpenGL work on win32
@@ -25,18 +32,15 @@ if __name__ == '__main__':
       sys.path.append(data_dir)
     os.environ['DATA_DIR'] = data_dir
 
-    if len(sys.argv) == 1:
-      sys.stderr.write("""
-Usage:
-  madparts ls <library>
-  madparts import <library> <footprint>
-  madparts export <footprint> <library>
-  madparts <footprint>
-""")
+    if len(sys.argv) not in [2,3]:
+      sys.stderr.write(usage % (sys.argv[0], sys.argv[0]))
       sys.exit(1)
-    if sys.argv[1] in ['ls', 'import', 'export']:
-      import main.cli
-      sys.exit(main.cli.cli_main())
-    else:
-      import main.madparts
-      sys.exit(main.madparts.gui_main(sys.argv[1]))
+
+    if sys.argv[1] == 'import':
+      if len(sys.argv) != 3:
+        sys.stderr.write(usage % (sys.argv[0], sys.argv[0]))
+        sys.exit(1)
+      sys.exit(main.madparts.gui_main(sys.argv[2], do_import=True))
+      
+    sys.exit(main.madparts.gui_main(sys.argv[1]))
+         
