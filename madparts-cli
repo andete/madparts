@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+#
+# (c) 2015 Joost Yervante Damad <joost@damad.be>
+# License: GPL
+
+import sys, os
+import main.cli
+
+if __name__ == '__main__':
+    # if there is a file called 'Makefile' in the same directory
+    # as this script, we're running from the development tree
+    dirname = os.path.dirname(os.path.abspath(sys.argv[0]))
+    in_dev_tree = os.path.exists(os.path.join(dirname, 'Makefile'))
+    if in_dev_tree:
+      print "in dev tree"
+      data_dir = dirname
+    else:
+      data_dir = os.path.join(sys.prefix, 'share', 'madparts')
+      sys.path.append(data_dir)
+    os.environ['DATA_DIR'] = data_dir
+
+    sys.exit(main.cli.cli_main())
