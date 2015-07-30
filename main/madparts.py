@@ -250,7 +250,7 @@ class MainWin(QtGui.QMainWindow):
     dialog = gui.dialogs.ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
     (footprint_names, importer, lib_filename) = dialog.get_data()
-    (lib_name, _ext) = os.path.splitext(lib_filename)
+    (lib_name, _ext) = os.path.splitext(os.path.basename(lib_filename))
     #lib_dir = QtCore.QDir(self.explorer.coffee_lib[selected_library].directory)
     lib_dir = QtCore.QDir(".")
     l = []
