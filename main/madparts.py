@@ -249,7 +249,8 @@ class MainWin(QtGui.QMainWindow):
     # TODO: select only one!
     dialog = gui.dialogs.ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (footprint_names, importer) = dialog.get_data()
+    (footprint_names, importer, lib_filename) = dialog.get_data()
+    (lib_name, _ext) = os.path.splitext(lib_filename)
     #lib_dir = QtCore.QDir(self.explorer.coffee_lib[selected_library].directory)
     lib_dir = QtCore.QDir(".")
     l = []
@@ -270,7 +271,7 @@ class MainWin(QtGui.QMainWindow):
     for (footprint_name, coffee) in cl:
     # TODO don't write!
       meta = pycoffee.eval_coffee_meta(coffee)
-      new_file_name = lib_dir.filePath("%s.coffee" % (meta['id']))
+      new_file_name = lib_dir.filePath("%s_%s.coffee" % (lib_name, meta['name']))
       with open(new_file_name, 'w+') as f:
         f.write(coffee)
     #self.explorer.rescan_library(selected_library)
