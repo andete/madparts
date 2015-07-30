@@ -138,8 +138,9 @@ class ImportFootprintsDialog(QtGui.QDialog):
     self.tree_selection_model.selectionChanged.connect(self.selection_changed)
     vbox.addWidget(tree)
     form_layout2 = QtGui.QFormLayout()
-    self.l_combo = library_combo(parent.explorer)
-    form_layout2.addRow("import to:", self.l_combo)
+    # TODO
+    #self.l_combo = library_combo(parent.explorer)
+    #form_layout2.addRow("import to:", self.l_combo)
     vbox.addLayout(form_layout2)
     buttons = QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel
     self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
@@ -181,7 +182,7 @@ class ImportFootprintsDialog(QtGui.QDialog):
 
   def get_data(self):
     indices = self.tree_selection_model.selectedIndexes()
-    return ([self.model.data(i) for i in indices], self.importer, self.l_combo.currentText())
+    return ([self.model.data(i) for i in indices], self.importer)
 
 class PreferencesDialog(QtGui.QDialog):
 

@@ -249,10 +249,13 @@ class MainWin(QtGui.QMainWindow):
     # TODO: select only one!
     dialog = gui.dialogs.ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
-    (footprint_names, importer, selected_library) = dialog.get_data()
-    lib_dir = QtCore.QDir(self.explorer.coffee_lib[selected_library].directory)
+    (footprint_names, importer) = dialog.get_data()
+    #lib_dir = QtCore.QDir(self.explorer.coffee_lib[selected_library].directory)
+    lib_dir = QtCore.QDir(".")
     l = []
+    # hack: taking only first TODO: proper fix
     for footprint_name in footprint_names:
+      print "doing footprint:", footprint_name
       interim = inter.import_footprint(importer, footprint_name) 
       l.append((footprint_name, interim))
     cl = []
@@ -270,7 +273,7 @@ class MainWin(QtGui.QMainWindow):
       new_file_name = lib_dir.filePath("%s.coffee" % (meta['id']))
       with open(new_file_name, 'w+') as f:
         f.write(coffee)
-    self.explorer.rescan_library(selected_library)
+    #self.explorer.rescan_library(selected_library)
     self.status('Importing done.')
     return new_file_name
 
