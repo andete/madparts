@@ -3,7 +3,7 @@
 # (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import argparse, sys, traceback
+import argparse, sys, traceback, os
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple
@@ -33,6 +33,22 @@ def export_footprint(remaining):
   exporter.save()
   print "Exported to "+args.library+"."
   return 0
+
+def rename_footprint(remaining):
+  parser = argparse.ArgumentParser(prog=sys.argv[0] + ' rename')
+  parser.add_argument('footprint', help='footprint file')
+  args = parser.parse_args(remaining)
+  with open(args.footprint, 'r') as f:
+    code = f.read()
+  (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
+  if interim == None:
+    print >> sys.stderr, error_txt
+    return 1
+  meta = filter(lambda x: x['type'] == 'meta', interim)[0]
+  name = meta['name'].replace(' ','_')
+  new_name = os.path.dirname(args.footprint)+"/"+name+".coffee"
+  os.rename(args.footprint, new_name)
+  print args.footprint, "renamed into ", new_name
 
 def import_footprint(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' import')
@@ -82,14 +98,16 @@ def list_library(remaining):
 def cli_main():
   parser = argparse.ArgumentParser()
   parser.add_argument('command', help='command to execute', 
-    choices=['import','export', 'ls'])
+    choices=['import','export', 'ls', 'rename'])
   (args, remaining) = parser.parse_known_args()
   if args.command == 'import':
     return import_footprint(remaining)
   elif args.command == 'export':
     return export_footprint(remaining)
-  else:
+  elif args.command == 'ls':
     return list_library(remaining)
+  else:
+    return rename_footprint(remaining)
 
 if __name__ == '__main__':
   sys.exit(cli_main())
