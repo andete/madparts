@@ -3,7 +3,7 @@
 # (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import time, traceback, os.path, os, argparse
+import time, traceback, os.path, os, argparse, sys
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
@@ -30,6 +30,9 @@ class MainWin(QtGui.QMainWindow):
 
     if do_import:
       self.file_name = self.import_footprint()
+      if self.file_name is None:
+        QtGui.qApp.quit()
+        sys.exit(1)
     else:
       self.file_name = file_name
       
@@ -246,35 +249,26 @@ class MainWin(QtGui.QMainWindow):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
 
   def import_footprint(self):
-    # TODO: select only one!
     dialog = gui.dialogs.ImportFootprintsDialog(self)
-    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    if dialog.exec_() != QtGui.QDialog.Accepted:
+      return None
     (footprint_names, importer, lib_filename) = dialog.get_data()
     (lib_name, _ext) = os.path.splitext(os.path.basename(lib_filename))
-    #lib_dir = QtCore.QDir(self.explorer.coffee_lib[selected_library].directory)
     lib_dir = QtCore.QDir(".")
-    l = []
-    # hack: taking only first TODO: proper fix
-    for footprint_name in footprint_names:
-      print "doing footprint:", footprint_name
-      interim = inter.import_footprint(importer, footprint_name) 
-      l.append((footprint_name, interim))
-    cl = []
-    for (footprint_name, interim) in l:
-      try:
-       coffee = generatesimple.generate_coffee(interim)
-       cl.append((footprint_name, coffee))
-      except Exception as ex:
-        tb = traceback.format_exc()
-        s = "warning: skipping footprint %s\nerror: %s" % (footprint_name, str(ex) + '\n' + tb)
-        QtGui.QMessageBox.warning(self, "warning", s)
-    for (footprint_name, coffee) in cl:
-    # TODO don't write!
-      meta = pycoffee.eval_coffee_meta(coffee)
-      new_file_name = lib_dir.filePath("%s_%s.coffee" % (lib_name, meta['name']))
-      with open(new_file_name, 'w+') as f:
-        f.write(coffee)
-    #self.explorer.rescan_library(selected_library)
+    footprint_name = footprint_names[0]
+    print "doing footprint:", footprint_name
+    interim = inter.import_footprint(importer, footprint_name) 
+    try:
+      coffee = generatesimple.generate_coffee(interim)
+    except Exception as ex:
+      tb = traceback.format_exc()
+      s = "warning: skipping footprint %s\nerror: %s" % (footprint_name, str(ex) + '\n' + tb)
+      QtGui.QMessageBox.warning(self, "warning", s)
+      return None
+    meta = pycoffee.eval_coffee_meta(coffee)
+    new_file_name = lib_dir.filePath("%s_%s.coffee" % (lib_name, meta['name']))
+    with open(new_file_name, 'w+') as f:
+      f.write(coffee)
     self.status('Importing done.')
     return new_file_name
 
