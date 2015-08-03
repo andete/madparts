@@ -46,9 +46,33 @@ def rename_footprint(remaining):
     return 1
   meta = filter(lambda x: x['type'] == 'meta', interim)[0]
   name = meta['name'].replace(' ','_')
-  new_name = os.path.dirname(args.footprint)+"/"+name+".coffee"
+  dir_name = os.path.dirname(args.footprint)
+  if dir_name != "":
+    new_name = dir_name+"/"+name+".coffee"
+  else:
+    new_name = name+".coffee"
   os.rename(args.footprint, new_name)
   print args.footprint, "renamed into ", new_name
+  
+def name_of_footprint(remaining):
+  parser = argparse.ArgumentParser(prog=sys.argv[0] + ' name')
+  parser.add_argument('footprint', help='footprint file')
+  args = parser.parse_args(remaining)
+  with open(args.footprint, 'r') as f:
+    code = f.read()
+  (error_txt, status_txt, interim) = pycoffee.compile_coffee(code)
+  if interim == None:
+    print >> sys.stderr, error_txt
+    return 1
+  meta = filter(lambda x: x['type'] == 'meta', interim)[0]
+  name = meta['name'].replace(' ','_')
+  dir_name = os.path.dirname(args.footprint)
+  if dir_name != "":
+    new_name = os.path.dirname(args.footprint)+"/"+name+".coffee"
+  else:
+    new_name = name+".coffee"
+  print new_name
+
 
 def import_footprint(remaining):
   parser = argparse.ArgumentParser(prog=sys.argv[0] + ' import')
@@ -98,7 +122,7 @@ def list_library(remaining):
 def cli_main():
   parser = argparse.ArgumentParser()
   parser.add_argument('command', help='command to execute', 
-    choices=['import','export', 'ls', 'rename'])
+    choices=['import','export', 'ls', 'rename', 'name'])
   (args, remaining) = parser.parse_known_args()
   if args.command == 'import':
     return import_footprint(remaining)
@@ -106,8 +130,10 @@ def cli_main():
     return export_footprint(remaining)
   elif args.command == 'ls':
     return list_library(remaining)
-  else:
+  elif args.command == 'rename':
     return rename_footprint(remaining)
+  else:
+    return name_of_footprint(remaining)
 
 if __name__ == '__main__':
   sys.exit(cli_main())

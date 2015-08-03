@@ -1,4 +1,4 @@
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # (c) 2013 Alex Schultz <alex@strangeautomata.com>
 # License: GPL
 
@@ -8,7 +8,7 @@ from inter import inter
 from qtscriptwrapper import JsEngine
 from qtscriptwrapper import JsEngineException
 
-supported_formats = ['1.0', '1.1', '1.2']
+supported_formats = ['1.0', '1.1', '1.2', '2.0']
 current_format = supported_formats[-1]
 
 js_make_js_from_coffee = None

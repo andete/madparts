@@ -12,7 +12,7 @@ if __name__ == '__main__':
     dirname = os.path.dirname(os.path.abspath(sys.argv[0]))
     in_dev_tree = os.path.exists(os.path.join(dirname, 'Makefile'))
     if in_dev_tree:
-      print "in dev tree"
+      print >> sys.stderr, "in dev tree"
       data_dir = dirname
     else:
       data_dir = os.path.join(sys.prefix, 'share', 'madparts')

@@ -3,7 +3,7 @@
 # (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import time, traceback, os.path, os, argparse, sys
+import time, traceback, os.path, os, argparse, sys, os.path
 
 from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
@@ -33,11 +33,13 @@ class MainWin(QtGui.QMainWindow):
       if self.file_name is None:
         QtGui.qApp.quit()
         sys.exit(1)
+      self.ever_saved = False
     else:
+      self.ever_saved = True
       self.file_name = file_name
-      
+
     self.readonly = not os.access(self.file_name, os.W_OK)
-    self.setWindowTitle("madparts: " + self.file_name)
+    self.setWindowTitle("madparts: " + os.path.basename(self.file_name))
 
     self.settings = QtCore.QSettings()
 
@@ -347,6 +349,9 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_keepout: filter_out.append('keepout')
       self.display.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.readonly:
+        # TODO
+        # if not self.ever_saved:
+        #    do save-as dialog
         with open(self.file_name, "w+") as f:
           f.write(code)
       if compilation_failed_last_time:
