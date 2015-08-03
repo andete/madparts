@@ -45,6 +45,7 @@ class MainWin(QtGui.QMainWindow):
 
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
+    self.add_action(fileMenu, '&Save as', self.save_as, 'Ctrl+S')
     self.add_action(fileMenu, '&Quit', self.close, 'Ctrl+Q')
 
     editMenu = menuBar.addMenu('&Edit')
@@ -225,12 +226,12 @@ class MainWin(QtGui.QMainWindow):
       self._export_footprint()
 
   def export_footprint(self):
-     dialog = gui.dialogs.LibrarySelectDialog(self)
-     if dialog.exec_() != QtGui.QDialog.Accepted: return
-     self.export_library_filename = dialog.filename
-     self.export_library_filetype = dialog.filetype
-     self.export_library_version = dialog.version
-     self._export_footprint()
+    dialog = gui.dialogs.LibrarySelectDialog(self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    self.export_library_filename = dialog.filename
+    self.export_library_filetype = dialog.filetype
+    self.export_library_version = dialog.version
+    self._export_footprint()
 
   def show_footprint_tab(self):
     self.left_qtab.setCurrentIndex(1)
@@ -238,6 +239,15 @@ class MainWin(QtGui.QMainWindow):
   def close(self):
     QtGui.qApp.quit()
 
+  def save_as(self):
+    dialog = gui.dialogs.SaveAsDialog(self.file_name, self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    # TODO
+    # save using existing filename as suggestion
+    # generate a new ID
+    # don't actually save, will be done automatically
+    pass
+    
   def zoom(self):
     self.display.zoomfactor = int(self.zoom_selector.text())
     self.display.zoom_changed = True
@@ -349,9 +359,9 @@ class MainWin(QtGui.QMainWindow):
       if not self.display_keepout: filter_out.append('keepout')
       self.display.set_shapes(inter.prepare_for_display(interim, filter_out))
       if not self.readonly:
-        # TODO
-        # if not self.ever_saved:
-        #    do save-as dialog
+        if not self.ever_saved:
+          self.save_as()
+          self.ever_saved = True
         with open(self.file_name, "w+") as f:
           f.write(code)
       if compilation_failed_last_time:
