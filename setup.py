@@ -3,7 +3,7 @@
 # (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-VERSION='1.2.1'
+VERSION='2.0.0'
 
 import glob, sys, platform
 
@@ -74,7 +74,7 @@ elif sys.platform.startswith('linux'):
    extra_options = dict(
        # Normally unix-like platforms will use "setup.py install"
        # and install the main script as such
-       scripts=['madparts'],
+       scripts=['madparts', 'madparts-cli', 'madparts-import'],
        )
    if not arch in ['x86_64']:
      raise Exception("unsupported arch %s" % (arch))
