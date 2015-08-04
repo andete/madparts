@@ -67,7 +67,7 @@ elif sys.platform == 'win32':
   extra_data_files = ['msvcp90.dll',]
   extra_options = dict(
       setup_requires=['py2exe'],
-      console=['madparts'],
+      console=['madparts', 'madparts-cli', 'madparts-import'],
       options=dict(py2exe=OPTIONS)
       )
 elif sys.platform.startswith('linux'):
