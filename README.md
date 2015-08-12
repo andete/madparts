@@ -3,6 +3,11 @@ madparts
 
 A functional footprint editor.
 
+what's new in 2.0
+=================
+
+Library management functionality has been completely removed from madparts simplifying the workflow by just leaving it to the user and the filesystem and filenames. More details are available in the updated documentation.
+
 features
 ========
 
