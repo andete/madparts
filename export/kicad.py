@@ -113,6 +113,7 @@ class Export:
 
 
     def pad(shape, smd=False):
+      want_paste = shape['paste']
       name = shape['name']
       if name is None or name == "":
         name = ""
@@ -158,7 +159,10 @@ class Export:
         raise Exception("%s shaped pad not supported in kicad" % (shape2))
       l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y'), iget(shape, 'rot')])
       if smd:
-        l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')])
+        if want_paste:
+          l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')])
+        else:
+          l.append([S('layers'), S('F.Cu'), S('F.Mask')])
       else:
         l.append([S('layers'), S('*.Cu'), S('*.Mask')])
       if not smd:

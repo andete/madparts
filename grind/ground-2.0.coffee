@@ -105,6 +105,7 @@ class Rect
 class Pad
   constructor: ->
     @type = 'pad'
+    @paste = true
 
 class RoundPad extends Pad
   constructor: (@r, @drill) ->
