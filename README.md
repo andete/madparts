@@ -20,7 +20,7 @@ features
 documentation
 =============
 
-Please check out the [wiki](https://github.com/andete/madparts/wiki).
+Please check out the [website](http://madparts.org).
 
 source dependencies
 ===================
