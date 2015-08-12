@@ -39,13 +39,13 @@ class MainWin(QtGui.QMainWindow):
       self.file_name = file_name
 
     self.readonly = not os.access(self.file_name, os.W_OK)
-    self.setWindowTitle("madparts: " + os.path.basename(self.file_name))
+    self.update_title()
 
     self.settings = QtCore.QSettings()
 
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
-    self.add_action(fileMenu, '&Save as', self.save_as, 'Ctrl+S')
+    self.add_action(fileMenu, '&Save As', self.save_as, 'Ctrl+S')
     self.add_action(fileMenu, '&Quit', self.close, 'Ctrl+Q')
 
     editMenu = menuBar.addMenu('&Edit')
@@ -104,6 +104,9 @@ class MainWin(QtGui.QMainWindow):
 
   ### GUI HELPERS
 
+  def update_title(self):
+    self.setWindowTitle("madparts: " + os.path.basename(self.file_name))
+  
   def set_code_textedit_readonly(self, readonly):
     self.code_textedit.setReadOnly(readonly)
     pal = self.code_textedit.palette()
@@ -240,13 +243,13 @@ class MainWin(QtGui.QMainWindow):
     QtGui.qApp.quit()
 
   def save_as(self):
+    # save using existing filename as suggestion
     dialog = gui.dialogs.SaveAsDialog(self.file_name, self)
     if dialog.exec_() != QtGui.QDialog.Accepted: return
-    # TODO
-    # save using existing filename as suggestion
-    # generate a new ID
-    # don't actually save, will be done automatically
-    pass
+    new_file_name = dialog.get_file_name()
+    if new_file_name == self.file_name: return
+    self.file_name = new_file_name
+    self.update_title()
     
   def zoom(self):
     self.display.zoomfactor = int(self.zoom_selector.text())

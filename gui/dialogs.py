@@ -269,11 +269,19 @@ class SaveAsDialog(QtGui.QDialog):
     self.button_box.accepted.connect(self.accept)
     vbox.addWidget(self.button_box)
     self.setLayout(vbox)
-
+    
   def get_file(self):
     fd = QtGui.QFileDialog(self, 'Save as...')
+    fd.setAcceptMode(QtGui.QFileDialog.AcceptSave)
     fd.setFilter("Coffeescript (*.coffee)")
-    if fd.exec_() == 0: return None
+    res = fd.exec_()
+    print 'res:', res
+    if res == 0:
+      print "none selected"
+      return None
     result = fd.selectedFiles()
+    print result
     self.filename_field.setText(result[0])
 
+  def get_file_name(self):
+    return self.filename_field.text()
