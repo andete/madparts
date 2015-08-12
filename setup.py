@@ -3,7 +3,7 @@
 # (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-VERSION='2.0.0'
+from main.version import VERSION
 
 import glob, sys, platform
 
