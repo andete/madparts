@@ -113,7 +113,9 @@ class Export:
 
 
     def pad(shape, smd=False):
-      want_paste = shape['paste']
+      want_paste = True
+      if 'paste' in shape:
+        want_paste = shape['paste']
       name = shape['name']
       if name is None or name == "":
         name = ""
