@@ -23,6 +23,8 @@ import export.detect
 
 from gui.defaultsettings import default_settings
 
+import version
+
 class MainWin(QtGui.QMainWindow):
 
   def __init__(self, file_name, do_import):
@@ -105,7 +107,7 @@ class MainWin(QtGui.QMainWindow):
   ### GUI HELPERS
 
   def update_title(self):
-    self.setWindowTitle("madparts: " + os.path.basename(self.file_name))
+    self.setWindowTitle("madparts " + version.VERSION + ": " + os.path.basename(self.file_name))
   
   def set_code_textedit_readonly(self, readonly):
     self.code_textedit.setReadOnly(readonly)
