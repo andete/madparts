@@ -144,7 +144,6 @@
         <ul class="nav navbar-nav">
           <li><a href="index.html">~</a></li>
           <li class="active"><a href="#">footprint editor</a></li>
-          <li><a href="inventory.html">inventory tool</a></li>
           <li><a href="http://damad.be/joost/">contact</a></li>
         </ul>
       </div>
@@ -185,7 +184,6 @@
               <ul class="nav">
                 <li><a href="#doc-eagle">Eagle</a></li>
                 <li><a href="#doc-kicad">Kicad</a></li>
-                <li><a href="#doc-libraries">Libraries</a></li>
                 <li><a href="#doc-editing">Editing</a></li>
                 <li><a href="#doc-command-line">Command-line</a></li>
                 <li><a href="#doc-format">Format</a></li>
@@ -227,6 +225,7 @@
        </div>
        <p>
          <ul>
+           <li>August 15, 2015: <a target="_" href="TODO blog post">2.0 release of madparts</a></li>
            <li>December 24, 2013: <a target="_" href="http://joost.damad.be/2013/12/using-madparts-for-making-electronics.html">blog post with detailed example of usage</a>.</li>
            <li>December 15, 2013: v1.2.1 released; for highlights see <a target="_" href="http://joost.damad.be/2013/12/madparts-release-121.html">this blog post</a>.</li>
            <li>August 19, 2013: v1.2 released; for highlights see <a target="_" href="http://joost.damad.be/2013/08/madparts-release-12.html">this blog post</a>.</li>
@@ -271,7 +270,7 @@ As a footprint library is just a directory, and each footprint is just a file, y
 
        <h3 id="faq-git">Is there a central github repo where we can all share footprints?</h3>
        <p>
-This is an excellent idea and I hope someone sets this up and maintains it. Let me know if you do. For now my own footprints can be found at <a target="_" href="https://github.com/andete/madparts-parts">madparts-parts</a>
+This is an excellent idea and I hope someone sets this up and maintains it. Let me know if you do. For now an older subset of my own footprints can be found at <a target="_" href="https://github.com/andete/madparts-parts">madparts-parts</a>
        </p>
 
        <h3 id="faq-file">Why is each footprint a separate file?</h3>
@@ -279,9 +278,10 @@ This is an excellent idea and I hope someone sets this up and maintains it. Let 
 This makes sense if you want to start collaborating with other people via a version management system. You don't want to have to merge files each time someone made a change to one footprint.
        </p>
 
-       <h3 id="faq-fn">Why are footprints called something like 9364e38b40644665a3c8c07a5f2f3190.coffee?</h3>
+       <h3 id="faq-fn">Why were footprints called something like 9364e38b40644665a3c8c07a5f2f3190.coffee in previous releases?</h3>
        <p>
-Each footprint has an unique file name this way. This helps avoiding name clashes if you're working together with other people. In the editor itself the footprints are shown with their name, so you don't have to worry about the file names in practice, except perhaps when doing merges in your version management system.
+
+         This was part of the footprint management system that was integrated in the 1.x releases of madparts. The 2.0 release has removed all this and filenames are up to you again.
        </p>
 
        <h3 id="faq-print">how can I print a footprint?</h3>
@@ -328,7 +328,7 @@ Milimeters are used everywhere. You can suffix a number with mi or mil for mils 
          <h1 id="documentation">Documentation</h1>
        </div>
        <p>
-Using the program should be quite straightforward. There are two tabs, the footprint editor and the library browser. A menu bar at the top provides import/export and other functions. Right-clicking on an item in the library browser also works. The right side of the program always shows a rendering of the currently selected footprint.
+Using the program should be quite straightforward. A menu bar at the top provides import/export and other functions. The right side of the program always shows a rendering of the currently selected footprint.
        </p>
 
        <h3 id="doc-eagle">Eagle</h3>
@@ -351,25 +351,9 @@ If you saved your footprint to a library, you may find that you can't select the
        <h3 id="doc-kicad">Kicad</h3>
        <h4>typical Kicad workflow</h3>
        <p>
-Kicad has two library formats, the old .mod and the new .pretty. Current (Aug 2013) kicad still uses the old .mod format files for selecting footprints within kicad. Therefor it is recommended to use a .mod file as target for exporting footprints. If you export a footprint to a .pretty directory or a .kicad_mod file you need to import it into the active .mod library via the kicad module editor.
-       </p>
-       <p>
-Besides that the workflow is basically the same as for eagle.
+Kicad has two library formats, the old .mod and the new .pretty. Code to support the old format is kept around for legacy reasons but as current kicad has switched to the new format the new format code is more heavily used and has more bugfixes applied. Note that unfortunately kicad caches the .pretty library content so you have to restart kicad to see a newly added footprint. If you just overwrite and existing footprint you can just change the footprint to the same via kicad in pcbnew and it will take the new footprint. I have some ideas to better integrate with Kicad but they are not there yet ;)
        </p>
 
-       <h3 id="doc-libraries">Libraries</h3>
-       <p>
-Libraries are just directories (folders). Adding a library means linking towards a directory on your computer. If that directory already contains footprints they will be shown. If you unlink a library it is not be removed from your computer it is just no longer shown in the program.
-       </p>
-       <p>
-The Library browser shows the footprints as a hierarchy. A footprint that is a clone of another is shown as a child.
-       </p>
-       <p>
-Double-click on a footprint to open it.
-       </p>
-       <p>
-From the library browser you can also export and import footprints from/to eagle CAD.
-       </p>
        <h3 id="doc-editing">Editing footprints</h3>
        <p>
        Editing footprints is almost real-time. This means that the code is compiled when you stop typing and the result is immediately shown on the display part of the editor. If there is a compilation error an error window will pop up from the bottom of the editor showing the error.
@@ -379,7 +363,7 @@ The footprint is automatically saved each time it compiles successfully. If your
 If you come from an older version of madparts you may want to check if auto compile is turned on as some older versions shipped with it turned off by default, meaning you have to turn it on yourself.
        </p>
        <h3 id="doc-command-line">Command-line</h3>
-       <p>It is possible to use madparts without GUI for importing and exporting footprints. Some examples of usage follow.</p>
+       <p>It is possible to use the madparts-cli program for importing and exporting footprints. Some examples of usage follow.</p>
 <h4>list a madparts library</h4>
 <pre>
 $ madparts ls examples/
