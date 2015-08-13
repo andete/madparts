@@ -275,12 +275,51 @@ class SaveAsDialog(QtGui.QDialog):
     fd.setAcceptMode(QtGui.QFileDialog.AcceptSave)
     fd.setFilter("Coffeescript (*.coffee)")
     res = fd.exec_()
-    print 'res:', res
     if res == 0:
-      print "none selected"
       return None
     result = fd.selectedFiles()
-    print result
+    self.filename_field.setText(result[0])
+
+  def get_file_name(self):
+    return self.filename_field.text()
+
+class OpenDialog(QtGui.QDialog):
+
+  def __init__(self, existing_file, parent=None):
+    super(OpenDialog, self).__init__(parent)
+    self.setWindowTitle('Open...')
+    self.resize(640,160) # TODO, there must be a better way to do this
+    vbox = QtGui.QVBoxLayout()
+    form_layout = QtGui.QFormLayout()
+    file_widget = QtGui.QWidget()
+    file_hbox = QtGui.QHBoxLayout()
+    self.filename_field = QtGui.QLineEdit()
+    if existing_file is None:
+      self.filename_field.setReadOnly(True)
+      self.filename_field.setPlaceholderText("press Browse")
+    else:
+      self.filename_field.setText(existing_file)
+    file_hbox.addWidget(self.filename_field)
+    browse_button = QtGui.QPushButton("Browse")
+    browse_button.clicked.connect(self.get_file)
+    file_hbox.addWidget(browse_button)
+    file_widget.setLayout(file_hbox)
+    form_layout.addRow("File", file_widget) 
+    vbox.addLayout(form_layout)
+    buttons = QtGui.QDialogButtonBox.Ok # | QtGui.QDialogButtonBox.Cancel
+    # is it acceptable not to allow Cancel?
+    self.button_box = QtGui.QDialogButtonBox(buttons, QtCore.Qt.Horizontal)
+    self.button_box.accepted.connect(self.accept)
+    vbox.addWidget(self.button_box)
+    self.setLayout(vbox)
+    
+  def get_file(self):
+    fd = QtGui.QFileDialog(self, 'Open...')
+    fd.setFilter("Coffeescript (*.coffee)")
+    res = fd.exec_()
+    if res == 0:
+      return None
+    result = fd.selectedFiles()
     self.filename_field.setText(result[0])
 
   def get_file_name(self):

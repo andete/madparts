@@ -31,9 +31,10 @@ if __name__ == '__main__':
       sys.path.append(data_dir)
     os.environ['DATA_DIR'] = data_dir
 
-    if len(sys.argv) != 2:
-      sys.stderr.write(usage % (sys.argv[0], sys.argv[0]))
-      sys.exit(1)
+    file_name = None
+    if len(sys.argv) >= 2:
+      file_name = sys.argv[1]
+      print 'opening file', file_name
 
-    sys.exit(main.madparts.gui_main(sys.argv[1]))
+    sys.exit(main.madparts.gui_main(file_name))
          

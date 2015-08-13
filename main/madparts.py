@@ -40,6 +40,9 @@ class MainWin(QtGui.QMainWindow):
       self.ever_saved = True
       self.file_name = file_name
 
+    if self.file_name == None:
+      self.open_file(True)
+      
     self.readonly = not os.access(self.file_name, os.W_OK)
     self.update_title()
 
@@ -47,6 +50,7 @@ class MainWin(QtGui.QMainWindow):
 
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
+    self.add_action(fileMenu, '&Open', self.open_file, 'Ctrl+O')
     self.add_action(fileMenu, '&Save As', self.save_as, 'Ctrl+S')
     self.add_action(fileMenu, '&Quit', self.close, 'Ctrl+Q')
 
@@ -252,6 +256,20 @@ class MainWin(QtGui.QMainWindow):
     if new_file_name == self.file_name: return
     self.file_name = new_file_name
     self.update_title()
+
+  def open_file(self, initial=False):
+    # open using existing filename as suggestion
+    dialog = gui.dialogs.OpenDialog(self.file_name, self)
+    if dialog.exec_() != QtGui.QDialog.Accepted: return
+    new_file_name = dialog.get_file_name()
+    if new_file_name == self.file_name: return
+    self.file_name = new_file_name
+    if not initial:
+      self.readonly = not os.access(self.file_name, os.W_OK)
+      with open(self.file_name) as f:
+        self.update_text(f.read())
+        self.set_code_textedit_readonly(self.readonly)
+      self.update_title()
     
   def zoom(self):
     self.display.zoomfactor = int(self.zoom_selector.text())
