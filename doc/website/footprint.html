@@ -182,6 +182,7 @@
            </li>
            <li><a href="#documentation">Documentation</a>
               <ul class="nav">
+                <li><a href="#doc-exe">Programs</a></li>
                 <li><a href="#doc-eagle">Eagle</a></li>
                 <li><a href="#doc-kicad">Kicad</a></li>
                 <li><a href="#doc-editing">Editing</a></li>
@@ -217,8 +218,8 @@
        <p>
          The main goal of madparts is to make electronic footprints in a programmatic way. This is done by making each footprint a small program, giving you huge expressiveness.
          In order to play nice with existing CAD packages, export and import from/to both eagle and kicad are supported.
-         Import does pattern detection detecting single, dual or quad package formations.
-         The footprint program is continously compiled, giving instant graphical feedback of your changes.
+         Import does pattern detection detecting of single, dual or quad package formations.
+         The footprint program is continously compiled, giving instant graphical feedback of your changes as you type.
          Because each footprint is a separate file, collaboration is easy. Just stick the files in a version management system.
        <div class="page-header">
          <h1 id="news">News</h1>
@@ -265,7 +266,7 @@ Indeed madparts is written in python, so python would be rather trivial to add. 
 
        <h3 id="faq-sharing">How about working together with other people on footprints, or sharing?</h3>
        <p>
-As a footprint library is just a directory, and each footprint is just a file, you can very easily share that directory via a version management system like git. (Or use something like dropbox or google drive, if you don't like having a version management system)
+As each footprint is just a file, you can very easily share those files using a version management system like git. (Or use something like dropbox or google drive, if you don't like having a version management system)
        </p>
 
        <h3 id="faq-git">Is there a central github repo where we can all share footprints?</h3>
@@ -291,7 +292,7 @@ You can't yet. It is a feature that is planned but not yet there. For now you ca
 
        <h3 id="faq-back">how can you make improvements to the program without breaking the existing footprints?</h3>
        <p>
-There is a #format meta-tag in each footprint. Madparts uses this to use the right version of the utilities code for that particular version of footprint. The current format is 1.2.
+There is a #format meta-tag in each footprint. Madparts uses this to use the right version of the utilities code for that particular version of footprint. The current format is 2.0.
        </p>
 
        <h3 id="faq-eagle">is import/export from/to eagle cad supported?</h3>
@@ -328,7 +329,17 @@ Milimeters are used everywhere. You can suffix a number with mi or mil for mils 
          <h1 id="documentation">Documentation</h1>
        </div>
        <p>
-Using the program should be quite straightforward. A menu bar at the top provides import/export and other functions. The right side of the program always shows a rendering of the currently selected footprint.
+Using the program should be quite straightforward. A menu bar at the top provides export and other functions. The right side of the program always shows a rendering of the currently selected footprint.
+       </p>
+
+       <h3 id="doc-exe">programs</h3>
+       <h4>madparts</h4>
+       <p>
+This is the main program. Start it with a .coffee file to edit it. Starting it without a file will pop up the open dialog allow you to select a file.         
+       </p>
+       <h4>madparts-import</h4>
+       <p>
+Use this program to import a footprint. Start it up and it will pop up a dialog asking to open a kicad or eagle library and then allows you to select a footprint to import.
        </p>
 
        <h3 id="doc-eagle">Eagle</h3>
@@ -539,21 +550,15 @@ footprint = () ->
 The meta block is special as it is not actual coffeescript code. It contains some meta data about the footprint.
 </p>
 <pre>
-#format 1.0
+#format 2.0
 #name TQFP44
-#id 9364e38b40644665a3c8c07a5f2f3190
-#parent e5bd48346acc4d549d678cb059be64ef
 #desc TQFP44 example
 #desc this package is used by e.g. the Atmel ATMEGA1284P-AU
 </pre>
 <p>
-<code>#format</code> indicates the footprint format. The current active format is 1.2. This tells the program which version of the footprint generating library it should use for executing the footprint.
+<code>#format</code> indicates the footprint format. The current active format is 2.0. This tells the program which version of the footprint generating library it should use for executing the footprint.
 </p><p>
-<code>#name</code> is the short name of the footprint. Multiple footprints are allowed to have the same footprint but it might get confusing :)
-</p><p>
-<code>#id</code> this is the unique id of the footprint, this generated automatically and you should NEVER edit it.
-</p><p>
-<code>#parent</code> if present, this tells the id of the parent of this footprint. You should NEVER edit it, unless to remove it entirely.
+<code>#name</code> is the short name of the footprint. Multiple footprints are allowed to have the same footprint but it might get confusing :) This is what is used as name when you export to kicad or eagle.
 </p><p>
 <code>#desc</code> A detailed description of the footprint. Multiple lines can be made by multiple <code>#desc</code> lines.
 </p>
@@ -653,27 +658,27 @@ Install the following packages via your distribution package manager:
 
 As of 1.2, pyv8 is no longer needed!
 
-Finally download a package of madparts 1.2.1 from <a target="_" href="http://madparts.org/download/1.2.1/linux/">http://madparts.org/download/1.2.1/linux/</a>
+Finally download a package of madparts 2.0.0 from <a target="_" href="http://madparts.org/download/2.0.0/linux/">http://madparts.org/download/2.0.0/linux/</a>
 
-Packages for Debian wheezy and jessie and Ubuntu saucy are provided.
+Packages for Debian 8 are provided.
        </p>
 
        <h3 id="dl-win32">Win32</h3>
        <p>
-Download the zipfile from <a href="http://madparts.org/download/1.2.1/win32/madparts-1.2.1.zip">madparts-1.2.1.zip</a>.
+Download the zipfile from <a href="http://madparts.org/download/2.0.0/win32/madparts-2.0.0.zip">madparts-2.0.0.zip</a>.
 
-Unzip the zipfile and execute the madparts.exe contained in the madparts-1.2.1 directory.
+Unzip the zipfile and execute the madparts.exe contained in the madparts-2.0.0 directory. It might be convenient to associate the .coffee file extension with the madparts.exe.
        </p>
 
        <h3 id="dl-osx">OS-X</h3>
        <p>
-For OS-X Montain Lion an app is provided. Download it from <a href="http://madparts.org/download/1.2.1/osx/madparts-1.2.1-osx.zip">madparts-1.2.1-osx.zip</a>, unzip and run it.
-For other variants of OS-X please look in the <a href="https://raw.github.com/andete/madparts/v1.2.1/BUILD.osx">BUILD.osx</a> file.
+For OS-X Montain Lion an app is provided. Download it from <a href="http://madparts.org/download/2.0.0/osx/madparts-2.0.0-osx.zip">madparts-2.0.0-osx.zip</a>, unzip and run it.
+For other variants of OS-X please look in the <a href="https://raw.github.com/andete/madparts/v2.0.0/BUILD.osx">BUILD.osx</a> file.
        </p>
 
        <h3 id="dl-source">Source</h3>
        <p>
-         <a href="http://madparts.org/download/1.2.1/source/madparts-1.2.1.tar.gz">madparts-1.2.1.tar.gz</a>
+         <a href="http://madparts.org/download/2.0.0/source/madparts-2.0.0.tar.gz">madparts-1.2.1.tar.gz</a>
        </p>
 
        <div class="page-header">
@@ -687,7 +692,7 @@ All the code lives in <a href="https://github.com/andete/madparts">github</a>.
     </div> <!-- row -->
 
     <footer>
-      <p class="text-right">&copy; 2013 Joost Yervante Damad.</p>
+      <p class="text-right">&copy; 2013-2015 Joost Yervante Damad.</p>
     </footer>
 
     </div> <!-- container -->
