@@ -499,3 +499,18 @@ remove = (l, i) ->
       if j > i
         x.xname = j-1
   map (filter l, not_named_i), renumber
+
+rect_bga = (b, between, x, y, name_gen, filter_func = ((x) -> true)) ->
+  x2 = (x-1)*between/2
+  y2 = (y-1)*between/2
+  combine [0..(y-1)].map ((j) ->
+    [0..(x-1)].map ((i) ->
+        if not filter_func i, j
+          []
+        else
+          b2 = clone b
+          b2.name = name_gen i, j
+          b2 = adjust_x b2, (-x2+between*i)
+          adjust_y b2, (y2-between*j)
+      )
+    )
