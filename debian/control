@@ -15,5 +15,4 @@ Description: a functional electronics footprint editor
   * high level pattern detection for single, dual quad formations
     of pads on import
   * instant graphical feedback with continuous compilation process
-  * easy collaboration because footprints are separate files and
-    libraries are just directories
+  * easy collaboration because footprints are separate files

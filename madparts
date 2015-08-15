@@ -4,7 +4,6 @@
 # License: GPL
 
 import sys, os
-import main.madparts
 
 usage = """
 Usage:
@@ -30,6 +29,7 @@ if __name__ == '__main__':
       data_dir = os.path.join(sys.prefix, 'share', 'madparts')
       sys.path.append(data_dir)
     os.environ['DATA_DIR'] = data_dir
+    import main.madparts
 
     file_name = None
     if len(sys.argv) >= 2:

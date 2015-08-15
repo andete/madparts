@@ -4,7 +4,6 @@
 # License: GPL
 
 import sys, os
-import main.madparts
 
 if __name__ == '__main__':
     # trick needed to make OpenGL work on win32
@@ -26,5 +25,5 @@ if __name__ == '__main__':
       sys.path.append(data_dir)
     os.environ['DATA_DIR'] = data_dir
 
+    import main.madparts
     sys.exit(main.madparts.gui_main(None, do_import=True))
-         

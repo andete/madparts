@@ -1,3 +1,9 @@
+madparts (2.0.0-1) unstable; urgency=low
+
+  * New package for 2.0.0 release
+
+ -- Joost Yervante Damad <joost@damad.be>  Sat, 15 Aug 2015 17:21:36 +0200
+
 madparts (1.2.1-1) unstable; urgency=low
 
   * New package for 1.2.1 release

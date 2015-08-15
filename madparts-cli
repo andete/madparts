@@ -4,7 +4,6 @@
 # License: GPL
 
 import sys, os
-import main.cli
 
 if __name__ == '__main__':
     # if there is a file called 'Makefile' in the same directory
@@ -19,4 +18,5 @@ if __name__ == '__main__':
       sys.path.append(data_dir)
     os.environ['DATA_DIR'] = data_dir
 
+    import main.cli
     sys.exit(main.cli.cli_main())
