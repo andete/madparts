@@ -31,7 +31,7 @@ class MainWin(QtGui.QMainWindow):
     super(MainWin, self).__init__()
 
     if do_import:
-      self.file_name = self.import_footprint()
+      self.file_name = self.import_footprint(True)
       if self.file_name is None:
         QtGui.qApp.quit()
         sys.exit(1)
@@ -51,6 +51,7 @@ class MainWin(QtGui.QMainWindow):
     menuBar = self.menuBar()
     fileMenu = menuBar.addMenu('&File')
     self.add_action(fileMenu, '&Open', self.open_file, 'Ctrl+O')
+    self.add_action(fileMenu, '&Import', self.import_footprint, 'Ctrl+I')
     self.add_action(fileMenu, '&Save As', self.save_as, 'Ctrl+S')
     self.add_action(fileMenu, '&Quit', self.close, 'Ctrl+Q')
 
@@ -283,7 +284,7 @@ class MainWin(QtGui.QMainWindow):
   def auto_zoom_changed(self):
     self.settings.setValue('gl/autozoom', str(self.auto_zoom.isChecked()))
 
-  def import_footprint(self):
+  def import_footprint(self, initial=False):
     dialog = gui.dialogs.ImportFootprintsDialog(self)
     if dialog.exec_() != QtGui.QDialog.Accepted:
       return None
@@ -305,7 +306,15 @@ class MainWin(QtGui.QMainWindow):
     with open(new_file_name, 'w+') as f:
       f.write(coffee)
     self.status('Importing done.')
-    return new_file_name
+    if not initial:
+      self.file_name = new_file_name
+      self.readonly = not os.access(self.file_name, os.W_OK)
+      with open(self.file_name) as f:
+        self.update_text(f.read())
+        self.set_code_textedit_readonly(self.readonly)
+      self.update_title()
+    else:
+      return new_file_name
 
   def docu_changed(self):
     self.display_docu = self.docu_action.isChecked()
