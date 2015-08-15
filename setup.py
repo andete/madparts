@@ -21,10 +21,11 @@ if sys.platform == 'darwin':
       'argv_emulation': True,
       #'includes': ['sip', 'PyQt4', 'PyQt4.QtCore', 'PyQt4.QtGui', 'simplejson'],
       #'excludes': ['PyQt4.QtDesigner', 'PyQt4.QtNetwork', 'PyQt4.QtOpenGL', 'PyQt4.QtScript', 'PyQt4.QtSql', 'PyQt4.QtTest', 'PyQt4.QtWebKit', 'PyQt4.QtXml', 'PyQt4.phonon'],
+      'extra_scripts': ['madparts-cli', 'madparts-import']
       }
   extra_options = dict(
       setup_requires=['py2app'],
-      app=['madparts','madparts-cli','madparts-import'],
+      app=['madparts'],
       # Cross-platform applications generally expect sys.argv to
       # be used for opening files.
       options=dict(py2app=OPTIONS),
