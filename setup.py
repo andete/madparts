@@ -24,7 +24,7 @@ if sys.platform == 'darwin':
       }
   extra_options = dict(
       setup_requires=['py2app'],
-      app=['madparts'],
+      app=['madparts','madparts-cli','madparts-import'],
       # Cross-platform applications generally expect sys.argv to
       # be used for opening files.
       options=dict(py2app=OPTIONS),

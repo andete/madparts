@@ -8,6 +8,7 @@ sudo port install py27-numpy
 sudo port install py27-opengl
 sudo port install py27-beautifulsoup4
 sudo port install py27-pil
+sudo port install py27-py2app
 
 Execute 'make darwin'
 
