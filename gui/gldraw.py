@@ -101,7 +101,7 @@ class GLDraw:
   def label(self, shape, labels):
     x = fget(shape,'x')
     y = fget(shape,'y')
-    dy = fget(shape,'dy', 1)
+    dy = fget(shape,'dy', 0.75)
     dx = fget(shape,'dx', 100.0) # arbitrary large number
     self._txt(shape, dx, dy, x, y)
     return labels

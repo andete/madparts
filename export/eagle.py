@@ -61,7 +61,7 @@ def _check_xml(soup):
   v = soup.eagle.get('version')
   if v == None:
     raise Exception("Unknown file format (no eagle XML?)")
-  if float(v) < 6:
+  if int(v.split('.', 1)[0]) < 6:
     raise Exception("Eagle 6.0 or later is required.")
   return v
 
