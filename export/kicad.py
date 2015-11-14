@@ -284,6 +284,9 @@ class Export:
       y = - fget(shape, 'y')
       dx = fget(shape, 'dx')
       dy = fget(shape, 'dy')
+      rot = fget(shape, 'rot')
+      if rot == 90 or rot == 270:
+        (dx, dy) = (dy, dx)
       lxy = [S('pts')]
       def add(x1, y1):
         lxy.append([S('xy'), fc(x1), fc(y1)])
@@ -352,7 +355,7 @@ class Export:
           'keepout': unknown,
           'stop': silk,
           'glue': silk,
-          'paste': lambda s: pad(s, smd=True),
+          'paste': silk,
           'restrict': unknown,
           'vrestrict': unknown,
           'smd': lambda s: pad(s, smd=True),
