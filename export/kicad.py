@@ -94,19 +94,19 @@ class Export:
       s.append(pad_line(x1,y1,x2,y2,width,'F.Mask'))
 
     def gen_lines(l,x,y,rot,radius,dx,dy):
-      #4 corners
-      xo = dx/2 - radius;
-      yo = dy/2 - radius;
+      # 4 corners
+      xo = dx/2 - radius
+      yo = dy/2 - radius
 
       rot = math.radians(rot)
 
-      xp = math.cos(rot)*xo - math.sin(rot)*yo;
-      yp = math.cos(rot)*yo +  math.sin(rot)*xo;
+      xp = math.cos(rot)*xo - math.sin(rot)*yo
+      yp = math.cos(rot)*yo +  math.sin(rot)*xo
             
-      x1 = x - xp;
-      x2 = x + xp;
-      y1 = y - yp;
-      y2 = y + yp;
+      x1 = x - xp
+      x2 = x + xp
+      y1 = y - yp
+      y2 = y + yp
 
       pad_lines(l,x1,y1,x2,y1,radius*2)
       pad_lines(l,x2,y1,x2,y2,radius*2)
@@ -118,11 +118,14 @@ class Export:
       want_paste = True
       if 'paste' in shape:
         want_paste = shape['paste']
-      name = shape['name']
-      if name is None or name == "":
-        name = ""
+      if 'name' in shape:
+        name = shape['name']
+        if name is None or name == "":
+          name = ""
+        else:
+          name = S(name)
       else:
-        name = S(name)
+        name = ""
       l = [S('pad'), name]
       shapes = [l]
       if smd:
@@ -163,10 +166,13 @@ class Export:
         raise Exception("%s shaped pad not supported in kicad" % (shape2))
       l.append([S('at'), fget(shape, 'x'), -fget(shape, 'y'), iget(shape, 'rot')])
       if smd:
-        if want_paste:
-          l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')])
+        if shape['type'] != 'smd':
+          l.append([S('layers'), S('F.Paste')])
         else:
-          l.append([S('layers'), S('F.Cu'), S('F.Mask')])
+          if want_paste:
+            l.append([S('layers'), S('F.Cu'), S('F.Paste'), S('F.Mask')])
+          else:
+            l.append([S('layers'), S('F.Cu'), S('F.Mask')])
       else:
         l.append([S('layers'), S('*.Cu'), S('*.Mask')])
       if not smd:
@@ -346,7 +352,7 @@ class Export:
           'keepout': unknown,
           'stop': silk,
           'glue': silk,
-          'paste': silk,
+          'paste': lambda s: pad(s, smd=True),
           'restrict': unknown,
           'vrestrict': unknown,
           'smd': lambda s: pad(s, smd=True),
