@@ -24,6 +24,7 @@ def type_to_layer_name(layer):
     'glue': 'F.Adhes',
     'docu': 'Dwgs.User',
     'hole': 'Edge.Cuts',
+    'paste': 'F.Paste',
     }.get(layer)
 
 def layer_name_to_type(name):
@@ -33,6 +34,7 @@ def layer_name_to_type(name):
     'F.Mask': 'stop',
     'F.Adhes': 'glue',
     'Edge.Cuts': 'hole',
+    'F.Paste': 'paste',
    }.get(name)
 
 
@@ -344,6 +346,7 @@ class Export:
           'keepout': unknown,
           'stop': silk,
           'glue': silk,
+          'paste': silk,
           'restrict': unknown,
           'vrestrict': unknown,
           'smd': lambda s: pad(s, smd=True),

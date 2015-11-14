@@ -37,8 +37,9 @@ def get_meta(inter):
 def prepare_for_display(inter, filter_out):
   inter = filter(lambda x: x['type'] not in filter_out, inter)
   h = {
-    'silk': 4,
-    'docu': 3,
+    'silk': 5,
+    'docu': 4,
+    'paste': 3,
     'smd': 2,
     'pad': 1,
   }

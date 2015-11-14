@@ -1,4 +1,4 @@
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 # default values for settings
@@ -22,6 +22,7 @@ color_schemes['default'] = {
   'vrestrict':  (0.0, 1.0, 0.0, 0.4),
   'unknown':  (1.0, 0.0, 1.0, 0.7),
   'hole': (1.0, 1.0, 1.0, 0.7),
+  'paste': (0.0, 1.0, 0.0, 0.7),
   }
 
 def _inverse(color_scheme):
