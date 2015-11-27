@@ -19,6 +19,8 @@ void main() {
   float ax = (size2.x / 2) - r;
   float ay = (size2.y / 2) - r;
 
+  // TODO: render non-round hole as a slot, not as an actual oval
+
   // if we are in a corner zone:
   if (abs(pos2.x) > ax && abs(pos2.y) > ay) {
     float x = (abs(pos2.x) - ax) / r;

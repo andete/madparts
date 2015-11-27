@@ -1,7 +1,9 @@
 #version 120
 
-// (c) 2013 Joost Yervante Damad <joost@damad.be>
+// (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 // License: GPL
+
+// TODO: render non-round hole as a slot, not as an actual oval
 
 // input
 uniform vec2 move;   // location
