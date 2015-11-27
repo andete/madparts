@@ -154,8 +154,16 @@ class GLDraw:
     x = fget(shape,'x')
     y = fget(shape,'y')
     drill = fget(shape,'drill')
-    if drill > 0.0:
-      self._hole(x,y, drill/2, drill/2)
+    if 'drill_dx' in shape:
+      drill_dx = fget(shape, 'drill_dx')
+    else:
+      drill_dx = drill
+    if 'drill_dy' in shape:
+      drill_dy = fget(shape, 'drill_dy')
+    else:
+      drill_dy = drill
+    if drill > 0.0 or drill_dx > 0.0 or drill_dy > 0.0:
+      self._hole(x, y, drill_dx/2, drill_dy/2)
     return labels
 
   def circle(self, shape, labels):
@@ -222,6 +230,14 @@ class GLDraw:
     ro = fget(shape, 'ro') / 100.0
     rot = fget(shape, 'rot')
     drill = fget(shape, 'drill')
+    if 'drill_dx' in shape:
+      drill_dx = fget(shape, 'drill_dx')
+    else:
+      drill_dx = drill
+    if 'drill_dy' in shape:
+      drill_dy = fget(shape, 'drill_dy')
+    else:
+      drill_dy = drill
     drill_off_dx = fget(shape, 'drill_off_dx')
     drill_off_dy = fget(shape, 'drill_off_dy')
     if rot not in [0, 90, 180, 270]:
@@ -238,15 +254,15 @@ class GLDraw:
     self.rect_shader.setUniformValue(self.rect_size_loc, dx, dy)
     self.rect_shader.setUniformValue(self.rect_move_loc, x, y)
     self.rect_shader.setUniformValue(self.rect_round_loc, ro, 0)
-    self.rect_shader.setUniformValue(self.rect_drill_loc, drill, 0)
+    self.rect_shader.setUniformValue(self.rect_drill_loc, drill_dx, drill_dy)
     self.rect_shader.setUniformValue(self.rect_drill_offset_loc, drill_off_dx, drill_off_dy)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
-    if drill > 0.0:
-      self._hole(x+drill_off_dx,y+drill_off_dy, drill/2, drill/2)
+    if drill > 0.0 or drill_dx > 0.0 or drill_dy > 0.0:
+      self._hole(x+drill_off_dx,y+drill_off_dy, drill_dx/2, drill_dy/2)
     if 'name' in shape:
       m = min(dx, dy)/1.5
       labels.append(lambda: self._txt(shape ,m, m, x, y, True))

@@ -1,6 +1,6 @@
 #version 120
 
-// (c) 2013 Joost Yervante Damad <joost@damad.be>
+// (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 // License: GPL
 
 // scale unit square to our rect size
@@ -17,7 +17,7 @@ uniform vec2 drill_offset;
 varying vec2 pos2;    // adjusted position
 varying float round2; // roundness of corners
 varying vec2 size2;   // size in x and y direction
-varying float drill2; // drill: radius
+varying vec2 drill2; // drill: radius
 varying vec2 drill_offset2;
 
 void main() {
@@ -31,7 +31,7 @@ void main() {
   gl_Position = gl_ModelViewProjectionMatrix * vert2;
   pos2 = vec2(vert);
   round2 = round.x;
-  drill2 = drill.x;
+  drill2 = drill;
   size2 = size;
   drill_offset2 = drill_offset;
 }
