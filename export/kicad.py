@@ -24,6 +24,7 @@ def type_to_layer_name(layer):
     'glue': 'F.Adhes',
     'docu': 'Dwgs.User',
     'hole': 'Edge.Cuts',
+    'edge': 'Edge.Cuts',
     'paste': 'F.Paste',
     }.get(layer)
 
@@ -176,7 +177,12 @@ class Export:
       else:
         l.append([S('layers'), S('*.Cu'), S('*.Mask')])
       if not smd:
-        l2 = [S('drill'), fget(shape, 'drill')]
+        if 'drill_dx' in shape or 'drill_dy' in shape:
+          drill_dx = fget(shape, 'drill_dx')
+          drill_dy = fget(shape, 'drill_dy')
+          l2 = [S('drill'), S('oval'), drill_dx, drill_dy]
+        else:
+          l2 = [S('drill'), fget(shape, 'drill')]
         if 'drill_off_dx' in shape or 'drill_off_dy' in shape:
           l2.append([S('offset'), fget(shape, 'drill_off_dx'), fget(shape, 'drill_off_dy')])
         l.append(l2)
@@ -360,6 +366,7 @@ class Export:
           'vrestrict': unknown,
           'smd': lambda s: pad(s, smd=True),
           'hole': hole,
+          'edge': silk,
           }.get(shape['type'], unknown)(shape)
         if l2 != None:
          l.extend(l2)

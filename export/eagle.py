@@ -155,7 +155,7 @@ class Export:
           pad['shape'] = 'square'
           if f_neq(shape['dx'], drill*1.5):
             pad['diameter'] = float(shape['dx'])
-        elif 'drill_dx' in shape:
+        elif 'drill_off_dx' in shape:
           pad['shape'] = 'offset'
           if f_neq(shape['dy'], drill*1.5):
             pad['diameter'] = float(shape['dy'])
@@ -544,7 +544,7 @@ class Import:
         res['ro'] = 100
         res['dx'] = 2*dia
         res['dy'] = dia
-        res['drill_dx'] = -dia/2
+        res['drill_off_dx'] = -dia/2
       elif shape == 'octagon':
         res['shape'] = 'octagon'
         res['r'] = dia/2
