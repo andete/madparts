@@ -131,7 +131,7 @@ class Export:
       # Dr <Pad drill> Xoffset Yoffset (round hole)
       if not smd:
         l.append("Dr %s %s %s" % (fget(shape, 'drill'), 
-          fget(shape, 'drill_dx'), fc(-fget(shape, 'drill_dy'))))
+          fget(shape, 'drill_off_dx'), fc(-fget(shape, 'drill_off_dy'))))
       # Po <x> <y>
       l.append("Po %s %s" % (fget(shape,'x'), fc(-fget(shape,'y'))))
       # At <Pad type> N <layer mask>
@@ -473,9 +473,9 @@ class Import:
           if d != 0.0:
             shape['drill'] = d
           if dx != 0.0:
-            shape['drill_dx'] = dx
+            shape['drill_off_dx'] = dx
           if dy != 0.0:
-            shape['drill_dy'] = dy
+            shape['drill_off_dy'] = dy
         # Dr <Pad drill.x> Xoffset Yoffset <Hole shape> <Pad drill.x> <Pad drill.y>
         else:
           print "oblong holes are currently not supported by madparts (converted to round)"
@@ -485,9 +485,9 @@ class Import:
           if d != 0.0:
             shape['drill'] = d
           if dx != 0.0:
-            shape['drill_dx'] = dx
+            shape['drill_off_dx'] = dx
           if dy != 0.0:
-            shape['drill_dy'] = fc(-dy)
+            shape['drill_off_dy'] = fc(-dy)
 
       # Sh <pad name> shape Xsize Ysize Xdelta Ydelta Orientation 
       def handle_shape(s):

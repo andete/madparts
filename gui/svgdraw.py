@@ -116,11 +116,11 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     res += self._line(x+rxa, y-rya, x-rxa ,y+rya, 0.05)
     return res
 
-  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
+  def _disc(self, x, y, rx, ry, drill, drill_off_dx, drill_off_dy, irx = 0.0, iry = 0.0):
     res = []
     res += self._ellipse(x, y, rx, ry, True)
     self.color = '#000000'
-    res += self._ellipse(x+drill_dx, y+drill_dy, drill/2, drill/2, True)
+    res += self._ellipse(x+drill_off_dx, y+drill_off_dy, drill/2, drill/2, True)
     # label?
     return res
 
@@ -149,10 +149,10 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     x = fget(shape,'x')
     y = fget(shape,'y')
     drill = fget(shape,'drill')
-    drill_dx = fget(shape,'drill_dx')
-    drill_dy = fget(shape,'drill_dy')
+    drill_off_dx = fget(shape,'drill_off_dx')
+    drill_off_dy = fget(shape,'drill_off_dy')
     res = []
-    res += self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
+    res += self._disc(x, y, rx, ry, drill, drill_off_dx, drill_off_dy)
     res += self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
       self.set_color('name')
@@ -195,18 +195,18 @@ class JYDSVGWidget(QtGui.QGraphicsView):
     ro = fget(shape, 'ro') / 100.0
     rot = fget(shape, 'rot')
     drill = fget(shape, 'drill')
-    drill_dx = fget(shape, 'drill_dx')
-    drill_dy = -fget(shape, 'drill_dy')
+    drill_off_dx = fget(shape, 'drill_off_dx')
+    drill_off_dy = -fget(shape, 'drill_off_dy')
     if rot not in [0, 90, 180, 270]:
       raise Exception("only 0, 90, 180, 270 rotation supported for now")
     if rot in [90, 270]:
       (dx, dy) = (dy, dx)
     if rot == 90:
-      (drill_dx, drill_dy) = (drill_dy, drill_dx)
+      (drill_off_dx, drill_off_dy) = (drill_off_dy, drill_off_dx)
     if rot == 180:
-      (drill_dx, drill_dy) = (-drill_dx, drill_dy)
+      (drill_off_dx, drill_off_dy) = (-drill_off_dx, drill_off_dy)
     if rot == 270:
-      (drill_dx, drill_dy) = (-drill_dy, -drill_dx)
+      (drill_off_dx, drill_off_dy) = (-drill_off_dy, -drill_off_dx)
     res = []
     res.append(svgfig.Rect(x-dx/2,y-dy/2,x+dx/2,y+dy/2, stroke=None, fill=self.color).SVG(trans=self.trans))
     res += self._hole(x,y, drill/2, drill/2)

@@ -177,8 +177,8 @@ class Export:
         l.append([S('layers'), S('*.Cu'), S('*.Mask')])
       if not smd:
         l2 = [S('drill'), fget(shape, 'drill')]
-        if 'drill_dx' in shape or 'drill_dy' in shape:
-          l2.append([S('offset'), fget(shape, 'drill_dx'), fget(shape, 'drill_dy')])
+        if 'drill_off_dx' in shape or 'drill_off_dy' in shape:
+          l2.append([S('offset'), fget(shape, 'drill_off_dx'), fget(shape, 'drill_off_dy')])
         l.append(l2)
       return shapes
     
@@ -525,9 +525,9 @@ class Import:
         drill = get_sub(x, 'drill')
         shape['drill'] = drill[0]
         if has_sub(drill, 'offset'):
-          [drill_dx, drill_dy] = get_sub(drill, 'offset')
-          shape['drill_dx'] = drill_dx
-          shape['drill_dy'] = -drill_dy
+          [drill_off_dx, drill_off_dy] = get_sub(drill, 'offset')
+          shape['drill_off_dx'] = drill_off_dx
+          shape['drill_off_dy'] = -drill_off_dy
       return shape
 
     #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))

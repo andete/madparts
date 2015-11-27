@@ -248,7 +248,7 @@ footprint = () ->
   shape_count += 1
 
   off_pad = new OffsetPad dia, drill+0.3
-  off_pad.drill_dx = -0.5			# This param adjusts the drill offset
+  off_pad.drill_off_dx = -0.5			# This param adjusts the drill offset
   off_pad.dx = 3.0
   off_pad.dy = 3.0
   off_pad.x = d * ((shape_count % grid_size_x) + grid_x_offset)

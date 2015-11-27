@@ -144,7 +144,7 @@ class OffsetPad extends Pad
     @ro = 100
     @dx = 2*dia
     @dy = dia
-    @drill_dx = -dia/2
+    @drill_off_dx = -dia/2
 
 class Disc
   constructor: (@r) ->

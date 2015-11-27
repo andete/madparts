@@ -106,7 +106,7 @@ class GLDraw:
     self._txt(shape, dx, dy, x, y)
     return labels
 
-  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0, a1 = 0.0, a2 = 360.0):
+  def _disc(self, x, y, rx, ry, drill, drill_off_dx, drill_off_dy, irx = 0.0, iry = 0.0, a1 = 0.0, a2 = 360.0):
     self.circle_shader.bind()
     self.circle_shader.setUniformValue(self.circle_move_loc, x, y)
     self.square_data_vbo.bind()
@@ -115,7 +115,7 @@ class GLDraw:
     self.circle_shader.setUniformValue(self.circle_radius_loc, rx, ry)
     self.circle_shader.setUniformValue(self.circle_inner_loc, irx, iry)
     self.circle_shader.setUniformValue(self.circle_drill_loc, drill, 0.0)
-    self.circle_shader.setUniformValue(self.circle_drill_offset_loc, drill_dx, drill_dy)
+    self.circle_shader.setUniformValue(self.circle_drill_offset_loc, drill_off_dx, drill_off_dy)
     a1 = (a1 % 361) * math.pi / 180.0
     a2 = (a2 % 361) * math.pi / 180.0
     self.circle_shader.setUniformValue(self.circle_angles_loc, a1, a2)
@@ -140,10 +140,10 @@ class GLDraw:
     x = fget(shape,'x')
     y = fget(shape,'y')
     drill = fget(shape,'drill')
-    drill_dx = fget(shape,'drill_dx')
-    drill_dy = fget(shape,'drill_dy')
+    drill_off_dx = fget(shape,'drill_off_dx')
+    drill_off_dy = fget(shape,'drill_off_dy')
  
-    self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
+    self._disc(x, y, rx, ry, drill, drill_off_dx, drill_off_dy)
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
@@ -185,7 +185,7 @@ class GLDraw:
       self._disc(x2, y2, w/2, w/2, 0.0, 0.0, 0.0)
     return labels
 
-  def _octagon(self, x, y, dx, dy, drill, drill_dx, drill_dy):
+  def _octagon(self, x, y, dx, dy, drill, drill_off_dx, drill_off_dy):
     self.octagon_shader.bind()
     self.octagon_shader.setUniformValue(self.octagon_move_loc, x, y)
     self.square_data_vbo.bind()
@@ -193,7 +193,7 @@ class GLDraw:
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     self.octagon_shader.setUniformValue(self.octagon_size_loc, dx, dy)
     self.octagon_shader.setUniformValue(self.octagon_drill_loc, drill, 0.0)
-    self.octagon_shader.setUniformValue(self.octagon_drill_offset_loc, drill_dx, drill_dy)
+    self.octagon_shader.setUniformValue(self.octagon_drill_offset_loc, drill_off_dx, drill_off_dy)
     glDrawArrays(GL_QUADS, 0, 4)
     self.octagon_shader.release() 
 
@@ -204,10 +204,10 @@ class GLDraw:
     x = fget(shape,'x')
     y = fget(shape,'y')
     drill = fget(shape,'drill')
-    drill_dx = fget(shape,'drill_dx')
-    drill_dy = fget(shape,'drill_dy')
+    drill_off_dx = fget(shape,'drill_off_dx')
+    drill_off_dy = fget(shape,'drill_off_dy')
  
-    self._octagon(x, y, dx, dy, drill, drill_dx, drill_dy)
+    self._octagon(x, y, dx, dy, drill, drill_off_dx, drill_off_dy)
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
@@ -222,31 +222,31 @@ class GLDraw:
     ro = fget(shape, 'ro') / 100.0
     rot = fget(shape, 'rot')
     drill = fget(shape, 'drill')
-    drill_dx = fget(shape, 'drill_dx')
-    drill_dy = fget(shape, 'drill_dy')
+    drill_off_dx = fget(shape, 'drill_off_dx')
+    drill_off_dy = fget(shape, 'drill_off_dy')
     if rot not in [0, 90, 180, 270]:
       raise Exception("only 0, 90, 180, 270 rotation supported for now")
     if rot in [90, 270]:
       (dx, dy) = (dy, dx)
     if rot == 90:
-      (drill_dx, drill_dy) = (drill_dy, drill_dx)
+      (drill_off_dx, drill_off_dy) = (drill_off_dy, drill_off_dx)
     if rot == 180:
-      (drill_dx, drill_dy) = (-drill_dx, drill_dy)
+      (drill_off_dx, drill_off_dy) = (-drill_off_dx, drill_off_dy)
     if rot == 270:
-      (drill_dx, drill_dy) = (-drill_dy, -drill_dx)
+      (drill_off_dx, drill_off_dy) = (-drill_off_dy, -drill_off_dx)
     self.rect_shader.bind()
     self.rect_shader.setUniformValue(self.rect_size_loc, dx, dy)
     self.rect_shader.setUniformValue(self.rect_move_loc, x, y)
     self.rect_shader.setUniformValue(self.rect_round_loc, ro, 0)
     self.rect_shader.setUniformValue(self.rect_drill_loc, drill, 0)
-    self.rect_shader.setUniformValue(self.rect_drill_offset_loc, drill_dx, drill_dy)
+    self.rect_shader.setUniformValue(self.rect_drill_offset_loc, drill_off_dx, drill_off_dy)
     self.square_data_vbo.bind()
     glEnableClientState(GL_VERTEX_ARRAY)
     glVertexPointer(2, GL_FLOAT, 0, self.square_data_vbo)
     glDrawArrays(GL_QUADS, 0, 4)
     self.rect_shader.release()
     if drill > 0.0:
-      self._hole(x,y, drill/2, drill/2)
+      self._hole(x+drill_off_dx,y+drill_off_dy, drill/2, drill/2)
     if 'name' in shape:
       m = min(dx, dy)/1.5
       labels.append(lambda: self._txt(shape ,m, m, x, y, True))

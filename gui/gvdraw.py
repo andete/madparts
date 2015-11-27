@@ -75,11 +75,11 @@ class JYDGVWidget(QtGui.QGraphicsView):
     self._line(x-rxa, y-rya, x+rxa ,y+rya, 0.001)
     self._line(x+rxa, y-rya, x-rxa ,y+rya, 0.001)
 
-  def _disc(self, x, y, rx, ry, drill, drill_dx, drill_dy, irx = 0.0, iry = 0.0):
+  def _disc(self, x, y, rx, ry, drill, drill_off_dx, drill_off_dy, irx = 0.0, iry = 0.0):
     self._ellipse(x-rx, y-ry, rx*2, ry*2, self.brush)
     self.color = QtGui.QColor.fromRgbF(0, 0, 0, 1.0)
     self.brush = QtGui.QBrush(self.color, Qt.SolidPattern)
-    self._ellipse(x+drill_dx-drill/2, y+drill_dy+-drill/2, drill, drill, self.brush)
+    self._ellipse(x+drill_off_dx-drill/2, y+drill_off_dy+-drill/2, drill, drill, self.brush)
 
   def _txt(self, s, x, y, dy):
     font = QtGui.QFont("Monospace")
@@ -113,9 +113,9 @@ class JYDGVWidget(QtGui.QGraphicsView):
     x = fget(shape,'x')
     y = fget(shape,'y')
     drill = fget(shape,'drill')
-    drill_dx = fget(shape,'drill_dx')
-    drill_dy = fget(shape,'drill_dy')
-    self._disc(x, y, rx, ry, drill, drill_dx, drill_dy)
+    drill_off_dx = fget(shape,'drill_off_dx')
+    drill_off_dy = fget(shape,'drill_off_dy')
+    self._disc(x, y, rx, ry, drill, drill_off_dx, drill_off_dy)
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:
@@ -154,18 +154,18 @@ class JYDGVWidget(QtGui.QGraphicsView):
     ro = fget(shape, 'ro') / 100.0
     rot = fget(shape, 'rot')
     drill = fget(shape, 'drill')
-    drill_dx = fget(shape, 'drill_dx')
-    drill_dy = -fget(shape, 'drill_dy')
+    drill_off_dx = fget(shape, 'drill_off_dx')
+    drill_off_dy = -fget(shape, 'drill_off_dy')
     if rot not in [0, 90, 180, 270]:
       raise Exception("only 0, 90, 180, 270 rotation supported for now")
     if rot in [90, 270]:
       (dx, dy) = (dy, dx)
     if rot == 90:
-      (drill_dx, drill_dy) = (drill_dy, drill_dx)
+      (drill_off_dx, drill_off_dy) = (drill_off_dy, drill_off_dx)
     if rot == 180:
-      (drill_dx, drill_dy) = (-drill_dx, drill_dy)
+      (drill_off_dx, drill_off_dy) = (-drill_off_dx, drill_off_dy)
     if rot == 270:
-      (drill_dx, drill_dy) = (-drill_dy, -drill_dx)
+      (drill_off_dx, drill_off_dy) = (-drill_off_dy, -drill_off_dx)
     if drill > 0.0:
       self._hole(x,y, drill/2, drill/2)
     if 'name' in shape:

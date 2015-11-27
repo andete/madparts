@@ -85,7 +85,7 @@ def simple_pad_rect(t, g, x, vl, ll):
 """ % (varname, dx, drill)
     a = _add_if(x, a, varname, 'ro')
   elif dx == 2*dy and ro == 100:
-    if 'drill_dx' in x and x['drill_dx'] == -dy/2:
+    if 'drill_off_dx' in x and x['drill_off_dx'] == -dy/2:
       a = """\
 %s = new OffsetPad %s, %s
 """ % (varname, dy, drill)
@@ -117,7 +117,7 @@ def _simple_pad_disc_octagon(g, constructor, x, vl, ll):
   a = """\
 %s = new %s %s, %s
 """ % (varname, constructor, x['r'], x['drill'])
-  a = _add_if(x, a, varname, 'drill_dx')
+  a = _add_if(x, a, varname, 'drill_off_dx')
   a = _add_if(x, a, varname, 'name', True)
   a = _add_if(x, a, varname, 'x')
   a = _add_if(x, a, varname, 'y')
