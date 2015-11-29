@@ -1,4 +1,4 @@
-# (c) 2014 Joost Yervante Damad <joost@damad.be>
+# (c) 2014-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 from PySide import QtGui, QtCore
