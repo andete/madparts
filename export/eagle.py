@@ -1,7 +1,7 @@
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import uuid, re, copy, math
+import re, copy, math
 
 from bs4 import BeautifulSoup, Tag
 
@@ -319,7 +319,6 @@ class Export:
     def unknown(shape):
       pass
 
-    idx = eget(meta, 'id', 'Id not found')
     desc = oget(meta, 'desc', '')
     parent_idx = oget(meta, 'parent', None)
     description = self.soup.new_tag('description')
@@ -398,7 +397,6 @@ class Import:
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name
-    meta['id'] = uuid.uuid4().hex
     meta['desc'] = None
     l = [meta]
 

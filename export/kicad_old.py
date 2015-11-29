@@ -1,4 +1,4 @@
-# (c) 2013 Joost Yervante Damad <joost@damad.be>
+# (c) 201-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 # kicad old format info can be found in:
@@ -8,7 +8,6 @@
 
 import os.path
 import shlex
-import uuid
 import math
 import time
 import re
@@ -90,7 +89,6 @@ class Export:
     # make name kicad compatible
     name = re.sub(' ','_',name)
     self.name = name
-    idx = eget(meta, 'id', 'Id not found')
     desc = oget(meta, 'desc', '')
     parent_idx = oget(meta, 'parent', None)
     d = []
@@ -362,7 +360,6 @@ class Import:
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = name
-    meta['id'] = uuid.uuid4().hex
     meta['desc'] = None
     l = [meta]
 

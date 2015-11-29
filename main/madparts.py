@@ -9,7 +9,6 @@ from PySide import QtGui, QtCore
 from PySide.QtCore import Qt
 
 import gui.dialogs
-import gui.library
 
 import coffee.pycoffee as pycoffee
 import coffee.generatesimple as generatesimple

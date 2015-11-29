@@ -1,7 +1,7 @@
 # (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
-import glob, math, os.path, uuid
+import glob, math, os.path
 
 import sexpdata
 from sexpdata import Symbol
@@ -70,7 +70,6 @@ class Export:
   def export_footprint(self, interim):
     meta = inter.get_meta(interim)
     name = eget(meta, 'name', 'Name not found')
-    idx = eget(meta, 'id', 'Id not found')
     descr = oget(meta, 'desc', '')
     parent_idx = oget(meta, 'parent', None)
     l = [
@@ -429,7 +428,6 @@ class Import:
     meta = {}
     meta['type'] = 'meta'
     meta['name'] = _convert_sexp_symbol_to_string(s[1])
-    meta['id'] = uuid.uuid4().hex
     meta['desc'] = None
     l = [meta]
 
