@@ -44,9 +44,9 @@ class JYDGVWidget(QtGui.QGraphicsView):
   def draw_dot_field(self):
     #grid drawing is really slow
     #re-enable when it is not redrawn every time
-    #self.set_color('grid')
-    #for (x,y) in self.dot_field_data:
-    #  self.scene.addEllipse(x, y, 0.001, 0.001, self.pen, self.brush)
+    self.set_color('grid')
+    for (x,y) in self.dot_field_data:
+      self.scene.addEllipse(x*self.q, y*self.q, 0.005, 0.005, self.pen, self.brush)
     self.set_color('axes')
     self._line(-100,0,100,0, 0.0001)
     self._line(0,-100,0,100, 0.0001)

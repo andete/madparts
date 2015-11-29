@@ -144,8 +144,13 @@ class MainWin(QtGui.QMainWindow):
   def _right_part(self):
     rvbox = QtGui.QVBoxLayout()
     rhbox = QtGui.QHBoxLayout()
-    import gui.gldraw
-    self.display = gui.gldraw.JYDGLWidget(self)
+    gv = False
+    if not gv:
+      import gui.gldraw
+      self.display = gui.gldraw.JYDGLWidget(self)
+    else:
+      import gui.gvdraw
+      self.display = gui.gvdraw.JYDGVWidget(self)
     self.zoom_selector = QtGui.QLineEdit(str(self.display.zoomfactor))
     self.zoom_selector.setValidator(QtGui.QIntValidator(1, 250))
     self.zoom_selector.editingFinished.connect(self.zoom)
