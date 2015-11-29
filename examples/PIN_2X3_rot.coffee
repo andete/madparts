@@ -1,8 +1,7 @@
 #format 1.1
 #name PIN 2X3_rot
-#id cc5eeb9a2cff48a4a61a3bc98f9debab
-#parent c27da481bc86472abbbf234a65140d26
 #desc 2X3 pin pinheader
+
 footprint = () ->
 
   d = 2.54

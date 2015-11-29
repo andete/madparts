@@ -1,6 +1,5 @@
 #format 1.1
 #name PIN 1X2
-#id 708e13cc5f4e43f7833af53070ba5078
 #desc 2 pin pinheader
 footprint = () ->
 

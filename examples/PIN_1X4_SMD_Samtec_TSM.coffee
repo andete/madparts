@@ -1,7 +1,5 @@
 #format 1.1
 #name PIN 1X4 SMD Samtec TSM
-#id d01beefd36ad45d7b724129e9dc8bfd4
-#parent 8e50c735f8324b00a18c9b34840053de
 #desc 4 pin pinheader
 footprint = () ->
 

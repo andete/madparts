@@ -1,6 +1,5 @@
 #format 1.2
 #name Sample shapes
-#id 2cedbb9a0d3247fd8d57c03551c81c7a
 #desc Overview of madparts capabilities
 #desc Code is 99%+ madparts example code
 #desc Lot of extra code here moving parts into a display layout  .... you do not normally need to do this. 

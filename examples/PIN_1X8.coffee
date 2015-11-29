@@ -1,7 +1,5 @@
 #format 1.1
 #name PIN 1X8
-#id 0467987b220e4ad3a8cc7250d4ac4848
-#parent 708e13cc5f4e43f7833af53070ba5078
 #desc 8 pin pinheader
 footprint = () ->
 

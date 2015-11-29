@@ -1,7 +1,6 @@
 #format 1.1
 #name DIL16
-#id 2ba395a2e67a49bd9defdf961b264e9f
-#parent 5162a77450f545079d5716a7c67b2b42
+
 footprint = () ->
  
   n = 16

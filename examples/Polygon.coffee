@@ -1,6 +1,5 @@
 #format 1.2
 #name Polygon
-#id 0aa9e2e2188f4b66a94f7e0f4b6bdded
 #desc a simple polygon example
 
 footprint = () ->

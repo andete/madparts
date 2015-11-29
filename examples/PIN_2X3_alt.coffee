@@ -1,7 +1,5 @@
 #format 1.1
 #name PIN 2X3_alt
-#id 5388ee423be14d9d8224d93e6647d65b
-#parent c27da481bc86472abbbf234a65140d26
 #desc 2X3 pin pinheader
 footprint = () ->
 

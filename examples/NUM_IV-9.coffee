@@ -1,6 +1,5 @@
 #format 1.1
 #name NUM_IV-9
-#id b20fe725b4644092912fb87bb673facf
 #desc Numitron IV-9 pinout
 
 footprint = () ->

@@ -1,7 +1,5 @@
 #format 1.1
 #name PIN 2X3 SMD Samtec TSM
-#id d7b5175613384e6f977e7df3eedf184d
-#parent d01beefd36ad45d7b724129e9dc8bfd4
 #desc 2x3 pin pinheader SMD
 footprint = () ->
 
