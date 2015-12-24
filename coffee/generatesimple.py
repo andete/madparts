@@ -26,8 +26,7 @@ def new_coffee_meta(meta):
   a = """\
 #format 2.0
 #name %s
-#id %s
-""" % (meta['name'], meta['id'])
+""" % (meta['name'])
   if meta['desc'] == None: return a
   for line in meta['desc'].splitlines():
     a = a + ("#desc %s\n" % (line))
