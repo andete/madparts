@@ -307,7 +307,7 @@ Yes.
 
        <h3 id="faq-geda">is import/export from/to geda supported?</h3>
        <p>
-No. If you're interested in contributing geda support I'm happy to assist.
+No. If you're interested in contributing geda support I'm happy to assist. Have a look at https://github.com/erichVK5/KicadModuleToGEDA for converting kicad to geda.
        </p>
 
        <h3 id="faq-symbol">Will there be a symbol editor as well?</h3>
@@ -375,18 +375,10 @@ If you come from an older version of madparts you may want to check if auto comp
        </p>
        <h3 id="doc-command-line">Command-line</h3>
        <p>It is possible to use the madparts-cli program for importing and exporting footprints. Some examples of usage follow.</p>
-<h4>list a madparts library</h4>
-<pre>
-$ madparts ls examples/
-10644a0b9a3a4f2a8a8b0add2ba7ce21 0603
-...
-e5bd48346acc4d549d678cb059be64ef TQFP32
-9364e38b40644665a3c8c07a5f2f3190 TQFP44
-</pre>
 
 <h4>list an eagle library</h4>
 <pre>
-madparts ls SparkFun-LED.lbr
+madparts-cli ls SparkFun-LED.lbr
 APA3010SF4C
 LED5MM
 LED3MM
@@ -401,7 +393,7 @@ LED-TRICOLOR-5050-IC
 As expected these contain only one module
 </p>
 <pre>
-madparts ls 0603.kicad_mod 
+madparts-cli ls 0603.kicad_mod 
 0603
 </pre>
 
@@ -418,7 +410,7 @@ NUM_IV-9
 
 <h4>list a .mod classic kicad module file</h4>
 <pre>
-madparts ls Crystals_RevB_20Apr2013.mod 
+madparts-cli ls Crystals_RevB_20Apr2013.mod 
 Crystal_Round_Horizontal_2mm_RevA_25Apr2012
 Crystal_Round_Vertical_3mm_RevA_25Apr2012
 Crystal_Round_Vertical_2mm_RevA_25Apr2012
@@ -427,8 +419,8 @@ Crystal_Round_Vertical_2mm_RevA_25Apr2012
 
 <h4>import an eagle footprint</h4>
 <pre>
-madparts import SparkFun-LED.lbr LED3MM
-SparkFun-LED.lbr/LED3MM written to c0882a5d7c384ca28ea95fcb051a8994.coffee
+madparts-cli import SparkFun-LED.lbr LED3MM
+SparkFun-LED.lbr/LED3MM written to LED3MM.coffee
 </pre>
 
 <h4>import a .kicad_mod module file</h4>
@@ -436,31 +428,31 @@ SparkFun-LED.lbr/LED3MM written to c0882a5d7c384ca28ea95fcb051a8994.coffee
 As only one footprint is contained in a .kicad_mod file, the second footprint name argument can be left off.
 </p>
 <pre>
-madparts import 0603.kicad_mod 
-0603.kicad_mod/0603 written to 252619c3322440efab7a8e87f62efeb8.coffee.
+madparts-cli import 0603.kicad_mod 
+0603.kicad_mod/0603 written to 0603.coffee.
 import a footprint from a kicad .pretty footprint directory
 madparts import offset.pretty MYCONN3
 in dev tree
-offset.pretty/MYCONN3 written to ef7ab8e1656544fb89baed928d139246.coffee.
+offset.pretty/MYCONN3 written to MYCONN3.coffee.
 </pre>
 
 <h4>import a footprint from a .mod classic kicad footprint file</h4>
 <pre>
-madparts import MYCONN3.mod 0603
+madparts-cli import MYCONN3.mod 0603
 in dev tree
-MYCONN3.mod/0603 written to 98111641bea34d01914e192bf5025c62.coffee.
+MYCONN3.mod/0603 written to 0603.coffee.
 </pre>
 
 <h4>export a footprint to eagle</h4>
 <pre>
-madparts export c0882a5d7c384ca28ea95fcb051a8994.coffee madparts.lbr
+madparts-cli export LED3MM.coffee madparts.lbr
 LED3MM compiled.
 Exported to madparts.lbr.
 </pre>
 
 <h4>export a footprint to a .kicad_mod module file</h4>
 <pre>
-madparts export examples/10644a0b9a3a4f2a8a8b0add2ba7ce21.coffee 0603.kicad_mod 
+madparts-cli export examples/0603.coffee 0603.kicad_mod 
 in dev tree
 0603 compiled.
 Exported to 0603.kicad_mod.
@@ -468,7 +460,7 @@ Exported to 0603.kicad_mod.
 
 <h4>export a footprint to a kicad .pretty footprint directory</h4>
 <pre>
-madparts export examples/10644a0b9a3a4f2a8a8b0add2ba7ce21.coffee offset.pretty
+madparts-cli export examples/0603.coffee offset.pretty
 in dev tree
 0603 compiled.
 Exported to offset.pretty.
@@ -479,7 +471,7 @@ This will create a 0603.kicad_mod file in the offset.pretty directory.
 
 <h4>export a footprint to a .mod classic kicad footprint file</h4>
 <pre>
-madparts export examples/10644a0b9a3a4f2a8a8b0add2ba7ce21.coffee MYCONN3.mod 
+madparts-cli export examples/0603.coffee MYCONN3.mod 
 in dev tree
 0603 compiled.
 Exported to MYCONN3.mod.
@@ -508,10 +500,8 @@ Exported to MYCONN3.mod.
 Let's look in detail at an example. Here is the full example, we'll go through it part by part below.
 </p>
 <pre>
-#format 1.2
+#format 2.0
 #name TQFP44
-#id 9364e38b40644665a3c8c07a5f2f3190
-#parent e5bd48346acc4d549d678cb059be64ef
 #desc TQFP44 example
 #desc this package is used by e.g. the Atmel ATMEGA1284P-AU
 
