@@ -18,6 +18,7 @@ def type_to_layer_name(layer):
     'pad': 'F.Cu', # not used like this
     'cu': 'F.Cu',  # generic non-pad/smd Cu
     'silk': 'F.SilkS',
+    'bsilk': 'B.SilkS',
     'name': 'F.SilkS',
     'value': 'Dwgs.User',
     'stop': 'F.Mask',
@@ -31,6 +32,7 @@ def type_to_layer_name(layer):
 def layer_name_to_type(name):
    return {
     'F.SilkS': 'silk',
+    'B.SilkS': 'bsilk',
     'Dwgs.User': 'docu',
     'F.Mask': 'stop',
     'F.Adhes': 'glue',
