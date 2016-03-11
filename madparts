@@ -37,4 +37,4 @@ if __name__ == '__main__':
       print 'opening file', file_name
 
     sys.exit(main.madparts.gui_main(file_name))
-         
+

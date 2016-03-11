@@ -1,4 +1,4 @@
-# (c) 2013-2015 Joost Yervante Damad <joost@damad.be>
+# (c) 2013-2016 Joost Yervante Damad <joost@damad.be>
 # License: GPL
 
 import glob, math, os.path
@@ -358,6 +358,7 @@ class Export:
           'pad': pad,
           'cu': silk,
           'silk': silk,
+          'bsilk': silk,
           'docu': silk,
           'keepout': unknown,
           'stop': silk,
