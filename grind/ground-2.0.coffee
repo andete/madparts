@@ -92,6 +92,8 @@ class Smd
     @y = 0
     @dx = 0
     @dy = 0
+    @paste_ratio = 1.0
+    @mask_swell = 0.0
     
 class Rect
   constructor: ->
@@ -106,6 +108,8 @@ class Pad
   constructor: ->
     @type = 'pad'
     @paste = true
+    @paste_ratio = 1.0
+    @mask_swell = 0.0
 
 class RoundPad extends Pad
   constructor: (@r, @drill) ->
