@@ -187,6 +187,8 @@ class Export:
         if 'drill_off_dx' in shape or 'drill_off_dy' in shape:
           l2.append([S('offset'), fget(shape, 'drill_off_dx'), fget(shape, 'drill_off_dy')])
         l.append(l2)
+      l.append([S('solder_mask_margin'), fget(shape, 'mask_swell')])
+      l.append([S('solder_paste_margin_ratio'), fget(shape, 'paste_ratio')])
       return shapes
     
     #(fp_line (start -2.54 -1.27) (end 2.54 -1.27) (layer F.SilkS) (width 0.381))

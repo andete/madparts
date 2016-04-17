@@ -10,7 +10,7 @@
 
 import sys
 
-if sys.platform == 'win32':
+if sys.platform == 'win32' or 'darwin':
   # we're using pillow 2.0 on win32
   from PIL import ImageFont
 else:
