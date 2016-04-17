@@ -9,3 +9,5 @@ debian/*.log
 debian/*.substvars
 debian/files
 debian/madparts
+.DS_Store
+
