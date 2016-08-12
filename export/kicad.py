@@ -9,6 +9,7 @@ from sexpdata import Symbol
 from mutil.mutil import *
 from inter import inter
 
+# a symbol
 def S(v):
   return Symbol(str(v))
 
@@ -98,7 +99,7 @@ class Export:
     parent_idx = oget(meta, 'parent', None)
     l = [
       S('module'),
-      S(name),
+      name,
       [S('layer'), S('F.Cu')],
       [S('descr'), descr],
     ]
