@@ -1,10 +1,12 @@
 // (c) 2016 Joost Yervante Damad <joost@damad.be>
 
 extern crate gtk;
+extern crate gdk_pixbuf;
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, CheckMenuItem, IconSize, Image, Label, Menu, MenuBar, MenuItem, Window,
           WindowPosition, WindowType};
+use gdk_pixbuf::Pixbuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -41,6 +43,22 @@ fn main() {
     quit.connect_activate(|_| {
         gtk::main_quit();
     });
+    
+    about.connect_activate(|_| {
+        let about = AboutDialog::new();
+        about.add_credit_section("Credits",&["Joost Yervante Damad <joost@damad.be>"]);
+        about.set_copyright(Some("MIT OR Apache-2.0"));
+        about.set_program_name("madparts");
+        about.set_version(Some(VERSION));
+        about.set_website(Some("http://madparts.org/"));
+        about.set_website_label(Some("madparts"));
+        let logo = Pixbuf::new_from_file_at_size("../media/icon.svg", 64, 64).unwrap();
+        about.set_logo(Some(&logo));
+        about.show();
+        about.run();
+        about.hide();
+    });
+                           
     
     let label = Label::new(Some("-madparts-"));
 
