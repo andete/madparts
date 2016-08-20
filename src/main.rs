@@ -2,10 +2,11 @@
 
 extern crate gtk;
 extern crate gdk_pixbuf;
+extern crate cairo;
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, CheckMenuItem, IconSize, Image, Label, Menu, MenuBar, MenuItem, Window,
-          WindowPosition, WindowType};
+          WindowPosition, WindowType, Paned, TextView, DrawingArea, Statusbar};
 use gdk_pixbuf::Pixbuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -60,10 +61,20 @@ fn main() {
     });
                            
     
-    let label = Label::new(Some("-madparts-"));
 
     v_box.pack_start(&menu_bar, false, false, 0);
-    v_box.pack_start(&label, true, true, 0);
+
+    let paned = Paned::new(gtk::Orientation::Horizontal);
+    let textview = TextView::new();
+    paned.pack1(&textview,true,true);
+    let drawingarea = DrawingArea::new();
+    paned.pack2(&drawingarea,true,true);
+    
+    v_box.pack_start(&paned, true, true, 0);
+
+    let statusbar = Statusbar::new();
+    statusbar.push(0, "hello.");
+    v_box.pack_start(&statusbar, false, false, 0);
 
     window.add(&v_box);
 
