@@ -5,13 +5,28 @@ extern crate gdk_pixbuf;
 extern crate cairo;
 
 use gtk::prelude::*;
-use gtk::{AboutDialog, CheckMenuItem, IconSize, Image, Label, Menu, MenuBar, MenuItem, Window,
-          WindowPosition, WindowType, Paned, TextView, DrawingArea, Statusbar};
+use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
 use gdk_pixbuf::Pixbuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
+fn usage() {
+    println!("Usage: madparts <coffee file>");
+}
+
+
 fn main() {
+
+    let args = std::env::args();
+    let mut args = args.skip(1); // program name
+    let filename = if let Some(filename) = args.next() {
+        filename
+    } else {
+        usage();
+        return;
+    };
+    println!("Using file: {}", filename);
+
     if gtk::init().is_err() {
         println!("Failed to initialize GTK.");
         return;
@@ -44,10 +59,10 @@ fn main() {
     quit.connect_activate(|_| {
         gtk::main_quit();
     });
-    
+
     about.connect_activate(|_| {
         let about = AboutDialog::new();
-        about.add_credit_section("Credits",&["Joost Yervante Damad <joost@damad.be>"]);
+        about.add_credit_section("Credits", &["Joost Yervante Damad <joost@damad.be>"]);
         about.set_copyright(Some("MIT OR Apache-2.0"));
         about.set_program_name("madparts");
         about.set_version(Some(VERSION));
@@ -59,13 +74,13 @@ fn main() {
         about.run();
         about.hide();
     });
-                           
-    
+
+
 
     v_box.pack_start(&menu_bar, false, false, 0);
 
     let drawingarea = DrawingArea::new();
-    
+
     v_box.pack_start(&drawingarea, true, true, 0);
 
     let statusbar = Statusbar::new();
