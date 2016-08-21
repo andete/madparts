@@ -3,6 +3,12 @@
 extern crate gtk;
 extern crate gdk_pixbuf;
 extern crate cairo;
+extern crate inotify;
+extern crate glib;
+
+use inotify::INotify;
+use inotify::ffi::*;
+use std::path::Path;
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
@@ -10,20 +16,24 @@ use gdk_pixbuf::Pixbuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-fn usage() {
-    println!("Usage: madparts <coffee file>");
+fn usage(program_name:&str) {
+    println!("Usage: {} <coffee file>", program_name);
 }
 
 
 fn main() {
 
-    let args = std::env::args();
-    let mut args = args.skip(1); // program name
-    let filename = if let Some(filename) = args.next() {
-        filename
+    let mut args = std::env::args();
+    let filename = if let Some(program_name) = args.next() {
+        if let Some(filename) = args.next() {
+            filename
+        } else {
+            usage(&program_name);
+            return
+        }
     } else {
-        usage();
-        return;
+        usage("unknown");
+        return
     };
     println!("Using file: {}", filename);
 
@@ -32,6 +42,16 @@ fn main() {
         return;
     }
 
+    let mut ino = INotify::init().unwrap();
+    ino.add_watch(Path::new(&filename), IN_MODIFY).unwrap();
+
+    glib::timeout_add(250, move || {
+        for event in ino.available_events().unwrap() {
+            println!("{:?}", event);
+        }
+        glib::Continue(true)
+    });
+    
     let window = gtk::Window::new(gtk::WindowType::Toplevel);
 
     window.set_title(&format!("madparts (rustic edition) {}", VERSION));
