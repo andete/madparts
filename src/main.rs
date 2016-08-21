@@ -64,13 +64,9 @@ fn main() {
 
     v_box.pack_start(&menu_bar, false, false, 0);
 
-    let paned = Paned::new(gtk::Orientation::Horizontal);
-    let textview = TextView::new();
-    paned.pack1(&textview,true,true);
     let drawingarea = DrawingArea::new();
-    paned.pack2(&drawingarea,true,true);
     
-    v_box.pack_start(&paned, true, true, 0);
+    v_box.pack_start(&drawingarea, true, true, 0);
 
     let statusbar = Statusbar::new();
     statusbar.push(0, "hello.");
