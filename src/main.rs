@@ -35,19 +35,33 @@ fn main() {
         usage("unknown");
         return
     };
-    println!("Using file: {}", filename);
 
     if gtk::init().is_err() {
         println!("Failed to initialize GTK.");
         return;
     }
 
-    let mut ino = INotify::init().unwrap();
-    ino.add_watch(Path::new(&filename), IN_MODIFY).unwrap();
-
+    let mut ino = match INotify::init() {
+        Ok(ino) => ino,
+        _ => {
+            println!("Failed to initialize Inotify");
+            return;
+        },
+    };
+    
+    let file_watch = match ino.add_watch(Path::new(&filename), IN_MODIFY) {
+        Ok(watch) => watch,
+        Err(err) => {
+            println!("IO Error for {}: {}", filename, err);
+            return;
+        },
+    };
+    
     glib::timeout_add(250, move || {
         for event in ino.available_events().unwrap() {
-            println!("{:?}", event);
+            if event.is_modify() && event.wd == file_watch {
+                println!("{} modified", filename);
+            }
         }
         glib::Continue(true)
     });
@@ -63,18 +77,26 @@ fn main() {
         gtk::main_quit();
         Inhibit(false)
     });
+    
 
     let v_box = gtk::Box::new(gtk::Orientation::Vertical, 10);
 
-    let menu = Menu::new();
     let menu_bar = MenuBar::new();
-    let file = MenuItem::new_with_label("File");
-    let about = MenuItem::new_with_label("About");
+    
+    let menu = Menu::new();
     let quit = MenuItem::new_with_label("Quit");
-    menu.append(&about);
     menu.append(&quit);
+    let file = MenuItem::new_with_label("File");
     file.set_submenu(Some(&menu));
+    
+    let menu = Menu::new();
+    let about = MenuItem::new_with_label("About");
+    menu.append(&about);
+    let help = MenuItem::new_with_label("Help");
+    help.set_submenu(Some(&menu));
+    
     menu_bar.append(&file);
+    menu_bar.append(&help);
 
     quit.connect_activate(|_| {
         gtk::main_quit();
