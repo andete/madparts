@@ -73,10 +73,16 @@ fn main() {
     window.set_position(gtk::WindowPosition::Center);
     window.set_default_size(350, 70);
 
-    window.connect_delete_event(|_, _| {
-        gtk::main_quit();
-        Inhibit(false)
-    });
+    let exit = Arc::new(Mutex::new(false));
+    
+    {
+        let exit = exit.clone();
+        window.connect_delete_event(move |_, _| {
+            let mut e = exit.lock().unwrap();
+            *e = true;
+            Inhibit(false)
+        });
+    }
     
 
     let v_box = gtk::Box::new(gtk::Orientation::Vertical, 10);
@@ -98,9 +104,13 @@ fn main() {
     menu_bar.append(&file);
     menu_bar.append(&help);
 
-    quit.connect_activate(|_| {
-        gtk::main_quit();
-    });
+    {
+        let exit = exit.clone();
+        quit.connect_activate(move |_| {
+            let mut e = exit.lock().unwrap();
+            *e = true;
+        });
+    }
 
     about.connect_activate(|_| {
         let about = AboutDialog::new();
@@ -157,6 +167,11 @@ fn main() {
     window.show_all();
 
     loop {
+        {
+            if *exit.lock().unwrap() {
+                break;
+            }
+        }
         gtk::main_iteration();
         let mut update = update_input.lock().unwrap();
         if *update {
