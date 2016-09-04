@@ -129,6 +129,7 @@ fn main() {
     let data = read_file(&filename).unwrap();
     buffer.set_text(&data);
     let input = TextView::new_with_buffer(&buffer);
+    input.set_editable(false);
     notebook.append_page(&input,Some(&Label::new(Some("input"))));
     
     let view = DrawingArea::new();
