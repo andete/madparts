@@ -9,17 +9,26 @@ extern crate glib;
 use inotify::INotify;
 use inotify::ffi::*;
 use std::path::Path;
+use std::io::Read;
+use std::sync::{Mutex,Arc};
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
+use gtk::{Notebook, Label, TextView, TextBuffer};
 use gdk_pixbuf::Pixbuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn usage(program_name:&str) {
-    println!("Usage: {} <coffee file>", program_name);
+    println!("Usage: {} <dyon file>", program_name);
 }
 
+fn read_file(name: &str) -> std::result::Result<String, std::io::Error> {
+    let mut f = try!(std::fs::File::open(name));
+    let mut s = String::new();
+    try!(f.read_to_string(&mut s));
+    Ok(s)
+}
 
 fn main() {
 
@@ -56,15 +65,6 @@ fn main() {
             return;
         },
     };
-    
-    glib::timeout_add(250, move || {
-        for event in ino.available_events().unwrap() {
-            if event.is_modify() && event.wd == file_watch {
-                println!("{} modified", filename);
-            }
-        }
-        glib::Continue(true)
-    });
     
     let window = gtk::Window::new(gtk::WindowType::Toplevel);
 
@@ -121,16 +121,49 @@ fn main() {
 
     v_box.pack_start(&menu_bar, false, false, 0);
 
-    let drawingarea = DrawingArea::new();
+    let notebook = Notebook::new();
 
-    v_box.pack_start(&drawingarea, true, true, 0);
+    v_box.pack_start(&notebook, true, true, 0);
+
+    let buffer = TextBuffer::new(None);
+    let data = read_file(&filename).unwrap();
+    buffer.set_text(&data);
+    let input = TextView::new_with_buffer(&buffer);
+    notebook.append_page(&input,Some(&Label::new(Some("input"))));
+    
+    let view = DrawingArea::new();
+    notebook.append_page(&view,Some(&Label::new(Some("view"))));
 
     let statusbar = Statusbar::new();
-    statusbar.push(0, "hello.");
+    statusbar.push(0, "Ready.");
     v_box.pack_start(&statusbar, false, false, 0);
 
     window.add(&v_box);
 
+    let update_input = Arc::new(Mutex::new(false));
+    let update_input_timeout_loop = update_input.clone();
+    gtk::timeout_add(250, move || {
+        for event in ino.available_events().unwrap() {
+            if event.wd == file_watch {
+                println!("modified!");
+                let mut update = update_input_timeout_loop.lock().unwrap();
+                *update = true;
+            }
+        }
+        glib::Continue(true)
+    });
+    
     window.show_all();
-    gtk::main();
+
+    loop {
+        gtk::main_iteration();
+        let mut update = update_input.lock().unwrap();
+        if *update {
+            *update = false;
+            let data = read_file(&filename).unwrap();
+            buffer.set_text(&data);
+            statusbar.pop(1);
+            println!("updated");
+        }
+    }
 }
