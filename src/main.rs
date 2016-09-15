@@ -5,6 +5,7 @@ extern crate gdk_pixbuf;
 extern crate cairo;
 extern crate inotify;
 extern crate glib;
+extern crate dyon;
 
 use inotify::INotify;
 use inotify::ffi::*;
@@ -14,7 +15,7 @@ use std::sync::{Mutex,Arc};
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
-use gtk::{Notebook, Label, TextView, TextBuffer};
+use gtk::{Notebook, Label, TextView, TextBuffer, ScrolledWindow};
 use gdk_pixbuf::Pixbuf;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -53,7 +54,7 @@ fn main() {
     let mut ino = match INotify::init() {
         Ok(ino) => ino,
         _ => {
-            println!("Failed to initialize Inotify");
+            println!("Failed to initialize INotify");
             return;
         },
     };
@@ -115,7 +116,7 @@ fn main() {
     about.connect_activate(|_| {
         let about = AboutDialog::new();
         about.add_credit_section("Credits", &["Joost Yervante Damad <joost@damad.be>"]);
-        about.set_copyright(Some("MIT OR Apache-2.0"));
+        about.set_copyright(Some("MIT/Apache-2.0"));
         about.set_program_name("madparts");
         about.set_version(Some(VERSION));
         about.set_website(Some("http://madparts.org/"));
@@ -135,12 +136,14 @@ fn main() {
 
     v_box.pack_start(&notebook, true, true, 0);
 
-    let buffer = TextBuffer::new(None);
+    let input_buffer = TextBuffer::new(None);
     let data = read_file(&filename).unwrap();
-    buffer.set_text(&data);
-    let input = TextView::new_with_buffer(&buffer);
+    input_buffer.set_text(&data);
+    let input = TextView::new_with_buffer(&input_buffer);
     input.set_editable(false);
-    notebook.append_page(&input,Some(&Label::new(Some("input"))));
+    let scrolled_input = ScrolledWindow::new(None,None);
+    scrolled_input.add(&input);
+    notebook.append_page(&scrolled_input,Some(&Label::new(Some("input"))));
     
     let view = DrawingArea::new();
     notebook.append_page(&view,Some(&Label::new(Some("view"))));
@@ -151,7 +154,7 @@ fn main() {
 
     window.add(&v_box);
 
-    let update_input = Arc::new(Mutex::new(false));
+    let update_input = Arc::new(Mutex::new(true));
     let update_input_timeout_loop = update_input.clone();
     gtk::timeout_add(250, move || {
         for event in ino.available_events().unwrap() {
@@ -166,6 +169,8 @@ fn main() {
     
     window.show_all();
 
+    let mut dyon_runtime = dyon::Runtime::new();
+    
     loop {
         {
             if *exit.lock().unwrap() {
@@ -175,11 +180,15 @@ fn main() {
         gtk::main_iteration();
         let mut update = update_input.lock().unwrap();
         if *update {
+            statusbar.push(1, "Updating...");
             *update = false;
             let data = read_file(&filename).unwrap();
-            buffer.set_text(&data);
+            input_buffer.set_text(&data);
             statusbar.pop(1);
             println!("updated");
+
+            let mut module = dyon::Module::new_intrinsics(Arc::new(dyon::prelude::Prelude::new_intrinsics().functions));
+            dyon::load_str(&filename, Arc::new(data), &mut module).unwrap();
         }
     }
 }
