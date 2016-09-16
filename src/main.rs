@@ -13,7 +13,6 @@ use inotify::ffi::*;
 use std::path::Path;
 use std::io::Read;
 use std::sync::{Mutex,Arc};
-use std::cell::Cell;
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
@@ -31,6 +30,39 @@ fn read_file(name: &str) -> std::result::Result<String, std::io::Error> {
     let mut s = String::new();
     try!(f.read_to_string(&mut s));
     Ok(s)
+}
+
+fn dyon_footprint(filename:&str, data:String) -> Result<Vec<f64>,String> {
+    use dyon::Module;
+    use dyon::Variable;
+    use std::cell::Cell;
+    
+    let mut dyon_runtime = dyon::Runtime::new();
+    let mut module = Module::new_intrinsics(Arc::new(dyon::prelude::Prelude::new_intrinsics().functions));
+    try!(dyon::load_str(&filename, Arc::new(data), &mut module));
+    let name: Arc<String> = Arc::new("footprint".into());
+    let call = dyon::ast::Call {
+        name: name.clone(),
+        f_index: Cell::new(module.find_function(&name, 0)),
+        args: vec![],
+        custom_source: None,
+        source_range: range::Range::empty(0),
+    };
+    // TODO error handling for run
+    let (v,_) = try!(dyon_runtime.call(&call,&module));
+    let mut res = vec![];
+    if let Some(Variable::Array(array)) = v {
+        for ref x in &array[..] {
+            if let Variable::F64(i,_) = **x {
+                res.push(i)
+            } else {
+                return Err("non-number found in array".into())
+            }
+        }
+        Ok(res)
+    } else {
+        Err("result of footprint function is not an array".into())
+    }
 }
 
 fn main() {
@@ -171,8 +203,6 @@ fn main() {
     
     window.show_all();
 
-    let mut dyon_runtime = dyon::Runtime::new();
-    
     loop {
         {
             if *exit.lock().unwrap() {
@@ -188,23 +218,8 @@ fn main() {
             input_buffer.set_text(&data);
             statusbar.pop(1);
             println!("updated");
-
-            let mut module = dyon::Module::new_intrinsics(Arc::new(dyon::prelude::Prelude::new_intrinsics().functions));
-            println!("X1");
-            // TODO error handling for parse
-            dyon::load_str(&filename, Arc::new(data), &mut module).unwrap();
-            let name: Arc<String> = Arc::new("footprint".into());
-            let call = dyon::ast::Call {
-                name: name.clone(),
-                f_index: Cell::new(module.find_function(&name, 0)),
-                args: vec![],
-                custom_source: None,
-                source_range: range::Range::empty(0),
-            };
-            // TODO error handling for run
-            let (v,_) = dyon_runtime.call(&call,&module).unwrap();
-            println!("{:?}", v);
-            println!("X2");
+            let v = dyon_footprint(&filename, data).unwrap();
+            println!("v: {:?}", v);
         }
     }
 }
