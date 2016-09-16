@@ -6,12 +6,14 @@ extern crate cairo;
 extern crate inotify;
 extern crate glib;
 extern crate dyon;
+extern crate range;
 
 use inotify::INotify;
 use inotify::ffi::*;
 use std::path::Path;
 use std::io::Read;
 use std::sync::{Mutex,Arc};
+use std::cell::Cell;
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
@@ -188,7 +190,21 @@ fn main() {
             println!("updated");
 
             let mut module = dyon::Module::new_intrinsics(Arc::new(dyon::prelude::Prelude::new_intrinsics().functions));
+            println!("X1");
+            // TODO error handling for parse
             dyon::load_str(&filename, Arc::new(data), &mut module).unwrap();
+            let name: Arc<String> = Arc::new("footprint".into());
+            let call = dyon::ast::Call {
+                name: name.clone(),
+                f_index: Cell::new(module.find_function(&name, 0)),
+                args: vec![],
+                custom_source: None,
+                source_range: range::Range::empty(0),
+            };
+            // TODO error handling for run
+            let (v,_) = dyon_runtime.call(&call,&module).unwrap();
+            println!("{:?}", v);
+            println!("X2");
         }
     }
 }
