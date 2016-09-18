@@ -13,6 +13,7 @@ use inotify::ffi::*;
 use std::path::Path;
 use std::io::Read;
 use std::sync::{Mutex,Arc};
+use std::collections::HashMap;
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
@@ -32,7 +33,7 @@ fn read_file(name: &str) -> std::result::Result<String, std::io::Error> {
     Ok(s)
 }
 
-fn dyon_footprint(filename:&str, data:String) -> Result<Vec<f64>,String> {
+fn dyon_footprint(filename:&str, data:String) -> Result<Vec<HashMap<String, dyon::Variable>>, String> {
     use dyon::Module;
     use dyon::Variable;
     use std::cell::Cell;
@@ -50,11 +51,16 @@ fn dyon_footprint(filename:&str, data:String) -> Result<Vec<f64>,String> {
     };
     // TODO error handling for run
     let (v,_) = try!(dyon_runtime.call(&call,&module));
+    println!("{:?}", v);
     let mut res = vec![];
     if let Some(Variable::Array(array)) = v {
         for ref x in &array[..] {
-            if let Variable::F64(i,_) = **x {
-                res.push(i)
+            if let Variable::Object(ref y) = **x { // Arc<HashMap<Arc<String>, Variable>>
+                let mut h:HashMap<String,dyon::Variable> = HashMap::new();
+                for (k,v) in &**y {
+                    h.insert((**k).clone(),v.clone());
+                }
+                res.push(h)
             } else {
                 return Err("non-number found in array".into())
             }
