@@ -12,5 +12,5 @@ gdk-pixbuf = "^0"
 gtk = "^0"
 cairo-rs = "^0"
 inotify = "*"
-dyon = "0.8.*"
 range = "0.3.*"
+cpython = { git = "https://github.com/dgrunwald/rust-cpython.git" }

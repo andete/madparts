@@ -5,8 +5,8 @@ extern crate gdk_pixbuf;
 extern crate cairo;
 extern crate inotify;
 extern crate glib;
-extern crate dyon;
 extern crate range;
+extern crate cpython;
 
 use inotify::INotify;
 use inotify::ffi::*;
@@ -20,10 +20,12 @@ use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
 use gtk::{Notebook, Label, TextView, TextBuffer, ScrolledWindow};
 use gdk_pixbuf::Pixbuf;
 
+use cpython::Python;
+
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
 fn usage(program_name:&str) {
-    println!("Usage: {} <dyon file>", program_name);
+    println!("Usage: {} <python file>", program_name);
 }
 
 fn read_file(name: &str) -> std::result::Result<String, std::io::Error> {
@@ -31,44 +33,6 @@ fn read_file(name: &str) -> std::result::Result<String, std::io::Error> {
     let mut s = String::new();
     try!(f.read_to_string(&mut s));
     Ok(s)
-}
-
-fn dyon_footprint(filename:&str, data:String) -> Result<Vec<HashMap<String, dyon::Variable>>, String> {
-    use dyon::Module;
-    use dyon::Variable;
-    use std::cell::Cell;
-    
-    let mut dyon_runtime = dyon::Runtime::new();
-    let mut module = Module::new_intrinsics(Arc::new(dyon::prelude::Prelude::new_intrinsics().functions));
-    try!(dyon::load_str(&filename, Arc::new(data), &mut module));
-    let name: Arc<String> = Arc::new("footprint".into());
-    let call = dyon::ast::Call {
-        name: name.clone(),
-        f_index: Cell::new(module.find_function(&name, 0)),
-        args: vec![],
-        custom_source: None,
-        source_range: range::Range::empty(0),
-    };
-    // TODO error handling for run
-    let (v,_) = try!(dyon_runtime.call(&call,&module));
-    println!("{:?}", v);
-    let mut res = vec![];
-    if let Some(Variable::Array(array)) = v {
-        for ref x in &array[..] {
-            if let Variable::Object(ref y) = **x { // Arc<HashMap<Arc<String>, Variable>>
-                let mut h:HashMap<String,dyon::Variable> = HashMap::new();
-                for (k,v) in &**y {
-                    h.insert((**k).clone(),v.clone());
-                }
-                res.push(h)
-            } else {
-                return Err("non-number found in array".into())
-            }
-        }
-        Ok(res)
-    } else {
-        Err("result of footprint function is not an array".into())
-    }
 }
 
 fn main() {
@@ -209,6 +173,14 @@ fn main() {
     
     window.show_all();
 
+    let gil = Python::acquire_gil();
+    let py = gil.python();
+
+    let sys = py.import("sys").unwrap();
+    let version: String = sys.get(py, "version").unwrap().extract(py).unwrap();
+    
+    println!("using python: {}", version);
+    
     loop {
         {
             if *exit.lock().unwrap() {
@@ -224,8 +196,9 @@ fn main() {
             input_buffer.set_text(&data);
             statusbar.pop(1);
             println!("updated");
-            let v = dyon_footprint(&filename, data).unwrap();
-            println!("v: {:?}", v);
+            py.run(&data,None,None).unwrap(); // TODO
+            let res = py.eval("footprint()", None,None).unwrap();
+            println!("res: {:?}", res);
         }
     }
 }
