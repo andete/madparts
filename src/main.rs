@@ -7,13 +7,15 @@ extern crate inotify;
 extern crate glib;
 extern crate range;
 extern crate cpython;
+extern crate env_logger;
+#[macro_use] extern crate log;
 
 use inotify::INotify;
 use inotify::ffi::*;
 use std::path::Path;
+use std::io;
 use std::io::Read;
 use std::sync::{Mutex,Arc};
-use std::collections::HashMap;
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
@@ -28,7 +30,7 @@ fn usage(program_name:&str) {
     println!("Usage: {} <python file>", program_name);
 }
 
-fn read_file(name: &str) -> std::result::Result<String, std::io::Error> {
+fn read_file(name: &str) -> Result<String, io::Error> {
     let mut f = try!(std::fs::File::open(name));
     let mut s = String::new();
     try!(f.read_to_string(&mut s));
@@ -36,7 +38,8 @@ fn read_file(name: &str) -> std::result::Result<String, std::io::Error> {
 }
 
 fn main() {
-
+    std::env::set_var("RUST_LOG","debug");
+    env_logger::init().unwrap();
     let mut args = std::env::args();
     let filename = if let Some(program_name) = args.next() {
         if let Some(filename) = args.next() {
@@ -51,14 +54,14 @@ fn main() {
     };
 
     if gtk::init().is_err() {
-        println!("Failed to initialize GTK.");
+        error!("Failed to initialize GTK.");
         return;
     }
 
     let mut ino = match INotify::init() {
         Ok(ino) => ino,
         _ => {
-            println!("Failed to initialize INotify");
+            error!("Failed to initialize INotify");
             return;
         },
     };
@@ -66,7 +69,7 @@ fn main() {
     let file_watch = match ino.add_watch(Path::new(&filename), IN_MODIFY) {
         Ok(watch) => watch,
         Err(err) => {
-            println!("IO Error for {}: {}", filename, err);
+            error!("IO Error for {}: {}", filename, err);
             return;
         },
     };
@@ -163,7 +166,7 @@ fn main() {
     gtk::timeout_add(250, move || {
         for event in ino.available_events().unwrap() {
             if event.wd == file_watch {
-                println!("modified!");
+                trace!("modified!");
                 let mut update = update_input_timeout_loop.lock().unwrap();
                 *update = true;
             }
@@ -179,7 +182,7 @@ fn main() {
     let sys = py.import("sys").unwrap();
     let version: String = sys.get(py, "version").unwrap().extract(py).unwrap();
     
-    println!("using python: {}", version);
+    info!("using python: {}", version);
     
     loop {
         {
@@ -195,10 +198,10 @@ fn main() {
             let data = read_file(&filename).unwrap();
             input_buffer.set_text(&data);
             statusbar.pop(1);
-            println!("updated");
+            trace!("updated");
             py.run(&data,None,None).unwrap(); // TODO
             let res = py.eval("footprint()", None,None).unwrap();
-            println!("res: {:?}", res);
+            info!("res: {:?}", res);
         }
     }
 }

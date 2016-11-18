@@ -14,3 +14,5 @@ cairo-rs = "^0"
 inotify = "*"
 range = "0.3.*"
 cpython = { git = "https://github.com/dgrunwald/rust-cpython.git" }
+env_logger = "0.3.*"
+log = "*"
