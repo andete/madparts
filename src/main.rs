@@ -31,9 +31,9 @@ fn usage(program_name:&str) {
 }
 
 fn read_file(name: &str) -> Result<String, io::Error> {
-    let mut f = try!(std::fs::File::open(name));
+    let mut f = std::fs::File::open(name)?;
     let mut s = String::new();
-    try!(f.read_to_string(&mut s));
+    f.read_to_string(&mut s)?;
     Ok(s)
 }
 
