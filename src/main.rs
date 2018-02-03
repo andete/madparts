@@ -103,8 +103,8 @@ fn main() {
     file.set_submenu(Some(&menu));
     
     let menu = Menu::new();
-    let about = MenuItem::new_with_label("About");
-    menu.append(&about);
+    let about_me = MenuItem::new_with_label("About");
+    menu.append(&about_me);
     let help = MenuItem::new_with_label("Help");
     help.set_submenu(Some(&menu));
     
@@ -119,8 +119,9 @@ fn main() {
         });
     }
 
-    about.connect_activate(|_| {
+    let about = {
         let about = AboutDialog::new();
+        about.set_transient_for(Some(&window));
         about.add_credit_section("Credits", &["Joost Yervante Damad <joost@damad.be>"]);
         about.set_copyright(Some("MIT/Apache-2.0"));
         about.set_program_name("madparts");
@@ -129,6 +130,10 @@ fn main() {
         about.set_website_label(Some("madparts"));
         let logo = Pixbuf::new_from_file_at_size("../media/icon.svg", 64, 64).unwrap();
         about.set_logo(Some(&logo));
+        about
+    };
+
+    about_me.connect_activate(move |_| {
         about.show();
         about.run();
         about.hide();
