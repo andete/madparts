@@ -1,8 +1,9 @@
-// (c) 2016 Joost Yervante Damad <joost@damad.be>
+// (c) 2016-2018 Joost Yervante Damad <joost@damad.be>
 
 extern crate gtk;
 extern crate gdk_pixbuf;
 extern crate cairo;
+extern crate clap;
 extern crate inotify;
 extern crate glib;
 extern crate range;
@@ -10,12 +11,15 @@ extern crate cpython;
 extern crate env_logger;
 #[macro_use] extern crate log;
 
-use inotify::INotify;
-use inotify::ffi::*;
 use std::path::Path;
 use std::io;
 use std::io::Read;
 use std::sync::{Mutex,Arc};
+
+use clap::{Arg, App};
+
+use inotify::{WatchMask, Inotify};
+
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
@@ -26,10 +30,6 @@ use cpython::Python;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-fn usage(program_name:&str) {
-    println!("Usage: {} <python file>", program_name);
-}
-
 fn read_file(name: &str) -> Result<String, io::Error> {
     let mut f = std::fs::File::open(name)?;
     let mut s = String::new();
@@ -39,26 +39,25 @@ fn read_file(name: &str) -> Result<String, io::Error> {
 
 fn main() {
     std::env::set_var("RUST_LOG","debug");
-    env_logger::init().unwrap();
-    let mut args = std::env::args();
-    let filename = if let Some(program_name) = args.next() {
-        if let Some(filename) = args.next() {
-            filename
-        } else {
-            usage(&program_name);
-            return
-        }
-    } else {
-        usage("unknown");
-        return
-    };
+    env_logger::init();
+    let matches = App::new("madparts")
+        .version(VERSION)
+        .author("Joost Yervante Damad <joost@damad.be>")
+        .about("a functional footprint editor")
+        .arg(Arg::with_name("INPUT")
+             .help("Sets the python file to use")
+             .required(true)
+             .index(1))
+        .get_matches();
+
+    let filename = matches.value_of("INPUT").unwrap();
 
     if gtk::init().is_err() {
         error!("Failed to initialize GTK.");
         return;
     }
 
-    let mut ino = match INotify::init() {
+    let mut ino = match Inotify::init() {
         Ok(ino) => ino,
         _ => {
             error!("Failed to initialize INotify");
@@ -66,7 +65,7 @@ fn main() {
         },
     };
     
-    let file_watch = match ino.add_watch(Path::new(&filename), IN_MODIFY) {
+    let file_watch = match ino.add_watch(Path::new(&filename), WatchMask::MODIFY) {
         Ok(watch) => watch,
         Err(err) => {
             error!("IO Error for {}: {}", filename, err);
@@ -164,7 +163,8 @@ fn main() {
     let update_input = Arc::new(Mutex::new(true));
     let update_input_timeout_loop = update_input.clone();
     gtk::timeout_add(250, move || {
-        for event in ino.available_events().unwrap() {
+        let mut buffer = [0; 1024];
+        for event in ino.read_events(&mut buffer).unwrap() {
             if event.wd == file_watch {
                 trace!("modified!");
                 let mut update = update_input_timeout_loop.lock().unwrap();
