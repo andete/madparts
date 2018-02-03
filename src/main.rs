@@ -12,7 +12,7 @@ extern crate env_logger;
 #[macro_use] extern crate log;
 
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use clap::{Arg, App};
@@ -65,15 +65,14 @@ fn run() -> Result<(), MpError> {
 
     let (window, statusbar, input_buffer, exit) = gui::make_gui(filename);
     
-    let update_input = Arc::new(Mutex::new(true));
+    let update_input = Arc::new(AtomicBool::new(true));
     let update_input_timeout_loop = update_input.clone();
     gtk::timeout_add(250, move || {
         let mut buffer = [0; 1024];
         for event in ino.read_events(&mut buffer).unwrap() {
             if event.wd == file_watch {
                 trace!("modified!");
-                let mut update = update_input_timeout_loop.lock().unwrap();
-                *update = true;
+                update_input_timeout_loop.store(true, Ordering::SeqCst);
             }
         }
         glib::Continue(true)
@@ -96,10 +95,8 @@ fn run() -> Result<(), MpError> {
             }
         }
         gtk::main_iteration();
-        let mut update = update_input.lock().unwrap();
-        if *update {
+        if update_input.compare_and_swap(true, false, Ordering::SeqCst) {
             statusbar.push(1, "Updating...");
-            *update = false;
             let data = util::read_file(&filename).unwrap();
             input_buffer.set_text(&data);
             statusbar.pop(1);
