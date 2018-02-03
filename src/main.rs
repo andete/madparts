@@ -15,11 +15,11 @@ use std::path::Path;
 use std::io;
 use std::io::Read;
 use std::sync::{Mutex,Arc};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use clap::{Arg, App};
 
 use inotify::{WatchMask, Inotify};
-
 
 use gtk::prelude::*;
 use gtk::{AboutDialog, Menu, MenuBar, MenuItem, DrawingArea, Statusbar};
@@ -27,6 +27,8 @@ use gtk::{Notebook, Label, TextView, TextBuffer, ScrolledWindow};
 use gdk_pixbuf::Pixbuf;
 
 use cpython::Python;
+
+use error::MpError;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
@@ -37,7 +39,7 @@ fn read_file(name: &str) -> Result<String, io::Error> {
     Ok(s)
 }
 
-fn main() {
+fn run() -> Result<(), MpError> {
     std::env::set_var("RUST_LOG","debug");
     env_logger::init();
     let matches = App::new("madparts")
@@ -52,16 +54,16 @@ fn main() {
 
     let filename = matches.value_of("INPUT").unwrap();
 
-    if gtk::init().is_err() {
+    if let Err(err) = gtk::init() {
         error!("Failed to initialize GTK.");
-        return;
+        return Err(err.into())
     }
 
     let mut ino = match Inotify::init() {
         Ok(ino) => ino,
-        _ => {
+        Err(err) => {
             error!("Failed to initialize INotify");
-            return;
+            return Err(err.into())
         },
     };
     
@@ -69,7 +71,7 @@ fn main() {
         Ok(watch) => watch,
         Err(err) => {
             error!("IO Error for {}: {}", filename, err);
-            return;
+            return Err(err.into())
         },
     };
     
@@ -80,13 +82,12 @@ fn main() {
     window.set_position(gtk::WindowPosition::Center);
     window.set_default_size(350, 70);
 
-    let exit = Arc::new(Mutex::new(false));
+    let exit = Arc::new(AtomicBool::new(false));
     
     {
         let exit = exit.clone();
         window.connect_delete_event(move |_, _| {
-            let mut e = exit.lock().unwrap();
-            *e = true;
+            exit.store(true, Ordering::SeqCst);
             Inhibit(false)
         });
     }
@@ -114,8 +115,7 @@ fn main() {
     {
         let exit = exit.clone();
         quit.connect_activate(move |_| {
-            let mut e = exit.lock().unwrap();
-            *e = true;
+            exit.store(true, Ordering::SeqCst);
         });
     }
 
@@ -184,14 +184,14 @@ fn main() {
     let gil = Python::acquire_gil();
     let py = gil.python();
 
-    let sys = py.import("sys").unwrap();
-    let version: String = sys.get(py, "version").unwrap().extract(py).unwrap();
+    let sys = py.import("sys")?;
+    let version: String = sys.get(py, "version")?.extract(py)?;
     
     info!("using python: {}", version);
     
     loop {
         {
-            if *exit.lock().unwrap() {
+            if exit.load(Ordering::SeqCst) {
                 break;
             }
         }
@@ -209,4 +209,12 @@ fn main() {
             info!("res: {:?}", res);
         }
     }
+    Ok(())
 }
+
+fn main() {
+    util::main_run(run);
+}
+
+mod util;
+mod error;
