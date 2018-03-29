@@ -5,6 +5,8 @@ use std::io;
 use glib;
 use cpython;
 
+// TODO: use failure crate
+
 #[derive(Debug)]
 pub enum MpError {
     GuiError(String),
