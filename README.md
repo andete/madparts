@@ -1,3 +1,5 @@
+Please remark that a rewrite in rust is in progress at https://github.com/rustit-be/madparts-rs
+
 madparts
 ========
 
